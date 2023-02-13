@@ -1,0 +1,10 @@
+<div class="controls-view flex-row">
+    <terminal-controls [(activeTerminalId)]="activeTerminalId" [(terminalWindows)]="terminalWindows">
+    </terminal-controls>
+    <app-controls></app-controls>
+</div>
+<div id="terminals-container">
+    <app-terminal *ngFor="let term of terminalWindows" class="terminal"
+        [ngClass]="{'hidden' : activeTerminalId !== term.id}" [TermId]="term.id">
+    </app-terminal>
+</div>

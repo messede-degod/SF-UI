@@ -1,0 +1,295 @@
+/* You can add global styles to this file, and also import other style files */
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital@1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital@1&display=swap');
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+
+:root {
+    --background: #ffff;
+    --content-background: #474747;
+    --brand-red: #e05a16;
+    --brand-black: black;
+    --active-bg: #dbd8d8ed;
+    --inactive-bg: #f2f2f2e1;
+    --term-tab: #696565;
+    --term-tab-icon: brightness(0) saturate(100%) invert(49%) sepia(7%) saturate(111%) hue-rotate(187deg) brightness(98%) contrast(94%);
+    --menu-btn-icon: brightness(0) saturate(100%) invert(98%) sepia(0%) saturate(1152%) hue-rotate(312deg) brightness(82%) contrast(67%);
+    caret-color: black;
+    --input-text-color: black;
+}
+
+
+[data-theme="dark"] {
+    color: white;
+    --background: #181a1b;
+    --content-background: #474747;
+    --brand-red: #eb7134;
+    --brand-black: white;
+    --active-bg: rgb(45 49 51 / 93%);
+    --inactive-bg: rgb(31 34 35 / 88%);
+    --term-tab: rgba(171, 183, 188, 0.93);
+    --term-tab-icon: brightness(0) saturate(100%) invert(49%) sepia(7%) saturate(111%) hue-rotate(187deg) brightness(98%) contrast(94%);
+    --menu-btn-icon: brightness(0) saturate(100%) invert(98%) sepia(0%) saturate(1152%) hue-rotate(312deg) brightness(82%) contrast(67%);
+    caret-color: white;
+    --input-text-color: white;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.sidebar {
+    justify-content: space-between;
+    height: 100vh;
+    width: 6%;
+    background-color: var(--background);
+}
+
+.content-view {
+    height: 100vh;
+    width: 95%;
+    background-color: var(--content-background);
+}
+
+.menu-items {
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.menu-brand {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5vh;
+    margin-top: 3.8vh;
+}
+
+
+.menu-brand>h6 {
+    font-size: 4.2vw;
+    font-family: 'PT Sans', sans-serif;
+    color: var(--brand-red);
+}
+
+.menu-brand>h6::first-letter {
+    color: var(--brand-black);
+}
+
+.menu-brand>span {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 0.75vw;
+    margin-top: 1.5vh;
+}
+
+
+.active-bg,
+.menu-button:hover,
+.terminal-tab:hover {
+    background-color: var(--active-bg);
+}
+
+.inactive-bg {
+    background-color: var(--inactive-bg);
+}
+
+
+.menu-button {
+    width: 70%;
+    height: 3.6vw;
+    margin-top: 1.5rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+}
+
+.menu-button>div>img {
+    filter: var(--menu-btn-icon);
+}
+
+.controls-view {
+    height: 5vh;
+    justify-content: space-between;
+    background-color: var(--background);
+}
+
+.terminal-control {
+    height: 2.8vh;
+    justify-content: flex-start;
+}
+
+.terminal-tab {
+    width: 7.2rem;
+    height: 1.9vh;
+    margin-top: 1.2vh;
+    margin-right: 0.9vh;
+    padding: 0.2rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 4px;
+}
+
+.terminal-tab>span {
+    margin-left: 0.3rem;
+    font-size: 0.9rem;
+    color: var(--term-tab);
+}
+
+.terminal-tab>img {
+    height: 1rem;
+    filter: var(--term-tab-icon);
+}
+
+.terminal-tab:hover,
+.menu-button:hover {
+    cursor: pointer;
+}
+
+.terminal-window-add {
+    width: 1.5rem !important;
+    height: 1.9vh !important;
+    justify-content: center !important;
+}
+
+.terminal-window-add-disabled {
+    cursor: not-allowed !important;
+}
+
+.terminal {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-grow: 1;
+}
+
+#terminals-container {
+    height: 95vh;
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Login Page */
+.login-container {
+    background-color: var(--background);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-container>div>h6 {
+    font-size: 16vh !important;
+}
+
+#brandInfo {
+    margin-top: 5vh;
+    font-size: 3vh !important;
+}
+
+.login-info {
+    margin-top: 2vh;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 2vh;
+    text-align: center;
+}
+
+.input-secret {
+    display: flex;
+    margin-top: 2vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    height: 4vh;
+    padding: 0.2rem;
+    padding-left: 0.8rem;
+    padding-right: 0.6rem;
+    background-color: var(--active-bg);
+    border-radius: 26px;
+}
+
+.input-secret>input {
+    width: 13vw;
+    height: 2.8vh;
+    border: 0;
+    outline: none;
+    color: var(--input-text-color);
+    background-color: var(--active-bg);
+}
+
+.input-secret>img {
+    height: 3.2vh;
+    filter: var(--term-tab-icon);
+    border-radius: 999px;
+}
+
+.input-secret>img:hover {
+    filter: var(--active-bg);
+}
+
+/* End Login Page */
+
+/* Help Dialog*/
+.help-dialog{
+    background-color: var(--background);
+}
+
+.help-dialog>*,.help-close-button{
+    color: var(--input-text-color) !important;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.help-close-button{
+    background-color: var(--inactive-bg);
+}
+
+.help-content{
+    font-size: large !important;
+    margin: 2rem;
+}
+
+.sub-list{
+    margin-top: 0;
+    margin-left: 4rem;
+}
+
+.help-heading{
+    margin-left: 2rem;
+}
+
+code{
+    color: white;
+    font-weight: 600;
+    background-color: rgb(56, 54, 54);
+}
+
+/* End Help Dialog*/

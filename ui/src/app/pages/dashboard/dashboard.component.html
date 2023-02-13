@@ -1,0 +1,30 @@
+<div class="flex-row">
+    <section class="sidebar flex-col">
+      <div class="menu-items flex-col">
+        <div class="menu-brand flex-col">
+          <h6>SF</h6>
+          <span>by hackerschoice</span>
+        </div>
+  
+        <div *ngFor="let menu of menuItems" class="menu-button"
+          [ngClass]="{'active-bg' : activeMenu === menu.name, 'inactive-bg' : activeMenu !== menu.name}"
+          (click)="setActiveMenu(menu.name)">
+          <div class="menu-icon">
+            <img [src]="menu.ilink">
+          </div>
+        </div>
+  
+      </div>
+  
+      <div class="instance-info">
+        <div class="instance-upgrade">
+        </div>
+        <div class="instance-name">
+        </div>
+      </div>
+    </section>
+    <section class="content-view flex-col">
+      <!-- <terminal-view></terminal-view> -->
+      <router-outlet></router-outlet>
+    </section>
+  </div>

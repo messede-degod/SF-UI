@@ -1,0 +1,12 @@
+<div class="terminal-control flex-row">
+  <div *ngFor="let term of terminalWindows" class="terminal-tab" [ngClass]="{'active-bg' : activeTerminalId === term.id,
+     'inactive-bg' : activeTerminalId !== term.id}" (click)="setTerminalActive(term.id)">
+    <span>{{getTerminalName(term.id)}}</span>
+    <img src="../assets/icons/close.svg" alt="" (click)="removeTerminal(term.id)">
+  </div>
+  <div class="terminal-tab terminal-window-add inactive-bg" 
+  [ngClass]="{'terminal-window-add-disabled': this.terminalWindows.length==MaxOpenTerminals}"
+  (click)="newTerminal()">
+    <img src="../assets/icons/new.svg" alt="">
+  </div>
+</div>

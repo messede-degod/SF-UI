@@ -1,0 +1,15 @@
+<div class="flex-col login-container">
+    <div class="menu-brand flex-col">
+        <h6>SF</h6>
+        <span id="brandInfo">by hackerschoice</span>
+    </div>
+    <div class="input-secret">
+        <input type="password" [(ngModel)]="secret" placeholder="Secret..." required (keyup.enter)="login()">
+        <img src="../../../assets/icons/question.svg" alt="" (click)="openHelpDialog()">
+    </div>
+    <div class="login-info">
+        <span>
+            Enter your Segfault Secret<br>to start using...
+        </span>
+    </div>
+</div>

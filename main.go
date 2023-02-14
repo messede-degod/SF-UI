@@ -25,7 +25,7 @@ type SfUI struct {
 	Debug             bool   // Print debug information
 	ShellCommand      string // Command to run on the pty
 	// Two additional arguments are added to ShellCommand
-	// 	Example:  somecmd  SECRET=abc REMOTE_IP=1.1.1.1
+	// 	Example:  somecmd  SECRET=abc REMOTE_ADDR=1.1.1.1
 	AddSfUIArgs          bool
 	CompiledClientConfig []byte // Ui related onfig that has to be sent to client
 	// SfEndpoint           string  // Current Sf Endpoints Name
@@ -186,7 +186,7 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 		return errors.New("Unacceptable Secret")
 	}
 	cmdParts = append(cmdParts, fmt.Sprintf(" SECRET=%s", terminal.ClientSecret))
-	cmdParts = append(cmdParts, fmt.Sprintf(" REMOTE_IP=%s", terminal.ClientIp)) // ClientIP provided by server, no sanitization required
+	cmdParts = append(cmdParts, fmt.Sprintf(" REMOTE_ADDR=%s", terminal.ClientIp)) // ClientIP provided by server, no sanitization required
 
 	apty, err := pty.Start(exec.Command(cmdParts[0], cmdParts[1:]...))
 	if err != nil {

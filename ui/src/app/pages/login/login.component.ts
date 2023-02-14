@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { HelpDialogComponent } from 'src/app/components/help-dialog/help-dialog.component';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { Config } from '../../config/config';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +13,7 @@ import { Router } from '@angular/router';
 export class LoginComponent {
   router!: Router
 
-  constructor(public dialog: MatDialog,private snackBar: MatSnackBar,router:  Router) {
+  constructor(public dialog: MatDialog, private snackBar: MatSnackBar, router: Router) {
     this.router = router
 
     if (localStorage.getItem('theme') == 'dark') {
@@ -38,18 +39,33 @@ export class LoginComponent {
   }
 
   secret: string = ""
-  login(){
-    if(this.secret==""){
-      var logginInMsg = this.snackBar.open("Please Enter Your Secret !","OK", {
+  async login() {
+    if (this.secret == "") {
+      var logginInMsg = this.snackBar.open("Please Enter Your Secret !", "OK", {
         duration: 2 * 1000
       });
       return
     }
-    var logginInMsg = this.snackBar.open("Loggin You In ....","OK", {
+
+    var logginInMsg = this.snackBar.open("Loggin You In ....", "OK", {
       duration: 5 * 1000
     });
-    this.router.navigate(['/dashboard/terminal'])
+
+    let response = fetch(Config.ApiEndpoint + "/secret", {
+      "method": "POST",
+      "body": JSON.stringify({ "secret": this.secret })
+    })
+    let rdata = await response
+    if (rdata.status == 200) {
+      logginInMsg.dismiss()
+      this.router.navigate(['/dashboard/terminal'])
+      return
+    }
+
     logginInMsg.dismiss()
+    this.snackBar.open("Invalid Secret !", "OK", {
+      duration: 5 * 1000
+    });
   }
 
 }

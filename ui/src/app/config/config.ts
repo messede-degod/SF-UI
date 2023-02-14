@@ -1,6 +1,10 @@
-export class Config{
-    // public static WSServerUrl = "ws://localhost:8080/ws";
-    public static WSServerUrl = "ws://127.0.0.1:7171/ws";
-    public static WSServerProtocol = "tty";
-    public static MaxOpenTerminals = 5;
+import { environment } from "src/environment/environment";
+
+export class Config {
+    public static ApiEndpoint = environment.Proto + "//" + environment.Host
+    public static WSServerProto = environment.WSServerProto
+    public static WSServerProtocol = this.WSServerProto
+    public static WSServerUrl = this.WSServerProto + "://" + environment.Host + "/ws";
+    public static MaxOpenTerminals = environment.MaxOpenTerminals
+    public static ClientSecret = ""
 }

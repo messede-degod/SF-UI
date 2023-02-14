@@ -78,15 +78,25 @@ export class TerminalComponent implements AfterViewInit {
       this.terminal.loadAddon(attachAddon);
 
       // Send Initial Command
-      this.socket.onopen = () => {
-        this.socket?.send(this.textEncoder.encode("sh\n"))
-      }
+      // this.socket.onopen = () => {
+      //   this.socket?.send(this.textEncoder.encode("sh\n"))
+      // }
 
       window.onresize = () => {
         this.fitAddon.fit();
       };
 
+      this.terminal.onResize(this.resizeTerm);
+
     }
+  }
+
+  resizeTerm = (evt: any) => {
+    const terminal_size = {
+      Width: evt.cols,
+      Height: evt.rows,
+    };
+    // this.socket.send(JSON.stringify(terminal_size));
   }
 
   enableWebglRenderer = () => {

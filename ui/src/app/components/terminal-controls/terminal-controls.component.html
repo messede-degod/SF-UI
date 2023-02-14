@@ -5,7 +5,7 @@
     <img src="../assets/icons/close.svg" alt="" (click)="removeTerminal(term.id)">
   </div>
   <div class="terminal-tab terminal-window-add inactive-bg" 
-  [ngClass]="{'terminal-window-add-disabled': this.terminalWindows.length==MaxOpenTerminals}"
+  [ngClass]="{'terminal-window-add-disabled': MaxTerminalsOpen}"
   (click)="newTerminal()">
     <img src="../assets/icons/new.svg" alt="">
   </div>

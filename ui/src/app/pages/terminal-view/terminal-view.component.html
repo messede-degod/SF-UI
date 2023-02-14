@@ -1,5 +1,9 @@
 <div class="controls-view flex-row">
-    <terminal-controls [(activeTerminalId)]="activeTerminalId" [(terminalWindows)]="terminalWindows">
+    <terminal-controls 
+        [activeTerminalId]="activeTerminalId"
+        (activeTerminalIdChange)="setActiveTerminal($event)" 
+        [(terminalWindows)]="terminalWindows"
+    >
     </terminal-controls>
     <app-controls></app-controls>
 </div>

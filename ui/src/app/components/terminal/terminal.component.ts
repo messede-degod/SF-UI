@@ -71,8 +71,8 @@ export class TerminalComponent implements AfterViewInit {
       this.fitAddon.fit()
       this.enableWebglRenderer()
 
-      this.socket = new WebSocket(Config.WSServerUrl, Config.WSServerProtocol);
-
+      this.socket = new WebSocket(this.getWSURL(), Config.WSServerProtocol);
+      
       // Attach The Sockets I/O to the terminal
       const attachAddon = new AttachAddon(this.socket,{bidirectional: true});
       this.terminal.loadAddon(attachAddon);
@@ -91,11 +91,24 @@ export class TerminalComponent implements AfterViewInit {
     }
   }
 
+  getWSURL = () :string =>{
+    // Determine whether to use ws or wss
+    let wsProto = "ws"
+    if (location.protocol=="https:"){
+      wsProto = "wss"
+    }
+
+    return wsProto+Config.WSServerUrl+"?secret="+localStorage.getItem('secret')
+            +"&rows="+this.terminal.rows
+            +"&cols="+this.terminal.cols
+  }
+
   resizeTerm = (evt: any) => {
     const terminal_size = {
       Width: evt.cols,
       Height: evt.rows,
     };
+    console.log(terminal_size)
     // this.socket.send(JSON.stringify(terminal_size));
   }
 

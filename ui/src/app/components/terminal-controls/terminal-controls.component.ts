@@ -1,4 +1,4 @@
-import { Component,Input,Output,EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Config } from 'src/app/config/config';
 
 @Component({
@@ -11,11 +11,11 @@ export class TerminalControlsComponent {
   @Output() activeTerminalIdChange = new EventEmitter<number>();
   @Input() terminalWindows: Array<any> = []
   @Output() terminalWindowsChange = new EventEmitter<Array<any>>();
-
-  MaxOpenTerminals = Config.MaxOpenTerminals
+  MaxTerminalsOpen = false
 
   newTerminal() {
-    if (this.terminalWindows.length == Config.MaxOpenTerminals){
+    if (this.terminalWindows.length == Config.MaxOpenTerminals) {
+      this.MaxTerminalsOpen = true
       return
     }
 
@@ -32,19 +32,20 @@ export class TerminalControlsComponent {
   }
 
   removeTerminal(termId: number) {
+    this.MaxTerminalsOpen = false
+    if (this.activeTerminalId == termId && this.terminalWindows.length != 0) {
+      this.setTerminalActive(this.terminalWindows[0].id)
+    }
     for (let i = 0; i < this.terminalWindows.length; i++) {
       if (this.terminalWindows[i].id == termId) {
         this.terminalWindows.splice(i, 1)
       }
     }
-    if (this.activeTerminalId == termId && this.terminalWindows.length != 0) {
-      this.setTerminalActive(this.terminalWindows[0].id)
-    }
-    console.log(this.terminalWindows,this.activeTerminalId)
   }
 
   setTerminalActive(termId: number) {
     this.activeTerminalId = termId
+    this.activeTerminalIdChange.emit(this.activeTerminalId)
   }
 
   getTerminalName(termId: number): string {

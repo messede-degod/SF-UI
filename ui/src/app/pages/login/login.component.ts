@@ -58,6 +58,7 @@ export class LoginComponent {
     let rdata = await response
     if (rdata.status == 200) {
       logginInMsg.dismiss()
+      localStorage.setItem('secret',this.secret)
       this.router.navigate(['/dashboard/terminal'])
       return
     }

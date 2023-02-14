@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'terminal-view',
@@ -10,4 +10,9 @@ export class TerminalViewComponent {
   terminalWindows: Array<any> = [
     { id: 1, name: "" }, // Default tab that is open on first launch
   ]
+
+  setActiveTerminal(termId: number){
+    this.activeTerminalId = termId
+  }
+
 }

@@ -15,10 +15,10 @@ prod: main.go
 	@echo "[+] Done Building"
 
 UI:
-	@rm -r ./ui/dist/sf-ui
+	@rm -rf ./ui/dist/sf-ui
 	@mkdir ./ui/dist/sf-ui
 	@npm run build --prefix ./ui/
 
 clean:
-	@rm $(BIN_DIR)/*
-	@rm -r ./ui/dist/sf-ui
+	@rm -f $(BIN_DIR)/*
+	@rm -rf ./ui/dist/sf-ui

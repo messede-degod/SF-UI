@@ -3,31 +3,52 @@ package main
 import (
 	"embed"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"log"
-	"mime"
 	"net/http"
+	"os/exec"
+	"regexp"
+	"strconv"
 	"strings"
+	"syscall"
+	"unsafe"
 
+	"github.com/creack/pty"
 	"golang.org/x/net/websocket"
 )
 
 type SfUI struct {
 	MaxWsTerminals    int    // Max terminals that can be allocated per client
 	ServerBindAddress string // Address to which the current app binds
-	DefaultSfEndpoint string // Default endpoint to use for the SSH connections
-	ForceSfEndpoint   bool   // Ignore client supplied endpoints
 	Debug             bool   // Print debug information
+	ShellCommand      string // Command to run on the pty
+	// Two additional arguments are added to ShellCommand
+	// 	Example:  somecmd  SECRET=abc REMOTE_IP=1.1.1.1
+	AddSfUIArgs          bool
+	CompiledClientConfig []byte // Ui related onfig that has to be sent to client
+	// SfEndpoint           string  // Current Sf Endpoints Name
+
 }
 
 type TermRequest struct {
-	Secret     string `json:"secret"`
-	SfEndpoint string `json:"sf_endpoint"`
+	Secret   string `json:"secret"`
+	ClientIp string
+	// SfEndpoint string `json:"sf_endpoint"`
 }
 
 type TermResponse struct {
-	Status     string `json:"status"`
-	SfEndpoint string `json:"sf_endpoint"`
+	Status string `json:"status"`
+	// SfEndpoint string `json:"sf_endpoint"`
+}
+
+type Terminal struct {
+	ClientSecret string
+	ClientIp     string
+	WSConn       *websocket.Conn
+	Rows         uint16
+	Cols         uint16
 }
 
 var buildTime string
@@ -37,122 +58,170 @@ var staticfiles embed.FS
 
 func main() {
 	sfui := SfUI{
-		MaxWsTerminals:    5,
+		MaxWsTerminals:    10,
 		ServerBindAddress: "127.0.0.1:7171",
-		DefaultSfEndpoint: "segfault.net",
-		ForceSfEndpoint:   true,
-		Debug:             true,
+		Debug:             false,
+		ShellCommand:      "sshpass -p segfault ssh root@segfault.net",
+		AddSfUIArgs:       false,
 	}
+	sfui.compileClientConfig()
+
 	log.Printf("SFUI [Version : %s] [Built on : %s]\n", "0.1", buildTime)
-	log.Printf("Listening on %s ....\n", sfui.ServerBindAddress)
+	log.Printf("Listening on http://%s ....\n", sfui.ServerBindAddress)
 	http.ListenAndServe(sfui.ServerBindAddress, http.HandlerFunc(sfui.requestHandler))
 	return
+}
+
+// Add any UI related configuration that has to be sent to client
+// Store it byte format, to prevent json marshalling on every request
+// See handleUIConfig()
+func (sfui *SfUI) compileClientConfig() {
+	compConfig := fmt.Sprintf(`{"max_terminals":"%d"}`, sfui.MaxWsTerminals)
+	sfui.CompiledClientConfig = []byte(compConfig)
 }
 
 func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 	if sfui.Debug {
 		log.Println(r.RemoteAddr, " ", r.URL, " ", r.UserAgent())
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Access-Control-Allow-Methods", "*")
+		w.Header().Add("Access-Control-Allow-Headers", "*")
 	}
 	switch r.URL.Path {
 	case "/secret":
-		sfui.handleHttp(w, r)
+		sfui.handleSecret(w, r)
 	case "/ws":
 		sfui.handleWs(w, r)
+		return // Dont add json header to WS requests
+	case "/config":
+		sfui.handleUIConfig(w, r)
 	default:
 		handleUIRequest(w, r)
+		return // Dont add json header to UI requests
 	}
+	w.Header().Add("Content-Type", "application/json")
 }
 
-func (sfui *SfUI) handleHttp(w http.ResponseWriter, r *http.Request) {
+func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {
 	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
 	if err == nil {
 		termReq := TermRequest{}
 		if json.Unmarshal(data, &termReq) == nil {
-			if sfui.isSecretValid(&termReq) {
+			termReq.ClientIp = r.RemoteAddr
+			if sfui.secretValid(&termReq) == nil {
 				w.WriteHeader(http.StatusOK)
 				termRes := TermResponse{
-					Status:     "OK",
-					SfEndpoint: sfui.getSfEndpoint(&termReq),
+					Status: "OK",
+					// SfEndpoint: sfui.SfEndpoint,
 				}
 				response, _ := json.Marshal(termRes)
-				w.Header().Add("Content-Type", "application/json")
 				w.Write(response)
 				return
 			}
 		}
 	}
 	w.WriteHeader(http.StatusInternalServerError)
-	w.Header().Add("Content-Type", "application/json")
 	w.Write([]byte(`{"status":"Internal Server Error"}`))
 }
 
 func (sfui *SfUI) handleWs(w http.ResponseWriter, r *http.Request) {
+	clientSecret := r.URL.Query().Get("secret")
+	rows, rerr := strconv.ParseUint(r.URL.Query().Get("rows"), 10, 16)
+	cols, cerr := strconv.ParseUint(r.URL.Query().Get("cols"), 10, 16)
+	if rerr != nil || cerr != nil {
+		rows = 30
+		cols = 100
+	}
+
 	websocket.Handler(func(ws *websocket.Conn) {
 		defer ws.Close()
-		for {
-			// Read
-			msg := ""
-			err := websocket.Message.Receive(ws, &msg)
-			if err != nil {
-				return
-			}
-			// Echo back
-			err = websocket.Message.Send(ws, msg)
-			if err != nil {
-				return
-			}
+
+		if err := sfui.secretValid(&TermRequest{
+			Secret:   clientSecret,
+			ClientIp: r.RemoteAddr,
+		}); err != nil { // Invalid Secret
+			ws.Write([]byte(err.Error()))
+			return
 		}
+
+		err := sfui.handleWsPty(&Terminal{
+			ClientSecret: clientSecret,
+			ClientIp:     r.RemoteAddr,
+			WSConn:       ws,
+			Rows:         uint16(rows),
+			Cols:         uint16(cols),
+		})
+		if err != nil {
+			ws.Write([]byte(err.Error()))
+		}
+
 	}).ServeHTTP(w, r)
 }
 
-func (sfui *SfUI) isSecretValid(TermRequest *TermRequest) bool {
-	return true
+func setTermDimensions(rows uint16, cols uint16, fd uintptr) {
+	window := struct {
+		row uint16
+		col uint16
+		x   uint16
+		y   uint16
+	}{
+		uint16(rows),
+		uint16(cols),
+		0,
+		0,
+	}
+	syscall.Syscall(
+		syscall.SYS_IOCTL,
+		fd,
+		syscall.TIOCSWINSZ,
+		uintptr(unsafe.Pointer(&window)),
+	)
 }
 
-func (sfui *SfUI) getSfEndpoint(TermRequest *TermRequest) string {
-	if sfui.ForceSfEndpoint || TermRequest.SfEndpoint == "" ||
-		!validSfEndpoint(TermRequest.SfEndpoint) {
-		return sfui.DefaultSfEndpoint
+var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z]+$`).MatchString
+
+func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
+	cmdParts := strings.Split(sfui.ShellCommand, " ")
+	if !isStringAlphabetic(terminal.ClientSecret) {
+		return errors.New("Unacceptable Secret")
 	}
-	return TermRequest.SfEndpoint
+	cmdParts = append(cmdParts, fmt.Sprintf(" SECRET=%s", terminal.ClientSecret))
+	cmdParts = append(cmdParts, fmt.Sprintf(" REMOTE_IP=%s", terminal.ClientIp)) // ClientIP provided by server, no sanitization required
+
+	apty, err := pty.Start(exec.Command(cmdParts[0], cmdParts[1:]...))
+	if err != nil {
+		return err
+	}
+	defer apty.Close()
+
+	setTermDimensions(uint16(terminal.Rows), uint16(terminal.Cols), apty.Fd())
+
+	go func() {
+		for {
+			_, rerr := io.Copy(terminal.WSConn, apty)
+			if rerr != nil {
+				break
+			}
+		}
+	}()
+
+	_, werr := io.Copy(apty, terminal.WSConn)
+	if werr != nil {
+		terminal.WSConn.Close()
+	}
+
+	return nil
 }
 
-func validSfEndpoint(Endpoint string) bool {
-	return true
+func (sfui *SfUI) secretValid(TermRequest *TermRequest) error {
+	// Pass Secret and Client IP to sf Core
+	// return errors.New("Banned User")
+	// return errors.New("Banned IP")
+	return nil
 }
 
-func handleUIRequest(w http.ResponseWriter, r *http.Request) {
-	pagePrefix := "ui/dist/sf-ui"
-	var page string
-
-	// Redirect / to /index.html
-	if r.URL.Path == "/" {
-		page = pagePrefix + "/index.html"
-	} else {
-		page = pagePrefix + r.URL.Path
-	}
-
-	// Enable Caching for everything other than index.html
-	if page != pagePrefix+"/index.html" {
-		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-		w.Header().Add("Cache-Control", "public max-age=31535996 immutable")
-	}
-
-	// Read the requested file from the FS
-	fileBytes, err := staticfiles.ReadFile(page)
-	if err == nil {
-		w.Header().Add("Content-Type", getContentType(&page))
-		w.Header().Add("Last-Modified", buildTime)
-		w.Write(fileBytes)
-		return
-	}
-
-	w.WriteHeader(http.StatusInternalServerError)
-	w.Write([]byte("404 Not Found"))
-}
-
-// Given a file name return the appropriate content type
-func getContentType(filename *string) string {
-	splits := strings.Split(*filename, ".")
-	return mime.TypeByExtension("." + splits[len(splits)-1])
+// Provide UI related config to client
+func (sfui *SfUI) handleUIConfig(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write(sfui.CompiledClientConfig)
 }

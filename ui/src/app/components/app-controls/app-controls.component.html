@@ -1,4 +1,8 @@
 <div class="flex-row">
+  <div class="terminal-tab terminal-window-add inactive-bg" (click)="toggleSidebar()">
+    <img *ngIf="sidebarVisible" src="../assets/icons/panel-close.svg" alt="">
+    <img *ngIf="!sidebarVisible" src="../assets/icons/panel-open.svg" alt="">
+  </div>
     <div class="terminal-tab terminal-window-add inactive-bg" (click)="toggleTheme()">
       <img *ngIf="curTheme!='dark'" src="../assets/icons/dark-mode.svg" alt="">
       <img *ngIf="curTheme=='dark'" src="../assets/icons/light-mode.svg" alt="">

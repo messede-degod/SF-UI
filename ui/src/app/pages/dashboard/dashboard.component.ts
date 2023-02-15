@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Injectable } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard',
@@ -7,7 +7,8 @@ import { Component } from '@angular/core';
 })
 export class DashboardComponent {
   title = 'Segfault';
-  activeMenu: String = "terminal"  
+  activeMenu: String = "terminal"
+  sidebarVisible: boolean = true
 
   menuItems: Array<any> = [
     { ilink: '../assets/icons/term.svg', name: "terminal" },

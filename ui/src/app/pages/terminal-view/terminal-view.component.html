@@ -1,12 +1,19 @@
-<div class="controls-view flex-row">
-    <terminal-controls 
-        [activeTerminalId]="activeTerminalId"
-        (activeTerminalIdChange)="setActiveTerminal($event)" 
-        [(terminalWindows)]="terminalWindows"
-    >
-    </terminal-controls>
-    <app-controls></app-controls>
+<div class="flex-row">
+    <div class="menu-brand menu-brand-small flex-col" *ngIf="showLogo">
+        <h6>SF</h6>
+        <span>by hackerschoice</span>
+    </div>
+    <div class="controls-view flex-row">
+        <terminal-controls 
+            [activeTerminalId]="activeTerminalId"
+            (activeTerminalIdChange)="setActiveTerminal($event)" 
+            [(terminalWindows)]="terminalWindows"
+        >
+        </terminal-controls>
+        <app-controls></app-controls>
+    </div>
 </div>
+
 <div id="terminals-container">
     <app-terminal *ngFor="let term of terminalWindows" class="terminal"
         [ngClass]="{'hidden' : activeTerminalId !== term.id}" [TermId]="term.id">

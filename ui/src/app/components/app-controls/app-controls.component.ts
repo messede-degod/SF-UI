@@ -1,18 +1,27 @@
-import { Component } from '@angular/core';
+import { Component, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { DashboardComponent } from 'src/app/pages/dashboard/dashboard.component';
+import { TerminalViewComponent } from 'src/app/pages/terminal-view/terminal-view.component'
 
 @Component({
   selector: 'app-controls',
   templateUrl: './app-controls.component.html',
-  styleUrls: ['./app-controls.component.css']
+  styleUrls: ['./app-controls.component.css'],
 })
 export class AppControlsComponent {
   router!: Router
+  dashboardComponent!: DashboardComponent
+  terminalViewComponent: TerminalViewComponent
 
-  constructor(router:  Router){
+  constructor(router:  Router,dashboardComponent: DashboardComponent,terminalViewComponent: TerminalViewComponent){
     this.router = router
+    this.dashboardComponent = dashboardComponent
+    this.terminalViewComponent= terminalViewComponent
     if(localStorage.getItem('theme')=='dark'){
       this.setTheme('dark')
+    }
+    if(localStorage.getItem('sidebarVisible')=='false'){
+      this.toggleSidebar()
     }
   }
 
@@ -44,6 +53,14 @@ export class AppControlsComponent {
 
   logout(){
     this.router.navigate(['/login'])
+  }
+
+  sidebarVisible: boolean = true
+  toggleSidebar(){
+    this.sidebarVisible = !this.sidebarVisible
+    this.dashboardComponent.sidebarVisible = this.sidebarVisible
+    this.terminalViewComponent.showLogo = !this.sidebarVisible
+    localStorage.setItem('sidebarVisible',this.sidebarVisible+"")
   }
 
 }

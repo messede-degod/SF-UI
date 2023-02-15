@@ -40,6 +40,7 @@ body {
     --menu-btn-icon: brightness(0) saturate(100%) invert(98%) sepia(0%) saturate(1152%) hue-rotate(312deg) brightness(82%) contrast(67%);
     caret-color: black;
     --input-text-color: black;
+    --control-bar-height: 5vh;
 }
 
 
@@ -56,6 +57,7 @@ body {
     --menu-btn-icon: brightness(0) saturate(100%) invert(98%) sepia(0%) saturate(1152%) hue-rotate(312deg) brightness(82%) contrast(67%);
     caret-color: white;
     --input-text-color: white;
+    --control-bar-height: 5vh;
 }
 
 .hidden {
@@ -73,6 +75,7 @@ body {
 .content-view {
     height: 100vh;
     width: 95%;
+    flex: 1;
     background-color: var(--content-background);
 }
 
@@ -83,11 +86,36 @@ body {
 
 .menu-brand {
     display: flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
+    height: var(--control-bar-height) !important;
     justify-content: center;
     align-items: center;
     margin-bottom: 1.5vh;
     margin-top: 3.8vh;
+    animation: fadeIn 0.5s;
+}
+
+.menu-brand-small{
+    margin: 0 !important;
+    height: var(--control-bar-height) !important;
+    width: 6vw;
+    font-size: 2.5vh !important;
+    background-color: var(--background) !important;
+    animation: fadeIn 0.5s;
+    overflow: hidden;
+}
+
+.menu-brand-small>h6{
+    font-size: 2.3vw !important;
+    margin-top: 1.2vh !important;
+    margin-bottom: 0 !important;
+}
+
+.menu-brand-small>span{
+    font-size: 0.6vw !important;
+    margin-top: 0.5vh !important;
 }
 
 
@@ -136,9 +164,10 @@ body {
 }
 
 .controls-view {
-    height: 5vh;
+    height: var(--control-bar-height);
     justify-content: space-between;
     background-color: var(--background);
+    width: 100%;
 }
 
 .terminal-control {

@@ -64,17 +64,47 @@ body {
     display: none !important;
 }
 
+@keyframes sideBarShow {
+    0% {
+        height: var(--control-bar-height);
+        width: 0%;
+    }
+
+    100% {
+        height: 100vh;
+        width: 6% !important;
+    }
+}
+
+@keyframes sideBarHide {
+    0% {
+        height: 100vh;
+        width: 6%;
+    }
+
+    100% {
+        height: var(--control-bar-height);
+        width: 0%;
+        display: none !important;
+    }
+}
+
 .sidebar {
     justify-content: space-between;
     height: 100vh;
     width: 6%;
     transition: width 2s;
     background-color: var(--background);
+    animation: sideBarShow 0.8s;
+}
+
+.sidebar-hidden {
+    animation: sideBarHide 0.8s forwards;
 }
 
 .content-view {
     height: 100vh;
-    width: 95%;
+    width: 94%;
     flex: 1;
     background-color: var(--content-background);
 }
@@ -97,7 +127,7 @@ body {
     animation: fadeIn 0.5s;
 }
 
-.menu-brand-small{
+.menu-brand-small {
     margin: 0 !important;
     height: var(--control-bar-height) !important;
     width: 6vw;
@@ -107,13 +137,13 @@ body {
     overflow: hidden;
 }
 
-.menu-brand-small>h6{
+.menu-brand-small>h6 {
     font-size: 2.3vw !important;
     margin-top: 1.2vh !important;
     margin-bottom: 0 !important;
 }
 
-.menu-brand-small>span{
+.menu-brand-small>span {
     font-size: 0.6vw !important;
     margin-top: 0.5vh !important;
 }
@@ -176,8 +206,23 @@ body {
 }
 
 @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
 }
 
 .terminal-tab {
@@ -193,6 +238,10 @@ body {
     align-items: center;
     border-radius: 4px;
     animation: fadeIn 0.5s;
+}
+
+.terminal-tab-closed {
+    animation: fadeOut 0.5s !important;
 }
 
 .terminal-tab>span {
@@ -235,7 +284,7 @@ body {
     overflow: hidden;
 }
 
-.terms-tabs-none{
+.terms-tabs-none {
     color: var(--active-bg);
     display: flex;
     flex: 1;
@@ -305,34 +354,35 @@ body {
 /* End Login Page */
 
 /* Help Dialog*/
-.help-dialog{
+.help-dialog {
     background-color: var(--background);
 }
 
-.help-dialog>*,.help-close-button{
+.help-dialog>*,
+.help-close-button {
     color: var(--input-text-color) !important;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
-.help-close-button{
+.help-close-button {
     background-color: var(--inactive-bg);
 }
 
-.help-content{
+.help-content {
     font-size: large !important;
     margin: 2rem;
 }
 
-.sub-list{
+.sub-list {
     margin-top: 0;
     margin-left: 4rem;
 }
 
-.help-heading{
+.help-heading {
     margin-left: 2rem;
 }
 
-code{
+code {
     color: white;
     font-weight: 600;
     background-color: rgb(56, 54, 54);

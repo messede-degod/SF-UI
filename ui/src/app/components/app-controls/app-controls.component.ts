@@ -56,8 +56,9 @@ export class AppControlsComponent {
   }
 
   sidebarVisible: boolean = true
-  toggleSidebar(){
+  async toggleSidebar(){
     this.sidebarVisible = !this.sidebarVisible
+    await new Promise(f => setTimeout(f, 150));
     this.dashboardComponent.sidebarVisible = this.sidebarVisible
     this.terminalViewComponent.showLogo = !this.sidebarVisible
     localStorage.setItem('sidebarVisible',this.sidebarVisible+"")

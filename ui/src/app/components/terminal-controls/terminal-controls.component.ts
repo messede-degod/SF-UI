@@ -12,6 +12,7 @@ export class TerminalControlsComponent {
   @Input() terminalWindows: Array<any> = []
   @Output() terminalWindowsChange = new EventEmitter<Array<any>>();
   MaxTerminalsOpen = false
+  closedTermTab: number = -1
 
   newTerminal() {
     if (this.terminalWindows.length == Config.MaxOpenTerminals) {
@@ -31,8 +32,10 @@ export class TerminalControlsComponent {
     this.setTerminalActive(newTermId)
   }
 
-  removeTerminal(termId: number) {
+  async removeTerminal(termId: number) {
     this.MaxTerminalsOpen = false
+    this.closedTermTab = termId
+    await new Promise(f => setTimeout(f, 150));
     if (this.activeTerminalId == termId && this.terminalWindows.length != 0) {
       this.setTerminalActive(this.terminalWindows[0].id)
     }
@@ -41,6 +44,7 @@ export class TerminalControlsComponent {
         this.terminalWindows.splice(i, 1)
       }
     }
+    this.closedTermTab = -1
   }
 
   setTerminalActive(termId: number) {

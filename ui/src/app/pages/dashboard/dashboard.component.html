@@ -1,7 +1,7 @@
 <div class="flex-row">
     <section class="sidebar flex-col" 
-    [ngClass]="{'hidden':!sidebarVisible}">
-      <div class="menu-items flex-col">
+    [ngClass]="{'sidebar-hidden':!sidebarVisible}">
+      <div class="menu-items flex-col" [ngClass]="{'hidden':!sidebarVisible}">
         <div class="menu-brand flex-col">
           <h6>SF</h6>
           <span>by hackerschoice</span>

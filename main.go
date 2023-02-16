@@ -182,11 +182,13 @@ var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z]+$`).MatchString
 
 func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 	cmdParts := strings.Split(sfui.ShellCommand, " ")
-	if !isStringAlphabetic(terminal.ClientSecret) {
-		return errors.New("Unacceptable Secret")
+	if sfui.AddSfUIArgs {
+		if !isStringAlphabetic(terminal.ClientSecret) {
+			return errors.New("Unacceptable Secret")
+		}
+		cmdParts = append(cmdParts, fmt.Sprintf(" SECRET=%s", terminal.ClientSecret))
+		cmdParts = append(cmdParts, fmt.Sprintf(" REMOTE_ADDR=%s", terminal.ClientIp)) // ClientIP provided by server, no sanitization required
 	}
-	cmdParts = append(cmdParts, fmt.Sprintf(" SECRET=%s", terminal.ClientSecret))
-	cmdParts = append(cmdParts, fmt.Sprintf(" REMOTE_ADDR=%s", terminal.ClientIp)) // ClientIP provided by server, no sanitization required
 
 	apty, err := pty.Start(exec.Command(cmdParts[0], cmdParts[1:]...))
 	if err != nil {

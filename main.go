@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -43,12 +44,26 @@ type TermResponse struct {
 	// SfEndpoint string `json:"sf_endpoint"`
 }
 
+// First of byte read from Terminal.Pty is matched with
+// the following constants, to determine the type of data
+// a client is sending
+const (
+	SFUI_CMD_RESIZE = '1'
+	SFUI_CMD_PAUSE  = '2'
+	SFUI_CMD_RESUME = '3'
+)
+
 type Terminal struct {
 	ClientSecret string
 	ClientIp     string
+	TermConfig   *TermConfig
 	WSConn       *websocket.Conn
-	Rows         uint16
-	Cols         uint16
+	Pty          *os.File
+}
+
+type TermConfig struct {
+	Rows uint16 `json:"rows"`
+	Cols uint16 `json:"cols"`
 }
 
 var buildTime string
@@ -148,8 +163,10 @@ func (sfui *SfUI) handleWs(w http.ResponseWriter, r *http.Request) {
 			ClientSecret: clientSecret,
 			ClientIp:     r.RemoteAddr,
 			WSConn:       ws,
-			Rows:         uint16(rows),
-			Cols:         uint16(cols),
+			TermConfig: &TermConfig{
+				Rows: uint16(rows),
+				Cols: uint16(cols),
+			},
 		})
 		if err != nil {
 			ws.Write([]byte(err.Error()))
@@ -158,7 +175,11 @@ func (sfui *SfUI) handleWs(w http.ResponseWriter, r *http.Request) {
 	}).ServeHTTP(w, r)
 }
 
-func setTermDimensions(rows uint16, cols uint16, fd uintptr) {
+func (terminal *Terminal) setTermDimensions(rows uint16, cols uint16) {
+	if terminal.Pty.Fd() <= 2 {
+		return
+	}
+
 	window := struct {
 		row uint16
 		col uint16
@@ -172,10 +193,32 @@ func setTermDimensions(rows uint16, cols uint16, fd uintptr) {
 	}
 	syscall.Syscall(
 		syscall.SYS_IOCTL,
-		fd,
+		terminal.Pty.Fd(),
 		syscall.TIOCSWINSZ,
 		uintptr(unsafe.Pointer(&window)),
 	)
+}
+
+// First byte in the chunk sent by the client is a indicator
+// of the type of data. This is a custom read implementation
+// to handle the first byte.
+func (terminal *Terminal) Read(msg []byte) (n int, err error) {
+	nmsg := make([]byte, 128)
+	n, err = terminal.WSConn.Read(nmsg)
+	if n > 0 {
+		switch nmsg[0] { // Check the type of data we recieved
+		case SFUI_CMD_RESIZE:
+			var termConfig TermConfig
+			if jerr := json.Unmarshal(nmsg[1:n-1], &termConfig); jerr == nil {
+				log.Println(termConfig.Rows, termConfig.Cols)
+				terminal.setTermDimensions(termConfig.Rows, termConfig.Cols)
+			}
+			return 0, nil
+		}
+		copy(msg, nmsg[1:]) // Copy everything except the first byte
+		return n, err
+	}
+	return n, err
 }
 
 var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z]+$`).MatchString
@@ -190,24 +233,25 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 		cmdParts = append(cmdParts, fmt.Sprintf(" REMOTE_ADDR=%s", terminal.ClientIp)) // ClientIP provided by server, no sanitization required
 	}
 
-	apty, err := pty.Start(exec.Command(cmdParts[0], cmdParts[1:]...))
+	var err error
+	terminal.Pty, err = pty.Start(exec.Command(cmdParts[0], cmdParts[1:]...))
 	if err != nil {
 		return err
 	}
-	defer apty.Close()
+	defer terminal.Pty.Close()
 
-	setTermDimensions(uint16(terminal.Rows), uint16(terminal.Cols), apty.Fd())
+	terminal.setTermDimensions(uint16(terminal.TermConfig.Rows), uint16(terminal.TermConfig.Cols))
 
 	go func() {
 		for {
-			_, rerr := io.Copy(terminal.WSConn, apty)
+			_, rerr := io.Copy(terminal.WSConn, terminal.Pty)
 			if rerr != nil {
 				break
 			}
 		}
 	}()
 
-	_, werr := io.Copy(apty, terminal.WSConn)
+	_, werr := io.Copy(terminal.Pty, terminal)
 	if werr != nil {
 		terminal.WSConn.Close()
 	}

@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, ViewEncapsulation, Input } from '@angular/core';
 import { ITheme, ITerminalOptions, Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
-import { AttachAddon } from 'xterm-addon-attach';
+import { AttachAddonComponent } from '../attach-addon/attach-addon.component';
 import { WebglAddon } from 'xterm-addon-webgl';
 import { Config } from 'src/app/config/config';
 
@@ -74,7 +74,7 @@ export class TerminalComponent implements AfterViewInit {
       this.socket = new WebSocket(this.getWSURL(), Config.WSServerProtocol);
       
       // Attach The Sockets I/O to the terminal
-      const attachAddon = new AttachAddon(this.socket,{bidirectional: true});
+      const attachAddon = new AttachAddonComponent(this.socket,{bidirectional: true});
       this.terminal.loadAddon(attachAddon);
 
       // Send Initial Command
@@ -84,10 +84,16 @@ export class TerminalComponent implements AfterViewInit {
 
       window.onresize = () => {
         this.fitAddon.fit();
+        const terminal_size = {
+          cols: this.terminal.cols,
+          rows: this.terminal.rows,
+        };
+        console.log(terminal_size)
+        this.socket.binaryType= 'blob'
+        
+        const SF_RESIZE = 1
+        this.socket.send(SF_RESIZE+JSON.stringify(terminal_size)+" ");
       };
-
-      this.terminal.onResize(this.resizeTerm);
-
     }
   }
 
@@ -103,14 +109,7 @@ export class TerminalComponent implements AfterViewInit {
             +"&cols="+this.terminal.cols
   }
 
-  resizeTerm = (evt: any) => {
-    const terminal_size = {
-      Width: evt.cols,
-      Height: evt.rows,
-    };
-    console.log(terminal_size)
-    // this.socket.send(JSON.stringify(terminal_size));
-  }
+
 
   enableWebglRenderer = () => {
     try {

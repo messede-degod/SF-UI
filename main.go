@@ -210,7 +210,6 @@ func (terminal *Terminal) Read(msg []byte) (n int, err error) {
 		case SFUI_CMD_RESIZE:
 			var termConfig TermConfig
 			if jerr := json.Unmarshal(nmsg[1:n-1], &termConfig); jerr == nil {
-				log.Println(termConfig.Rows, termConfig.Cols)
 				terminal.setTermDimensions(termConfig.Rows, termConfig.Cols)
 			}
 			return 0, nil
@@ -244,13 +243,15 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 
 	go func() {
 		for {
-			_, rerr := io.Copy(terminal.WSConn, terminal.Pty)
+			_, rerr := io.Copy(terminal.WSConn, terminal.Pty) // Copy from PTY -> WS
 			if rerr != nil {
 				break
 			}
 		}
 	}()
 
+	// Copy from WS -> PTY, but use the Read() function
+	// we defined for Terminal to read from the websocket
 	_, werr := io.Copy(terminal.Pty, terminal)
 	if werr != nil {
 		terminal.WSConn.Close()

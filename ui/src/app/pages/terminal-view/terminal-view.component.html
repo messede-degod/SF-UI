@@ -14,7 +14,7 @@
     </div>
 </div>
 
-<div id="terminals-container">
+<div class="terminals-container">
     <app-terminal *ngFor="let term of terminalWindows" class="terminal"
         [ngClass]="{'hidden' : activeTerminalId !== term.id}" [TermId]="term.id">
     </app-terminal>

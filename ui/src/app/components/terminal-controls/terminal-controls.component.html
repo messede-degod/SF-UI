@@ -1,13 +1,11 @@
 <div class="terminal-control flex-row">
   <div *ngFor="let term of terminalWindows" class="terminal-tab" 
-  
     [ngClass]="
       {'active-bg' : activeTerminalId === term.id,
       'inactive-bg' : activeTerminalId !== term.id,
       'terminal-tab-closed': closedTermTab==term.id}" 
-     
-     (click)="setTerminalActive(term.id)">
-    <span>{{getTerminalName(term.id)}}</span>
+     >
+    <span (click)="setTerminalActive(term.id)">{{getTerminalName(term.id)}}</span>
     <img src="../assets/icons/close.svg" alt="" (click)="removeTerminal(term.id)">
   </div>
   <div class="terminal-tab terminal-window-add inactive-bg" 

@@ -42,9 +42,9 @@ export class AppControlsComponent {
   }
 
   fullScreen: boolean = false
-  async toggleFullscreen() {
+  toggleFullscreen() {
     if (this.fullScreen) {
-      await document.exitFullscreen();
+      document.exitFullscreen();
     } else {
       document.body.requestFullscreen();
     }

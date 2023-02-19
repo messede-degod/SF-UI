@@ -18,7 +18,7 @@
     <app-terminal *ngFor="let term of terminalWindows" class="terminal"
         [ngClass]="{'hidden' : activeTerminalId !== term.id}" [TermId]="term.id">
     </app-terminal>
-    <div *ngIf="terminalWindows.length==0" class="terms-tabs-none">
+    <div *ngIf="terminalWindows.length==0" class="terminal-tabs-none">
         No Open Terminals, Go Ahead Open A New One!
     </div>
 </div>

@@ -35,13 +35,21 @@ export class TerminalControlsComponent {
   async removeTerminal(termId: number) {
     this.MaxTerminalsOpen = false
     this.closedTermTab = termId
+    let removedTermPos = 0
     await new Promise(f => setTimeout(f, 150));
-    if (this.activeTerminalId == termId && this.terminalWindows.length != 0) {
-      this.setTerminalActive(this.terminalWindows[0].id)
-    }
     for (let i = 0; i < this.terminalWindows.length; i++) {
       if (this.terminalWindows[i].id == termId) {
+        removedTermPos = i
         this.terminalWindows.splice(i, 1)
+        break
+      }
+    }
+
+    if (this.activeTerminalId == termId && this.terminalWindows.length != 0) {
+      if(removedTermPos>this.terminalWindows.length-1){
+        this.setTerminalActive(this.terminalWindows[this.terminalWindows.length-1].id)  
+      }else{
+        this.setTerminalActive(this.terminalWindows[removedTermPos].id)
       }
     }
     this.closedTermTab = -1

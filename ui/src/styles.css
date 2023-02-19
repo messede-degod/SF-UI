@@ -47,7 +47,7 @@ body {
 [data-theme="dark"] {
     color: white;
     --background: #181a1b;
-    --content-background: #474747;
+    --content-background: #353a3c;
     --brand-red: #eb7134;
     --brand-black: white;
     --active-bg: rgb(45 49 51 / 93%);
@@ -284,8 +284,8 @@ body {
     overflow: hidden;
 }
 
-.terms-tabs-none {
-    color: var(--active-bg);
+.terminal-tabs-none {
+    color: #ffff;
     display: flex;
     flex: 1;
     justify-content: center;

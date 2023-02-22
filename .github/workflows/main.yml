@@ -1,0 +1,23 @@
+name: SFUI Build
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository content
+        uses: actions/checkout@v2 
+        
+      - name: Install Dependencies
+        run: apt install -y golang-1.9 npm make
+        
+      - name: Install Angular
+        run: npm install -g @angular/cli
+
+      - name: Make UI
+        run: make UI
+        
+      - name: Make Binary
+        run: make prod

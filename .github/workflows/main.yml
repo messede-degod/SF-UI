@@ -8,7 +8,9 @@ jobs:
 
     steps:
       - name: Checkout repository content
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v3.3.0
+        with:
+          fetch-depth: 0
         
       - name: Install Dependencies
         run: sudo apt install -y golang npm make

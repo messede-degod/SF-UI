@@ -1,4 +1,5 @@
 import { Component, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,7 +18,13 @@ export class DashboardComponent {
     { ilink: '../assets/icons/web.svg', name: "web" },
   ]
 
+  router!: Router
+  constructor(router: Router) {
+    this.router = router
+  }
+
   setActiveMenu(name: string) {
     this.activeMenu = name
+    this.router.navigate(['dashboard',name]);
   }
 }

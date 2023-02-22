@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Config } from './config/config';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -9,8 +10,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class AppComponent {
   title = 'Segfault';
+  router: Router
 
-  constructor(private snackBar: MatSnackBar) {
+  constructor(private snackBar: MatSnackBar, router: Router) {
+    this.router = router
     this.fetchConfig()
   }
 
@@ -20,6 +23,9 @@ export class AppComponent {
     if (rdata.status == 200) {
       let config = await rdata.json()
       Config.MaxOpenTerminals = config.max_terminals
+      if(config.auto_login){
+        this.router.navigate(['/dashboard/terminal'])
+      }
     } else {
       this.snackBar.open("Failed to fetch config from server !", "OK", {
         duration: 2 * 1000

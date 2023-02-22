@@ -15,6 +15,7 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { LoginComponent } from './pages/login/login.component';
 import { HelpDialogComponent } from './components/help-dialog/help-dialog.component';
 import { FormsModule } from '@angular/forms';
+import { DesktopViewComponent } from './pages/desktop-view/desktop-view.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { FormsModule } from '@angular/forms';
     DashboardComponent,
     LoginComponent,
     HelpDialogComponent,
+    DesktopViewComponent,
   ],
   imports: [
     BrowserModule,

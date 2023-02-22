@@ -8,25 +8,31 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
+	"unicode/utf8"
 	"unsafe"
 
 	"github.com/creack/pty"
+	"github.com/koding/websocketproxy"
 	"golang.org/x/net/websocket"
 )
 
 type SfUI struct {
 	MaxWsTerminals    int    // Max terminals that can be allocated per client
 	ServerBindAddress string // Address to which the current app binds
+	XpraWSAddress     string // Address at which the xpra ws server is listening
 	Debug             bool   // Print debug information
 	ShellCommand      string // Command to run on the pty
 	// Two additional arguments are added to ShellCommand
 	// 	Example:  somecmd  SECRET=abc REMOTE_ADDR=1.1.1.1
+	// This is usefull for global deployment of SFUI and integration
+	// with Segfault Core.
 	AddSfUIArgs          bool
 	CompiledClientConfig []byte // Ui related onfig that has to be sent to client
 	// SfEndpoint           string  // Current Sf Endpoints Name
@@ -75,8 +81,9 @@ func main() {
 	sfui := SfUI{
 		MaxWsTerminals:    10,
 		ServerBindAddress: "127.0.0.1:7171",
+		XpraWSAddress:     "ws://127.0.0.1:2000/",
 		Debug:             false,
-		ShellCommand:      "sshpass -p segfault ssh root@segfault.net",
+		ShellCommand:      "bash",
 		AddSfUIArgs:       false,
 	}
 	sfui.compileClientConfig()
@@ -91,7 +98,11 @@ func main() {
 // Store it byte format, to prevent json marshalling on every request
 // See handleUIConfig()
 func (sfui *SfUI) compileClientConfig() {
-	compConfig := fmt.Sprintf(`{"max_terminals":"%d"}`, sfui.MaxWsTerminals)
+	compConfig := fmt.Sprintf(
+		`{"max_terminals":"%d","auto_login":%s}`,
+		sfui.MaxWsTerminals,
+		strconv.FormatBool(!sfui.AddSfUIArgs), // Redirect client directly to dashboard if not in global mode.
+	)
 	sfui.CompiledClientConfig = []byte(compConfig)
 }
 
@@ -107,6 +118,9 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 		sfui.handleSecret(w, r)
 	case "/ws":
 		sfui.handleWs(w, r)
+		return // Dont add json header to WS requests
+	case "/xpraws":
+		sfui.handleXpraWS(w, r)
 		return // Dont add json header to WS requests
 	case "/config":
 		sfui.handleUIConfig(w, r)
@@ -242,12 +256,7 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 	terminal.setTermDimensions(uint16(terminal.TermConfig.Rows), uint16(terminal.TermConfig.Cols))
 
 	go func() {
-		for {
-			_, rerr := io.Copy(terminal.WSConn, terminal.Pty) // Copy from PTY -> WS
-			if rerr != nil {
-				break
-			}
-		}
+		io.Copy(terminal.WSConn, terminal.Pty) // Copy from PTY -> WS
 	}()
 
 	// Copy from WS -> PTY, but use the Read() function
@@ -271,4 +280,41 @@ func (sfui *SfUI) secretValid(TermRequest *TermRequest) error {
 func (sfui *SfUI) handleUIConfig(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(sfui.CompiledClientConfig)
+}
+
+type wsConn struct {
+	conn *websocket.Conn
+	buf  []byte
+}
+
+// Checking and buffering `b`
+// If `b` is invalid UTF-8, it would be buffered
+// if buffer is valid UTF-8, it would write to connection
+func (ws *wsConn) Write(b []byte) (i int, err error) {
+	if !utf8.Valid(b) {
+		buflen := len(ws.buf)
+		blen := len(b)
+		ws.buf = append(ws.buf, b...)[:buflen+blen]
+		if utf8.Valid(ws.buf) {
+			_, e := ws.conn.Write(ws.buf)
+			ws.buf = ws.buf[:0]
+			return blen, e
+		}
+		return blen, nil
+	}
+
+	if len(ws.buf) > 0 {
+		n, err := ws.conn.Write(ws.buf)
+		ws.buf = ws.buf[:0]
+		if err != nil {
+			return n, err
+		}
+	}
+	n, e := ws.conn.Write(b)
+	return n, e
+}
+
+func (sfui *SfUI) handleXpraWS(w http.ResponseWriter, r *http.Request) {
+	u, _ := url.Parse(sfui.XpraWSAddress)
+	websocketproxy.NewProxy(u).ServeHTTP(w, r) // Get rid of this dependency
 }

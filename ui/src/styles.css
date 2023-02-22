@@ -102,11 +102,15 @@ body {
     animation: sideBarHide 0.8s forwards;
 }
 
-.content-view {
+.content-view{
     height: 100vh;
     width: 94%;
     flex: 1;
     background-color: var(--content-background);
+}
+
+.desktop-view{
+    height: 100vh;
 }
 
 .menu-items {
@@ -248,6 +252,7 @@ body {
     margin-left: 0.3rem;
     font-size: 0.9rem;
     color: var(--term-tab);
+    width: 90%;
 }
 
 .terminal-tab>img {

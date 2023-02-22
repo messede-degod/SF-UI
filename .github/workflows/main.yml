@@ -21,6 +21,9 @@ jobs:
       - name: List Dir Structure
         run: ls -la
 
+      - name: Install npm modules
+        run: cd ui && npm install
+        
       - name: Make UI
         run: make UI
         

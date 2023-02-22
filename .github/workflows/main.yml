@@ -16,8 +16,10 @@ jobs:
       - name: Install Angular
         run: sudo npm install -g @angular/cli
 
+      - name: List Dir Structure
+        run: ls -la
+
       - name: Make UI
-        working-directory: ./SF-UI/
         run: make UI
         
       - name: Make Binary

@@ -17,6 +17,7 @@ jobs:
         run: sudo npm install -g @angular/cli
 
       - name: Make UI
+        working-directory: ./SF-UI/
         run: make UI
         
       - name: Make Binary

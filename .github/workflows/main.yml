@@ -11,10 +11,10 @@ jobs:
         uses: actions/checkout@v2 
         
       - name: Install Dependencies
-        run: apt install -y golang-1.9 npm make
+        run: sudo apt install -y golang-1.9 npm make
         
       - name: Install Angular
-        run: npm install -g @angular/cli
+        run: sudo npm install -g @angular/cli
 
       - name: Make UI
         run: make UI

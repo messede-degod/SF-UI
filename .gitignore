@@ -5,6 +5,7 @@ ui/dist
 ui/tmp
 ui/out-tsc
 ui/bazel-out
+ui/src/app/config/config.ts
 bin/*
 
 # Node

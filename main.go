@@ -224,7 +224,7 @@ func (terminal *Terminal) Read(msg []byte) (n int, err error) {
 		switch nmsg[0] { // Check the type of data we recieved
 		case SFUI_CMD_RESIZE:
 			var termConfig TermConfig
-			if jerr := json.Unmarshal(nmsg[1:n-1], &termConfig); jerr == nil {
+			if jerr := json.Unmarshal(nmsg[1:n], &termConfig); jerr == nil {
 				terminal.setTermDimensions(termConfig.Rows, termConfig.Cols)
 			}
 			return 0, nil

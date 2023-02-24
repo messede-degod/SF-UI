@@ -92,7 +92,7 @@ export class TerminalComponent implements AfterViewInit {
         this.socket.binaryType= 'blob'
         
         const SF_RESIZE = 1
-        this.socket.send(SF_RESIZE+JSON.stringify(terminal_size)+" ");
+        this.socket.send(SF_RESIZE+JSON.stringify(terminal_size));
       };
     }
   }

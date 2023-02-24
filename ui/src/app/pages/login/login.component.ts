@@ -59,7 +59,7 @@ export class LoginComponent {
     if (rdata.status == 200) {
       logginInMsg.dismiss()
       localStorage.setItem('secret',this.secret)
-      this.router.navigate(['/dashboard/terminal'])
+      this.router.navigate(['/dashboard'])
       return
     }
 

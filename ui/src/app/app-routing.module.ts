@@ -8,11 +8,7 @@ import { TerminalViewComponent } from './pages/terminal-view/terminal-view.compo
 const routes: Routes = [
   {path: '', redirectTo: '/login', pathMatch: 'full'},
   {path: 'login', component: LoginComponent},
-  {path: 'dashboard', component: DashboardComponent,children:[
-    {path:"terminal" , component: TerminalViewComponent},
-    {path:"desktop" , component: DesktopViewComponent}
-  ]},
-  // {path:"login" , component: },
+  {path: 'dashboard', component: DashboardComponent},
 ];
 
 @NgModule({

@@ -25,7 +25,7 @@
       </div>
     </section>
     <section class="content-view flex-col">
-      <!-- <terminal-view></terminal-view> -->
-      <router-outlet></router-outlet>
+      <terminal-view [ngClass]="{'hidden': activeMenu!='terminal'}"></terminal-view>
+      <desktop-view [ngClass]="{'hidden': activeMenu!='desktop'}"></desktop-view>
     </section>
   </div>

@@ -16,6 +16,8 @@ import { LoginComponent } from './pages/login/login.component';
 import { HelpDialogComponent } from './components/help-dialog/help-dialog.component';
 import { FormsModule } from '@angular/forms';
 import { DesktopViewComponent } from './pages/desktop-view/desktop-view.component';
+import { PortsViewComponent } from './pages/ports-view/ports-view.component';
+import { WebViewComponent } from './pages/web-view/web-view.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +30,8 @@ import { DesktopViewComponent } from './pages/desktop-view/desktop-view.componen
     LoginComponent,
     HelpDialogComponent,
     DesktopViewComponent,
+    PortsViewComponent,
+    WebViewComponent,
   ],
   imports: [
     BrowserModule,

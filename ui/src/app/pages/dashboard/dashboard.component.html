@@ -27,5 +27,7 @@
     <section class="content-view flex-col">
       <terminal-view [ngClass]="{'hidden': activeMenu!='terminal'}"></terminal-view>
       <desktop-view [ngClass]="{'hidden': activeMenu!='desktop'}"></desktop-view>
+      <ports-view [ngClass]="{'hidden': activeMenu!='ports'}"></ports-view>
+      <web-view [ngClass]="{'hidden': activeMenu!='web'}"></web-view>
     </section>
   </div>

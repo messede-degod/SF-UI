@@ -33,6 +33,7 @@ type SfUI struct {
 	// 	Example:  somecmd  SECRET=abc REMOTE_ADDR=1.1.1.1
 	// This is usefull for global deployment of SFUI and integration
 	// with Segfault Core.
+	// If false, user is redirected to SFUI dashboard without any authentication
 	AddSfUIArgs          bool
 	CompiledClientConfig []byte // Ui related onfig that has to be sent to client
 	// SfEndpoint           string  // Current Sf Endpoints Name
@@ -50,7 +51,7 @@ type TermResponse struct {
 	// SfEndpoint string `json:"sf_endpoint"`
 }
 
-// First of byte read from Terminal.Pty is matched with
+// First byte read from Terminal.Pty is matched with
 // the following constants, to determine the type of data
 // a client is sending
 const (

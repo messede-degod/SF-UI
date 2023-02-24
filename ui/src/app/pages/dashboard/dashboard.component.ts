@@ -19,12 +19,16 @@ export class DashboardComponent {
   ]
 
   router!: Router
+  desktopRequested: boolean = false
+
   constructor(router: Router) {
     this.router = router
   }
 
   setActiveMenu(name: string) {
     this.activeMenu = name
-    this.router.navigate(['dashboard',name]);
+    if(this.activeMenu=="desktop" && !this.desktopRequested){
+      this.desktopRequested = true
+    }
   }
 }

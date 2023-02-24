@@ -24,7 +24,7 @@ export class AppComponent {
       let config = await rdata.json()
       Config.MaxOpenTerminals = config.max_terminals
       if(config.auto_login){
-        this.router.navigate(['/dashboard/terminal'])
+        this.router.navigate(['/dashboard'])
       }
     } else {
       this.snackBar.open("Failed to fetch config from server !", "OK", {

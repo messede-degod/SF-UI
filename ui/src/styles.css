@@ -13,9 +13,66 @@ body {
     font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital@1&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@1,700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital@1&display=swap');
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: url('assets/fonts/material-icons.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('assets/fonts/roboto-300.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/roboto-400.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('assets/fonts/roboto-500.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Source Sans Pro';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url('assets/fonts/source-sans-pro-i-400.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'PT Sans';
+    font-style: italic;
+    font-weight: 700;
+    font-display: swap;
+    src: url('assets/fonts/pt-sans-700.ttf') format('truetype');
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+}
 
 .flex-row {
     display: flex;
@@ -102,14 +159,14 @@ body {
     animation: sideBarHide 0.8s forwards;
 }
 
-.content-view{
+.content-view {
     height: 100vh;
     width: 94%;
     flex: 1;
     background-color: var(--content-background);
 }
 
-.desktop-view{
+.desktop-view {
     height: 100vh;
 }
 

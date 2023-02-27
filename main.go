@@ -36,6 +36,8 @@ type SfUI struct {
 	AddSfUIArgs          bool
 	CompiledClientConfig []byte // Ui related onfig that has to be sent to client
 	// SfEndpoint           string  // Current Sf Endpoints Name
+	SfUIOrigin         string // Where SFUI is deployed, for CSRF prevention, ex: https://web.segfault.net
+	DisableOriginCheck bool   // Disable Origin Checking
 
 }
 
@@ -85,13 +87,14 @@ func main() {
 		Debug:             false,
 		ShellCommand:      "bash",
 		AddSfUIArgs:       false,
+		SfUIOrigin:        "http://127.0.0.1:7171",
+		DisableOriginCheck: true,
 	}
 	sfui.compileClientConfig()
 
 	log.Printf("SFUI [Version : %s] [Built on : %s]\n", "0.1", buildTime)
 	log.Printf("Listening on http://%s ....\n", sfui.ServerBindAddress)
 	http.ListenAndServe(sfui.ServerBindAddress, http.HandlerFunc(sfui.requestHandler))
-	return
 }
 
 // Add any UI related configuration that has to be sent to client
@@ -164,6 +167,11 @@ func (sfui *SfUI) handleWs(w http.ResponseWriter, r *http.Request) {
 
 	websocket.Handler(func(ws *websocket.Conn) {
 		defer ws.Close()
+
+		if !sfui.originAcceptable(ws.Request()) {
+			ws.Write([]byte(`unacceptable origin`))
+			return
+		}
 
 		if err := sfui.secretValid(&TermRequest{
 			Secret:   clientSecret,
@@ -240,7 +248,7 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 	cmdParts := strings.Split(sfui.ShellCommand, " ")
 	if sfui.AddSfUIArgs {
 		if !isStringAlphabetic(terminal.ClientSecret) {
-			return errors.New("Unacceptable Secret")
+			return errors.New("unacceptable secret")
 		}
 		cmdParts = append(cmdParts, fmt.Sprintf(" SECRET=%s", terminal.ClientSecret))
 		cmdParts = append(cmdParts, fmt.Sprintf(" REMOTE_ADDR=%s", terminal.ClientIp)) // ClientIP provided by server, no sanitization required
@@ -282,5 +290,16 @@ func (sfui *SfUI) handleUIConfig(w http.ResponseWriter, r *http.Request) {
 
 func (sfui *SfUI) handleXpraWS(w http.ResponseWriter, r *http.Request) {
 	u, _ := url.Parse(sfui.XpraWSAddress)
-	websocketproxy.NewProxy(u).ServeHTTP(w, r) // Get rid of this dependency
+	wp := websocketproxy.NewProxy(u) // Get rid of this dependency
+	wp.Upgrader = websocketproxy.DefaultUpgrader
+	wp.Upgrader.CheckOrigin = sfui.originAcceptable
+	wp.ServeHTTP(w, r)
+}
+
+func (sfui *SfUI) originAcceptable(r *http.Request) bool {
+	if !sfui.DisableOriginCheck {
+		origin := r.Header.Get("Origin")
+		return origin == sfui.SfUIOrigin
+	}
+	return true
 }

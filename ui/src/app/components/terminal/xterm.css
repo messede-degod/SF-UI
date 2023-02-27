@@ -103,7 +103,8 @@
 }
 
 .xterm .xterm-screen {
-    position: relative;
+    /* position: relative; */
+    position: fixed;
 }
 
 .xterm .xterm-screen canvas {

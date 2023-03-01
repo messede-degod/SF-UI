@@ -81,13 +81,13 @@ var staticfiles embed.FS
 
 func main() {
 	sfui := SfUI{
-		MaxWsTerminals:    10,
-		ServerBindAddress: "127.0.0.1:7171",
-		XpraWSAddress:     "ws://127.0.0.1:2000/",
-		Debug:             false,
-		ShellCommand:      "bash",
-		AddSfUIArgs:       false,
-		SfUIOrigin:        "http://127.0.0.1:7171",
+		MaxWsTerminals:     10,
+		ServerBindAddress:  "127.0.0.1:7171",
+		XpraWSAddress:      "ws://127.0.0.1:2000/",
+		Debug:              false,
+		ShellCommand:       "bash",
+		AddSfUIArgs:        false,
+		SfUIOrigin:         "http://127.0.0.1:7171",
 		DisableOriginCheck: true,
 	}
 	sfui.compileClientConfig()
@@ -119,19 +119,17 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/secret":
 		sfui.handleSecret(w, r)
-	case "/ws":
-		sfui.handleWs(w, r)
-		return // Dont add json header to WS requests
-	case "/xpraws":
-		sfui.handleXpraWS(w, r)
-		return // Dont add json header to WS requests
+		w.Header().Add("Content-Type", "application/json")
 	case "/config":
 		sfui.handleUIConfig(w, r)
+		w.Header().Add("Content-Type", "application/json")
+	case "/ws":
+		sfui.handleWs(w, r)
+	case "/xpraws":
+		sfui.handleXpraWS(w, r)
 	default:
 		handleUIRequest(w, r)
-		return // Dont add json header to UI requests
 	}
-	w.Header().Add("Content-Type", "application/json")
 }
 
 func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {

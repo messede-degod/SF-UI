@@ -4,21 +4,21 @@
         <span>by hackerschoice</span>
     </div>
     <div class="controls-view flex-row">
-        <terminal-controls 
-            [activeTerminalId]="activeTerminalId"
-            (activeTerminalIdChange)="setActiveTerminal($event)" 
-            [(terminalWindows)]="terminalWindows"
-        >
+        <terminal-controls [activeTerminalId]="activeTerminalId" (activeTerminalIdChange)="setActiveTerminal($event)"
+            [(terminalWindows)]="terminalWindows">
         </terminal-controls>
         <app-controls></app-controls>
     </div>
 </div>
 
-<div class="terminals-container">
+<div  *ngIf="terminalWindows.length>0" class="terminals-container">
     <app-terminal *ngFor="let term of terminalWindows" class="terminal"
         [ngClass]="{'hidden' : activeTerminalId !== term.id}" [TermId]="term.id">
     </app-terminal>
-    <div *ngIf="terminalWindows.length==0" class="terminal-tabs-none">
+</div>
+
+<div *ngIf="terminalWindows.length==0" class="terminals-container">
+    <div  class="terminal-tabs-none">
         No Open Terminals, Go Ahead Open A New One!
     </div>
 </div>

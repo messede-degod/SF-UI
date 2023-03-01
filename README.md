@@ -6,6 +6,7 @@ A UI frontend for the services provided by [segfault]("https://thc.org/segfault"
 
 - Install Basics: `sudo apt install -y npm make golang`
 - Install Angular: `npm install -g @angular/cli`
+- Install JS Deps: `cd ui`  then `npm install`
 
 ## Building
 

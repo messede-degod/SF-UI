@@ -1,5 +1,5 @@
 # Deploying using Nginx
-Deploying  UI files (html,css,js etc) is recommened in production deployments.
+Deploying  UI files (html,css,js etc) with nginx is recommened in production deployments.
 
 
 ## Copy UI files

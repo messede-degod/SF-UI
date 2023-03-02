@@ -22,7 +22,7 @@ Deploying  UI files (html,css,js etc) with nginx is recommened in production dep
 - Make sure you have SF-UI running on a appropriate address that nginx can reach.
 - Add the following location directives within the `server` block, (in the same order !).
 ```
-	    location ~* .(png|ico|gif|jpg|jpeg|css|js|svg|html)$ {
+	location ~* .(png|ico|gif|jpg|jpeg|css|js|svg|html)$ {
                 # First attempt to serve request as file, then
                 # as directory, then fall back to displaying a 404.
                 try_files $uri $uri/ =404;

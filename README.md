@@ -29,8 +29,7 @@ SFUI starts by accepting a  secret and a domain (ex: segfault.net, de.segfault.n
 ## Info
 
 Application currently embeds the UI files into binary, using go's embed feature (this is for convenience).
-In production it may be preferable to serve the UI content using a webserver like nginx.
-In such cases run `make UI` then  copy the contents of ui/dist/sf-ui/ to the webserver root and proxy pass requests to `/secret` and `/ws` to SFUI.
+In production it may be preferable to serve the UI content using a webserver like nginx, See `other/nginx/Readme.md` for further instructions.
 
 
 ## Acknowledgement

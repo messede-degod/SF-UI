@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { HelpDialogComponent } from 'src/app/components/help-dialog/help-dialog.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Config } from '../../config/config';
 
@@ -12,6 +12,7 @@ import { Config } from '../../config/config';
 })
 export class LoginComponent {
   router!: Router
+  rippleColor: string = "primary"
 
   constructor(public dialog: MatDialog, private snackBar: MatSnackBar, router: Router) {
     this.router = router
@@ -39,34 +40,61 @@ export class LoginComponent {
   }
 
   secret: string = ""
+  logginInMsg!: MatSnackBarRef<TextOnlySnackBar>
+
   async login() {
-    if (this.secret == "") {
-      var logginInMsg = this.snackBar.open("Please Enter Your Secret !", "OK", {
-        duration: 2 * 1000
-      });
-      return
+    var loginData = {
+      "secret": this.secret,
+      "new_instance": false
     }
 
-    var logginInMsg = this.snackBar.open("Loggin You In ....", "OK", {
-      duration: 5 * 1000
-    });
+    if (this.LoginWithSecret) {
+      let secretValid = this.secret.match('[a-zA-Z0-9]*$')
+      if (secretValid == null || secretValid[0] == '') {
+        this.logginInMsg = this.snackBar.open("Please Enter A Valid Secret !", "OK", {
+          duration: 2 * 1000
+        });
+        return
+      }
+      this.logginInMsg = this.snackBar.open("Loggin You In ....", "OK", {
+        duration: 5 * 1000
+      });
+    } else {
+      loginData.new_instance = true
+      this.logginInMsg = this.snackBar.open("Creating A New Instance ....", "OK", {
+        duration: 5 * 1000
+      });
+    }
 
     let response = fetch(Config.ApiEndpoint + "/secret", {
       "method": "POST",
-      "body": JSON.stringify({ "secret": this.secret })
+      "body": JSON.stringify(loginData)
     })
     let rdata = await response
     if (rdata.status == 200) {
-      logginInMsg.dismiss()
-      localStorage.setItem('secret',this.secret)
+      this.logginInMsg.dismiss()
+
+      if (this.LoginWithSecret) {
+        localStorage.setItem('secret', this.secret)
+      } else {
+        let respBody = await rdata.json()
+        localStorage.setItem('secret', respBody.secret)
+      }
+
       this.router.navigate(['/dashboard'])
       return
     }
 
-    logginInMsg.dismiss()
+    this.logginInMsg.dismiss()
     this.snackBar.open("Invalid Secret !", "OK", {
       duration: 5 * 1000
     });
+  }
+
+  LoginWithSecret: boolean = false
+
+  async loginWithSecret() {
+    this.LoginWithSecret = true
   }
 
 }

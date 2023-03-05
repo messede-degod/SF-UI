@@ -42,13 +42,15 @@ type SfUI struct {
 }
 
 type TermRequest struct {
-	Secret   string `json:"secret"`
-	ClientIp string
+	Secret      string `json:"secret"`
+	NewInstance bool   `json:"new_instance"`
+	ClientIp    string
 	// SfEndpoint string `json:"sf_endpoint"`
 }
 
 type TermResponse struct {
 	Status string `json:"status"`
+	Secret string `json:"secret,omitempty"`
 	// SfEndpoint string `json:"sf_endpoint"`
 }
 
@@ -138,6 +140,20 @@ func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {
 		termReq := TermRequest{}
 		if json.Unmarshal(data, &termReq) == nil {
 			termReq.ClientIp = r.RemoteAddr
+			if termReq.NewInstance {
+				secret, err := sfui.generateSecret(&termReq)
+				if err == nil {
+					w.WriteHeader(http.StatusOK)
+					termRes := TermResponse{
+						Status: "OK",
+						Secret: secret,
+					}
+					response, _ := json.Marshal(termRes)
+					w.Write(response)
+					return
+				}
+			}
+
 			if sfui.secretValid(&termReq) == nil {
 				w.WriteHeader(http.StatusOK)
 				termRes := TermResponse{
@@ -278,6 +294,11 @@ func (sfui *SfUI) secretValid(TermRequest *TermRequest) error {
 	// return errors.New("Banned User")
 	// return errors.New("Banned IP")
 	return nil
+}
+
+func (sfui *SfUI) generateSecret(TermRequest *TermRequest) (Secret string, Error error) {
+	// Request a new secret from Sf Core and return it
+	return "AAAAAAAAAAAAAAAAAAA", nil
 }
 
 // Provide UI related config to client

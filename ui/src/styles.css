@@ -98,6 +98,8 @@ body {
     caret-color: black;
     --input-text-color: black;
     --control-bar-height: 5vh;
+    --start-new-btn-text: white;
+    --enter-secret-btn-text: white;
 }
 
 
@@ -115,6 +117,8 @@ body {
     caret-color: white;
     --input-text-color: white;
     --control-bar-height: 5vh;
+    --start-new-btn-text: black;
+    --enter-secret-btn-text: white;
 }
 
 .hidden {
@@ -370,7 +374,7 @@ body {
 
 #brandInfo {
     margin-top: 5vh;
-    font-size: 3vh !important;
+    font-size: 2.3vh !important;
 }
 
 .login-info {
@@ -382,7 +386,7 @@ body {
 
 .input-secret {
     display: flex;
-    margin-top: 2vh;
+    margin-top: 2.5vh;
     justify-content: center;
     align-items: center;
     flex-direction: row;
@@ -393,6 +397,34 @@ body {
     background-color: var(--active-bg);
     border-radius: 26px;
 }
+
+.login-btn-container {
+    display: flex;
+    margin-top: 3vh;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: row;
+    height: 4vh;
+    width: 15vw;
+    padding: 0.2rem;
+    padding-left: 0.8rem;
+    padding-right: 0.6rem;
+}
+
+.login-btn-container>div>button {
+    border-radius: 20px !important;
+}
+
+.start-new-btn {
+    background-color: var(--brand-black) !important;
+    color: var(--start-new-btn-text) !important;
+}
+
+.enter-secret-btn {
+    background-color: var(--brand-red) !important;
+    color: var(--enter-secret-btn-text) !important;
+}
+
 
 .input-secret>input {
     width: 13vw;

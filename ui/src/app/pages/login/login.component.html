@@ -3,13 +3,24 @@
         <h6>SF</h6>
         <span id="brandInfo">by hackerschoice</span>
     </div>
-    <div class="input-secret">
+    <div *ngIf="LoginWithSecret" class="input-secret">
         <input type="password" [(ngModel)]="secret" placeholder="Secret..." required (keyup.enter)="login()">
         <img src="../../../assets/icons/question.svg" alt="" (click)="openHelpDialog()">
     </div>
+    <div *ngIf="!LoginWithSecret" class="login-btn-container">
+        <div>
+            <button mat-raised-button class="start-new-btn" (click)="login()">Start New</button>
+        </div>
+        <div>
+            <button mat-raised-button class="enter-secret-btn" (click)="loginWithSecret()">Enter Secret</button>
+        </div>
+    </div>
     <div class="login-info">
-        <span>
-            Enter your Segfault Secret<br>to start using...
+        <span *ngIf="LoginWithSecret">
+            Enter your Segfault secret<br>to start using...
+        </span>
+        <span *ngIf="!LoginWithSecret">
+            Free root shells for you...
         </span>
     </div>
 </div>

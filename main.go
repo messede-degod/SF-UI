@@ -297,8 +297,8 @@ func (sfui *SfUI) secretValid(TermRequest *TermRequest) error {
 }
 
 func (sfui *SfUI) generateSecret(TermRequest *TermRequest) (Secret string, Error error) {
-	// Request a new secret from Sf Core and return it
-	return "AAAAAAAAAAAAAAAAAAA", nil
+	// Return a new secret
+	return RandomStr(10), nil
 }
 
 // Provide UI related config to client

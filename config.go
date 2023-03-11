@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"regexp"
 	"strconv"
 
 	"gopkg.in/yaml.v2"
@@ -36,15 +35,14 @@ func (sfui *SfUI) ReadConfig() {
 
 func (sfui *SfUI) loadDefaultConfig() {
 	*sfui = SfUI{
-		MaxWsTerminals:          10,
-		ServerBindAddress:       "127.0.0.1:7171",
-		XpraWSAddress:           "ws://127.0.0.1:2000/",
-		Debug:                   false,
-		ShellCommand:            "bash",
-		AddSfUIArgs:             false,
-		SfUIOrigin:              "http://127.0.0.1:7171",
-		DisableOriginCheck:      true,
-		validSecretRegexMatcher: regexp.MustCompile(`^[a-zA-Z]+$`).MatchString,
+		MaxWsTerminals:     10,
+		ServerBindAddress:  "127.0.0.1:7171",
+		XpraWSAddress:      "ws://127.0.0.1:2000/",
+		Debug:              false,
+		ShellCommand:       "bash",
+		AddSfUIArgs:        false,
+		SfUIOrigin:         "http://127.0.0.1:7171",
+		DisableOriginCheck: true,
 	}
 }
 

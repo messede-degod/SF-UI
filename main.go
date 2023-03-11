@@ -19,12 +19,11 @@ type SfUI struct {
 	// This is usefull for global deployment of SFUI and integration
 	// with Segfault Core.
 	// If false, user is redirected to SFUI dashboard without any authentication
-	AddSfUIArgs             bool   `yaml:"add_sf_ui_args"`
-	CompiledClientConfig    []byte // Ui related onfig that has to be sent to client
-	SfEndpoint              string `yaml:"sf_endpoint"`          // Current Sf Endpoints Name
-	SfUIOrigin              string `yaml:"sf_ui_origin"`         // Where SFUI is deployed, for CSRF prevention, ex: https://web.segfault.net
-	DisableOriginCheck      bool   `yaml:"disable_origin_check"` // Disable Origin Checking
-	validSecretRegexMatcher func(s string) bool
+	AddSfUIArgs          bool   `yaml:"add_sf_ui_args"`
+	CompiledClientConfig []byte // Ui related onfig that has to be sent to client
+	SfEndpoint           string `yaml:"sf_endpoint"`          // Current Sf Endpoints Name
+	SfUIOrigin           string `yaml:"sf_ui_origin"`         // Where SFUI is deployed, for CSRF prevention, ex: https://web.segfault.net
+	DisableOriginCheck   bool   `yaml:"disable_origin_check"` // Disable Origin Checking
 }
 
 var buildTime string

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
@@ -138,10 +139,12 @@ func (terminal *Terminal) Read(msg []byte) (n int, err error) {
 	return n, err
 }
 
+var validSecret = regexp.MustCompile(`^[a-zA-Z]+$`).MatchString
+
 func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 	cmdParts := strings.Split(sfui.ShellCommand, " ")
 	if sfui.AddSfUIArgs {
-		if !sfui.validSecretRegexMatcher(terminal.ClientSecret) {
+		if !validSecret(terminal.ClientSecret) {
 			return errors.New("unacceptable secret")
 		}
 		cmdParts = append(cmdParts, fmt.Sprintf(" SECRET=%s", terminal.ClientSecret))

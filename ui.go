@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+// Provide UI related config to client
+func (sfui *SfUI) handleUIConfig(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write(sfui.CompiledClientConfig)
+}
+
 func handleUIRequest(w http.ResponseWriter, r *http.Request) {
 	pagePrefix := "ui/dist/sf-ui"
 	var page string

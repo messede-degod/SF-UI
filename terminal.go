@@ -142,17 +142,18 @@ func (terminal *Terminal) Read(msg []byte) (n int, err error) {
 var validSecret = regexp.MustCompile(`^[a-zA-Z]+$`).MatchString
 
 func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
-	cmdParts := strings.Split(sfui.ShellCommand, " ")
+	shellCommand := sfui.ShellCommand
 	if sfui.AddSfUIArgs {
 		if !validSecret(terminal.ClientSecret) {
 			return errors.New("unacceptable secret")
 		}
-		cmdParts = append(cmdParts, fmt.Sprintf(" SECRET=%s", terminal.ClientSecret))
-		cmdParts = append(cmdParts, fmt.Sprintf(" REMOTE_ADDR=%s", terminal.ClientIp)) // ClientIP provided by server, no sanitization required
+		if strings.Count(sfui.ShellCommand, "]s") >= 1 { // trying to match %[1]s and %[2]s
+			shellCommand = fmt.Sprintf(sfui.ShellCommand, terminal.ClientSecret, terminal.ClientIp)
+		}
 	}
 
 	var err error
-	terminal.Pty, err = pty.Start(exec.Command(cmdParts[0], cmdParts[1:]...))
+	terminal.Pty, err = pty.Start(exec.Command("bash", "-c", shellCommand))
 	if err != nil {
 		return err
 	}

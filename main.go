@@ -14,8 +14,12 @@ type SfUI struct {
 	XpraWSAddress     string `yaml:"xpra_ws_address"`     // Address at which the xpra ws server is listening
 	Debug             bool   `yaml:"debug"`               // Print debug information
 	ShellCommand      string `yaml:"shell_command"`       // Command to run on the pty
-	// Two additional arguments are added to ShellCommand
-	// 	Example:  somecmd  SECRET=abc REMOTE_ADDR=1.1.1.1
+	// Additional arguments are inserted into to ShellCommand
+	// Expects ShellCommand to have format specifiers.
+	// "%[1]s" will be replaced by the client secret.
+	// "%[2]s" will be replaced by the clients ip address.
+	// 	Example:  mycmd -secret %[1]s -client-ip %[2]s
+	// 	Result: mycmd -secret XXXXXX -client-ip 7.7.7.7
 	// This is usefull for global deployment of SFUI and integration
 	// with Segfault Core.
 	// If false, user is redirected to SFUI dashboard without any authentication

@@ -46,6 +46,7 @@ type Terminal struct {
 	TermConfig   *TermConfig
 	WSConn       *websocket.Conn
 	Pty          *os.File
+	MsgBuf       []byte
 }
 
 type TermConfig struct {
@@ -86,6 +87,7 @@ func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
 				Rows: uint16(rows),
 				Cols: uint16(cols),
 			},
+			MsgBuf: make([]byte, 256),
 		})
 		if err != nil {
 			ws.Write([]byte(err.Error()))
@@ -122,18 +124,17 @@ func (terminal *Terminal) setTermDimensions(rows uint16, cols uint16) {
 // of the type of data. This is a custom read implementation
 // to handle the first byte.
 func (terminal *Terminal) Read(msg []byte) (n int, err error) {
-	nmsg := make([]byte, 128)
-	n, err = terminal.WSConn.Read(nmsg)
+	n, err = terminal.WSConn.Read(terminal.MsgBuf)
 	if n > 0 {
-		switch nmsg[0] { // Check the type of data we recieved
+		switch terminal.MsgBuf[0] { // Check the type of data we recieved
 		case SFUI_CMD_RESIZE:
 			var termConfig TermConfig
-			if jerr := json.Unmarshal(nmsg[1:n], &termConfig); jerr == nil {
+			if jerr := json.Unmarshal(terminal.MsgBuf[1:n], &termConfig); jerr == nil {
 				terminal.setTermDimensions(termConfig.Rows, termConfig.Cols)
 			}
 			return 0, nil
 		}
-		copy(msg, nmsg[1:]) // Copy everything except the first byte
+		copy(msg, terminal.MsgBuf[1:]) // Copy everything except the first byte
 		return n, err
 	}
 	return n, err
@@ -170,6 +171,7 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 		terminal.WSConn.Close()
 	}
 
+	terminal.Pty.Close()
 	return nil
 }
 
@@ -182,7 +184,7 @@ func (sfui *SfUI) secretValid(TermRequest *TermRequest) error {
 
 func (sfui *SfUI) generateSecret(TermRequest *TermRequest) (Secret string, Error error) {
 	// Return a new secret
-	return RandomStr(10), nil
+	return RandomStr(25), nil
 }
 
 func (sfui *SfUI) originAcceptable(r *http.Request) bool {

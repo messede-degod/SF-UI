@@ -24,7 +24,7 @@ type SfUI struct {
 	// with Segfault Core.
 	// If false, user is redirected to SFUI dashboard without any authentication
 	AddSfUIArgs          bool   `yaml:"add_sf_ui_args"`
-	CompiledClientConfig []byte // Ui related onfig that has to be sent to client
+	CompiledClientConfig []byte // Ui related config that has to be sent to client
 	SfEndpoint           string `yaml:"sf_endpoint"`          // Current Sf Endpoints Name
 	SfUIOrigin           string `yaml:"sf_ui_origin"`         // Where SFUI is deployed, for CSRF prevention, ex: https://web.segfault.net
 	DisableOriginCheck   bool   `yaml:"disable_origin_check"` // Disable Origin Checking
@@ -36,8 +36,7 @@ var buildTime string
 var staticfiles embed.FS
 
 func main() {
-	sfui := SfUI{}
-	sfui.ReadConfig()
+	sfui := ReadConfig()
 
 	log.Printf("SFUI [Version : %s] [Built on : %s]\n", "0.1", buildTime)
 	log.Printf("Listening on http://%s ....\n", sfui.ServerBindAddress)

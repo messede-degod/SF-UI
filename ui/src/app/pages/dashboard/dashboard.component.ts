@@ -10,6 +10,7 @@ export class DashboardComponent {
   title = 'Segfault';
   activeMenu: String = "terminal"
   sidebarVisible: boolean = true
+  sidebarFirstLoad: boolean = true
 
   menuItems: Array<any> = [
     { ilink: '../assets/icons/term.svg', name: "terminal" },

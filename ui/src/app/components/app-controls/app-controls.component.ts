@@ -60,6 +60,7 @@ export class AppControlsComponent {
     this.sidebarVisible = !this.sidebarVisible
     await new Promise(f => setTimeout(f, 150));
     this.dashboardComponent.sidebarVisible = this.sidebarVisible
+    this.dashboardComponent.sidebarFirstLoad = false
     this.terminalViewComponent.showLogo = !this.sidebarVisible
     localStorage.setItem('sidebarVisible',this.sidebarVisible+"")
   }

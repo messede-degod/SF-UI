@@ -156,6 +156,9 @@ body {
     width: 6%;
     transition: width 2s;
     background-color: var(--background);
+}
+
+.sidebar-show {
     animation: sideBarShow 0.8s;
 }
 

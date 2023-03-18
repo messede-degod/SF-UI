@@ -23,6 +23,12 @@ export class LoginComponent {
     if (localStorage.getItem('intro-shown') != 'true') {
       this.openHelpDialog()
     }
+    let storedSecret = localStorage.getItem('secret')
+    if (storedSecret!=null){
+      this.LoginWithSecret = true
+      this.secret = storedSecret
+      this.login()
+    }
   }
 
   curTheme: string | null = null
@@ -83,6 +89,8 @@ export class LoginComponent {
 
       this.router.navigate(['/dashboard'])
       return
+    }else{
+      localStorage.removeItem('secret')
     }
 
     this.logginInMsg.dismiss()

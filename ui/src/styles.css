@@ -353,13 +353,21 @@ body {
     overflow: hidden;
 }
 
-.terminal-tabs-none {
+.page-info-text {
     color: #ffff;
     display: flex;
     flex: 1;
     justify-content: center;
     align-items: center;
     font-size: xx-large;
+}
+
+.loading-xpra-indicator{
+    position: absolute;
+    z-index: -99;
+    left: 45vw;
+    right: auto;
+    top: 45vh;
 }
 
 /* Login Page */

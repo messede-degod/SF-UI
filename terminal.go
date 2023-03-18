@@ -154,7 +154,8 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 	}
 
 	var err error
-	terminal.Pty, err = pty.Start(exec.Command("bash", "-c", shellCommand))
+	command := exec.Command("bash", "-c", shellCommand)
+	terminal.Pty, err = pty.Start(command)
 	if err != nil {
 		return err
 	}
@@ -171,6 +172,8 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 		terminal.WSConn.Close()
 	}
 
+	command.Process.Kill()
+	command.Wait()
 	terminal.Pty.Close()
 	return nil
 }

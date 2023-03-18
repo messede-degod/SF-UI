@@ -126,7 +126,7 @@ export class TerminalComponent implements AfterViewInit {
     }
   };
 
-  ngOnDestory(){
+  ngOnDestroy(){
     this.socket.close()
     this.termEle?.remove()
     this.webglAddon.dispose()

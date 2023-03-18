@@ -135,7 +135,7 @@ func (terminal *Terminal) Read(msg []byte) (n int, err error) {
 			return 0, nil
 		}
 		copy(msg, terminal.MsgBuf[1:]) // Copy everything except the first byte
-		return n, err
+		return n - 1, err
 	}
 	return n, err
 }

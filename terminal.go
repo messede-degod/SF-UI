@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"strconv"
 	"strings"
 	"syscall"
 	"unsafe"
@@ -35,36 +34,44 @@ type TermResponse struct {
 // the following constants, to determine the type of data
 // a client is sending
 const (
-	SFUI_CMD_RESIZE = '1'
-	SFUI_CMD_PAUSE  = '2'
-	SFUI_CMD_RESUME = '3'
+	SFUI_CMD_RESIZE        = '1'
+	SFUI_CMD_PAUSE         = '2'
+	SFUI_CMD_RESUME        = '3'
+	SFUI_CMD_AUTHENTICATE  = '4'
+	TERM_MAX_AUTH_FAILURES = 3
 )
 
 type Terminal struct {
 	ClientSecret string
 	ClientIp     string
-	TermConfig   *TermConfig
+	AuthFailures uint
 	WSConn       *websocket.Conn
 	Pty          *os.File
 	MsgBuf       []byte
 }
 
 type TermConfig struct {
-	Rows uint16 `json:"rows"`
-	Cols uint16 `json:"cols"`
+	Secret string `json:"secret"`
+	Rows   uint16 `json:"rows"`
+	Cols   uint16 `json:"cols"`
 }
 
 func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
-	clientSecret := r.URL.Query().Get("secret")
-	rows, rerr := strconv.ParseUint(r.URL.Query().Get("rows"), 10, 16)
-	cols, cerr := strconv.ParseUint(r.URL.Query().Get("cols"), 10, 16)
-	if rerr != nil || cerr != nil {
-		rows = 30
-		cols = 100
-	}
-
 	websocket.Handler(func(ws *websocket.Conn) {
 		defer ws.Close()
+
+		terminal := Terminal{
+			ClientIp: r.RemoteAddr,
+			WSConn:   ws,
+			MsgBuf:   make([]byte, 256),
+		}
+
+		clientSecret, cerr := terminal.ReadSecret()
+		if cerr != nil {
+			ws.Write([]byte(cerr.Error()))
+			return
+		}
+		terminal.ClientSecret = clientSecret
 
 		if !sfui.originAcceptable(ws.Request()) {
 			ws.Write([]byte(`unacceptable origin`))
@@ -79,16 +86,7 @@ func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err := sfui.handleWsPty(&Terminal{
-			ClientSecret: clientSecret,
-			ClientIp:     r.RemoteAddr,
-			WSConn:       ws,
-			TermConfig: &TermConfig{
-				Rows: uint16(rows),
-				Cols: uint16(cols),
-			},
-			MsgBuf: make([]byte, 256),
-		})
+		err := sfui.handleWsPty(&terminal)
 		if err != nil {
 			ws.Write([]byte(err.Error()))
 		}
@@ -118,6 +116,25 @@ func (terminal *Terminal) setTermDimensions(rows uint16, cols uint16) {
 		syscall.TIOCSWINSZ,
 		uintptr(unsafe.Pointer(&window)),
 	)
+}
+
+// Read Secret Sent by Client
+func (terminal *Terminal) ReadSecret() (secret string, err error) {
+	for terminal.AuthFailures < TERM_MAX_AUTH_FAILURES {
+		n, err := terminal.WSConn.Read(terminal.MsgBuf)
+		if n > 0 && err == nil {
+			if terminal.MsgBuf[0] == SFUI_CMD_AUTHENTICATE { // Check the type of data we recieved
+				var termConfig TermConfig
+				if jerr := json.Unmarshal(terminal.MsgBuf[1:n], &termConfig); jerr == nil {
+					if termConfig.Secret != "" {
+						return termConfig.Secret, nil
+					}
+				}
+			}
+		}
+		terminal.AuthFailures += 1
+	}
+	return "", errors.New("Client did not supply valid secret (after 3 attempts)")
 }
 
 // First byte in the chunk sent by the client is a indicator
@@ -160,8 +177,6 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 		return err
 	}
 	defer terminal.Pty.Close()
-
-	terminal.setTermDimensions(uint16(terminal.TermConfig.Rows), uint16(terminal.TermConfig.Cols))
 
 	go io.Copy(terminal.WSConn, terminal.Pty) // Copy from PTY -> WS
 

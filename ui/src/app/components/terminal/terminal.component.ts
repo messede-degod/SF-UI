@@ -22,6 +22,9 @@ export class TerminalComponent implements AfterViewInit {
   webglAddon: WebglAddon;
   termEle!: HTMLElement | null; // Html element within which we render the terminal
 
+  SF_RESIZE: number = 1
+  SF_AUTHENTICATE: number = 4
+
 
   @Input() TermId: number = 0;
   @Input() AuthToken: string = ""; // To authenticate against ttyd
@@ -77,10 +80,13 @@ export class TerminalComponent implements AfterViewInit {
       const attachAddon = new AttachAddonComponent(this.socket,{bidirectional: true});
       this.terminal.loadAddon(attachAddon);
 
-      // Send Initial Command
-      // this.socket.onopen = () => {
-      //   this.socket?.send(this.textEncoder.encode("sh\n"))
-      // }
+      //Authenticate using Secret
+      this.socket.onopen = () => {
+        const termSecret = {
+          secret: localStorage.getItem('secret') 
+        }
+        this.socket?.send(this.SF_AUTHENTICATE+JSON.stringify(termSecret))
+      }
 
       window.onresize = () => {
         this.fitAddon.fit();
@@ -93,8 +99,7 @@ export class TerminalComponent implements AfterViewInit {
         };
         this.socket.binaryType= 'blob'
         
-        const SF_RESIZE = 1
-        this.socket.send(SF_RESIZE+JSON.stringify(terminal_size));
+        this.socket.send(this.SF_RESIZE+JSON.stringify(terminal_size));
       })
 
     }
@@ -107,9 +112,7 @@ export class TerminalComponent implements AfterViewInit {
       wsProto = "wss"
     }
 
-    return wsProto+Config.WSServerUrl+"?secret="+localStorage.getItem('secret')
-            +"&rows="+this.terminal.rows
-            +"&cols="+this.terminal.cols
+    return wsProto+Config.WSServerUrl
   }
 
 

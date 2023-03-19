@@ -52,6 +52,7 @@ export class AppControlsComponent {
   }
 
   logout(){
+    localStorage.removeItem("secret")
     this.router.navigate(['/login'])
   }
 

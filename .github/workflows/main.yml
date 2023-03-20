@@ -29,3 +29,10 @@ jobs:
         
       - name: Make Binary
         run: make prod
+        
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: sfui
+          path: bin/sfui
+          retention-days: 365  

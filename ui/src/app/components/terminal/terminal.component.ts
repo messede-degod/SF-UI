@@ -86,6 +86,10 @@ export class TerminalComponent implements AfterViewInit {
           secret: localStorage.getItem('secret') 
         }
         this.socket?.send(this.SF_AUTHENTICATE+JSON.stringify(termSecret))
+
+
+        // Resize Terminal for the first time
+        this.fitAddon.fit();
       }
 
       window.onresize = () => {

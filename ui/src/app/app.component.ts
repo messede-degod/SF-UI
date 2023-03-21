@@ -26,6 +26,7 @@ export class AppComponent {
       if(config.auto_login){
         this.router.navigate(['/dashboard'])
       }
+      Config.DesktopDisabled = config.desktop_disabled
     } else {
       this.snackBar.open("Failed to fetch config from server !", "OK", {
         duration: 2 * 1000

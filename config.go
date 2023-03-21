@@ -37,6 +37,7 @@ func getDefaultConfig() SfUI {
 		AddSfUIArgs:        false,
 		SfUIOrigin:         "http://127.0.0.1:7171",
 		DisableOriginCheck: true,
+		DisableDesktop:     false,
 	}
 }
 
@@ -45,9 +46,10 @@ func getcompiledClientConfig(sfui SfUI) []byte {
 	// Store it byte format, to prevent json marshalling on every request
 	// See handleUIConfig()
 	compConfig := []byte(fmt.Sprintf(
-		`{"max_terminals":"%d","auto_login":%s}`,
+		`{"max_terminals":"%d","auto_login":%s,"desktop_disabled":%s}`,
 		sfui.MaxWsTerminals,
-		strconv.FormatBool(!sfui.AddSfUIArgs), // Redirect client directly to dashboard if not in global mode.
+		strconv.FormatBool(!sfui.AddSfUIArgs),   // Redirect client directly to dashboard if not in global mode.
+		strconv.FormatBool(sfui.DisableDesktop), // Hide the GUI Option in UI
 	))
 	return compConfig
 }

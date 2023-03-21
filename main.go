@@ -28,9 +28,11 @@ type SfUI struct {
 	SfEndpoint           string `yaml:"sf_endpoint"`          // Current Sf Endpoints Name
 	SfUIOrigin           string `yaml:"sf_ui_origin"`         // Where SFUI is deployed, for CSRF prevention, ex: https://web.segfault.net
 	DisableOriginCheck   bool   `yaml:"disable_origin_check"` // Disable Origin Checking
+	DisableDesktop       bool   `yaml:"disable_desktop"`      // Disable websocket based GUI desktop access
 }
 
 var buildTime string
+var SfuiVersion string = "0.1"
 
 //go:embed ui/dist/sf-ui
 var staticfiles embed.FS
@@ -38,7 +40,7 @@ var staticfiles embed.FS
 func main() {
 	sfui := ReadConfig()
 
-	log.Printf("SFUI [Version : %s] [Built on : %s]\n", "0.1", buildTime)
+	log.Printf("SFUI [Version : %s] [Built on : %s]\n", SfuiVersion, buildTime)
 	log.Printf("Listening on http://%s ....\n", sfui.ServerBindAddress)
 	http.ListenAndServe(sfui.ServerBindAddress, http.HandlerFunc(sfui.requestHandler))
 }
@@ -60,7 +62,9 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 	case "/ws":
 		sfui.handleTerminalWs(w, r)
 	case "/xpraws":
-		sfui.handleDesktopWS(w, r)
+		if !sfui.DisableDesktop {
+			sfui.handleDesktopWS(w, r)
+		}
 	default:
 		handleUIRequest(w, r)
 	}

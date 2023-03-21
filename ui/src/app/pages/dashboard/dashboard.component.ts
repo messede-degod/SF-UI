@@ -1,5 +1,6 @@
 import { Component, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { Config } from 'src/app/config/config';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,23 +13,25 @@ export class DashboardComponent {
   sidebarVisible: boolean = true
   sidebarFirstLoad: boolean = true
 
-  menuItems: Array<any> = [
-    { ilink: '../assets/icons/term.svg', name: "terminal" },
-    { ilink: '../assets/icons/desk.svg', name: "desktop" },
-    { ilink: '../assets/icons/ports.svg', name: "ports" },
-    { ilink: '../assets/icons/web.svg', name: "web" },
-  ]
+  menuItems: Array<any> = []
 
   router!: Router
   desktopRequested: boolean = false
 
+
   constructor(router: Router) {
     this.router = router
+    this.menuItems.push({ ilink: '../assets/icons/term.svg', name: "terminal" })
+    if (!Config.DesktopDisabled) {
+      this.menuItems.push({ ilink: '../assets/icons/desk.svg', name: "desktop" })
+    }
+    this.menuItems.push({ ilink: '../assets/icons/ports.svg', name: "ports" })
+    this.menuItems.push({ ilink: '../assets/icons/web.svg', name: "web" })
   }
 
   setActiveMenu(name: string) {
     this.activeMenu = name
-    if(this.activeMenu=="desktop" && !this.desktopRequested){
+    if (this.activeMenu == "desktop" && !this.desktopRequested) {
       this.desktopRequested = true
     }
   }

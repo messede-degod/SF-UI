@@ -157,7 +157,7 @@ func (terminal *Terminal) Read(msg []byte) (n int, err error) {
 	return n, err
 }
 
-var validSecret = regexp.MustCompile(`^[a-zA-Z]+$`).MatchString
+var validSecret = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
 
 func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 	shellCommand := sfui.ShellCommand

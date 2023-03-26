@@ -13,32 +13,38 @@ type SfUI struct {
 	ServerBindAddress string `yaml:"server_bind_address"` // Address to which the current app binds
 	XpraWSAddress     string `yaml:"xpra_ws_address"`     // Address at which the xpra ws server is listening
 	Debug             bool   `yaml:"debug"`               // Print debug information
-	ShellCommand      string `yaml:"shell_command"`       // Command to run on the pty
-	// Additional arguments are inserted into to ShellCommand
-	// Expects ShellCommand to have format specifiers.
-	// "%[1]s" will be replaced by the client secret.
-	// "%[2]s" will be replaced by the clients ip address.
-	// 	Example:  mycmd -secret %[1]s -client-ip %[2]s
-	// 	Result: mycmd -secret XXXXXX -client-ip 7.7.7.7
-	// This is usefull for global deployment of SFUI and integration
-	// with Segfault Core.
-	// If false, user is redirected to SFUI dashboard without any authentication
-	AddSfUIArgs          bool   `yaml:"add_sf_ui_args"`
+
+	MasterSSHCommand         string `yaml:"master_ssh_command"`          // Command used to setup the SSH Master Socket
+	TearDownMasterSSHCommand string `yaml:"teardown_master_ssh_command"` // Command used to teardown the SSH Master Socket.
+	SlaveSSHCommand          string `yaml:"slave_ssh_command"`           // Command used to start a SSH shell using the master socket
+	GUIBridgeCommand         string `yaml:"gui_bridge_command"`          // Command used to setup a GUI port forward using the master socket
+
 	CompiledClientConfig []byte // Ui related config that has to be sent to client
 	SfEndpoint           string `yaml:"sf_endpoint"`          // Current Sf Endpoints Name
 	SfUIOrigin           string `yaml:"sf_ui_origin"`         // Where SFUI is deployed, for CSRF prevention, ex: https://web.segfault.net
 	DisableOriginCheck   bool   `yaml:"disable_origin_check"` // Disable Origin Checking
 	DisableDesktop       bool   `yaml:"disable_desktop"`      // Disable websocket based GUI desktop access
+	// Directory where SSH sockets are stored,
+	// Diretcory Structure:
+	// 		WorkDir/
+	//			|-sfui/		(created by sfui- container for client dirs)
+	//				|-perClientUniqDir/ (a unique string derived from secret)
+	//						- gui.sock (ssh -L ./gui.sock:127.0.0.1:2000 root@segfault.net)
+	WorkDirectory string `yaml:"work_directory"`
 }
 
 var buildTime string
-var SfuiVersion string = "0.1"
+var SfuiVersion string = "0.1.1"
 
 //go:embed ui/dist/sf-ui
 var staticfiles embed.FS
 
 func main() {
 	sfui := ReadConfig()
+	gerr := sfui.cleanWorkDir()
+	if gerr != nil {
+		log.Fatal(gerr)
+	}
 
 	log.Printf("SFUI [Version : %s] [Built on : %s]\n", SfuiVersion, buildTime)
 	log.Printf("Listening on http://%s ....\n", sfui.ServerBindAddress)
@@ -47,7 +53,7 @@ func main() {
 
 func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 	if sfui.Debug {
-		log.Println(r.RemoteAddr, " ", r.URL, " ", r.UserAgent())
+		// log.Println(r.RemoteAddr, " ", r.URL, " ", r.UserAgent())
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.Header().Add("Access-Control-Allow-Methods", "*")
 		w.Header().Add("Access-Control-Allow-Headers", "*")

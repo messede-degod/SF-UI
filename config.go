@@ -29,15 +29,18 @@ func ReadConfig() SfUI {
 
 func getDefaultConfig() SfUI {
 	return SfUI{
-		MaxWsTerminals:     10,
-		ServerBindAddress:  "127.0.0.1:7171",
-		XpraWSAddress:      "ws://127.0.0.1:2000/",
-		Debug:              false,
-		ShellCommand:       "bash",
-		AddSfUIArgs:        false,
-		SfUIOrigin:         "http://127.0.0.1:7171",
-		DisableOriginCheck: true,
-		DisableDesktop:     false,
+		MaxWsTerminals:           10,
+		ServerBindAddress:        "127.0.0.1:7171",
+		XpraWSAddress:            "ws://127.0.0.1:2000/",
+		Debug:                    false,
+		MasterSSHCommand:         "sshpass -p segfault ssh -M -S %s/ssh.sock -o \"SetEnv SECRET=%s\" root@%s",
+		TearDownMasterSSHCommand: "sshpass -p segfault ssh -S %s/ssh.sock -O exit root@%s",
+		SlaveSSHCommand:          "sshpass -p segfault ssh -S %s/ssh.sock -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s",
+		GUIBridgeCommand:         "sshpass -p segfault ssh -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:2000  -o \"SetEnv SECRET=%s\" root@%s",
+		SfUIOrigin:               "http://127.0.0.1:7171",
+		DisableOriginCheck:       true,
+		DisableDesktop:           false,
+		WorkDirectory:            "/dev/shm/",
 	}
 }
 
@@ -46,9 +49,9 @@ func getcompiledClientConfig(sfui SfUI) []byte {
 	// Store it byte format, to prevent json marshalling on every request
 	// See handleUIConfig()
 	compConfig := []byte(fmt.Sprintf(
-		`{"max_terminals":"%d","auto_login":%s,"desktop_disabled":%s}`,
+		`{"max_terminals":"%d","auto_login":false,"desktop_disabled":%s}`,
 		sfui.MaxWsTerminals,
-		strconv.FormatBool(!sfui.AddSfUIArgs),   // Redirect client directly to dashboard if not in global mode.
+		// strconv.FormatBool(!sfui.AddSfUIArgs),   // Redirect client directly to dashboard if not in global mode.
 		strconv.FormatBool(sfui.DisableDesktop), // Hide the GUI Option in UI
 	))
 	return compConfig

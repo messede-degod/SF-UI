@@ -2,9 +2,12 @@ max_ws_terminals: 10
 server_bind_address: 127.0.0.1:7171
 xpra_ws_address: ws://127.0.0.1:65000/
 debug: false
-shell_command: sshpass -p segfault ssh -o "SetEnv SECRET=%[1]s" root@teso.segfault.net 
-add_sf_ui_args: true
-sf_endpoint: "segfault.net"
+sf_endpoint: "teso.segfault.net"
 sf_ui_origin: http://127.0.0.1:7171
 disable_origin_check: true
 disable_desktop: false
+work_directory: /dev/shm
+master_ssh_command:         "sshpass -p segfault ssh -M -S %s/ssh.sock -o \"SetEnv SECRET=%s\" root@%s"
+teardown_master_ssh_command: "sshpass -p segfault ssh -S %s/ssh.sock -O exit root@%s"
+slave_ssh_command:          "sshpass -p segfault ssh -S %s/ssh.sock -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s"
+gui_bridge_command:         "sshpass -p segfault ssh -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:2000  -o \"SetEnv SECRET=%s\" root@%s"

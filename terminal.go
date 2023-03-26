@@ -3,14 +3,12 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"regexp"
-	"strings"
 	"syscall"
+	"time"
 	"unsafe"
 
 	"github.com/creack/pty"
@@ -160,18 +158,29 @@ func (terminal *Terminal) Read(msg []byte) (n int, err error) {
 var validSecret = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
 
 func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
-	shellCommand := sfui.ShellCommand
-	if sfui.AddSfUIArgs {
-		if !validSecret(terminal.ClientSecret) {
-			return errors.New("unacceptable secret")
-		}
-		if strings.Count(sfui.ShellCommand, "]s") >= 1 { // trying to match %[1]s and %[2]s
-			shellCommand = fmt.Sprintf(sfui.ShellCommand, terminal.ClientSecret, terminal.ClientIp)
-		}
+	if !validSecret(terminal.ClientSecret) {
+		return errors.New("unacceptable secret")
+	}
+
+	// Get the  associated client or create a new one
+	// client variable below will get stale
+	client, cerr := sfui.GetExistingClientOrMakeNew(terminal.ClientSecret)
+	if cerr != nil {
+		return cerr
+	}
+
+	client.IncTermCount() // Add to terminal  Quota (SFUI.MaxWsTerminals)
+	defer sfui.RemoveClientIfInactive(terminal.ClientSecret)
+	defer client.DecTermCount() // Remove from terminal Quota
+
+	// Wait untill the master SSH socket becomes available
+	merr := sfui.waitFormMasterSSHSocket(client.ClientId, time.Second*10, 2)
+	if merr != nil {
+		return merr
 	}
 
 	var err error
-	command := exec.Command("bash", "-c", shellCommand)
+	command := sfui.getSlaveSSHTerminalCommand(client.ClientId, terminal.ClientSecret, terminal.ClientIp)
 	terminal.Pty, err = pty.Start(command)
 	if err != nil {
 		return err

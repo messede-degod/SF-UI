@@ -35,25 +35,25 @@ export class TerminalComponent implements AfterViewInit {
     cursorBlink: true,
     fontFamily: 'Consolas,Liberation Mono,Menlo,Courier,monospace',
     theme: {
-        foreground: '#d2d2d2',
-        background: '#2b2b2b',
-        cursor: '#adadad',
-        black: '#000000',
-        red: '#d81e00',
-        green: '#5ea702',
-        yellow: '#cfae00',
-        blue: '#427ab3',
-        magenta: '#89658e',
-        cyan: '#00a7aa',
-        white: '#dbded8',
-        brightBlack: '#686a66',
-        brightRed: '#f54235',
-        brightGreen: '#99e343',
-        brightYellow: '#fdeb61',
-        brightBlue: '#84b0d8',
-        brightMagenta: '#bc94b7',
-        brightCyan: '#37e6e8',
-        brightWhite: '#f1f1f0',
+      foreground: '#d2d2d2',
+      background: '#2b2b2b',
+      cursor: '#adadad',
+      black: '#000000',
+      red: '#d81e00',
+      green: '#5ea702',
+      yellow: '#cfae00',
+      blue: '#427ab3',
+      magenta: '#89658e',
+      cyan: '#00a7aa',
+      white: '#dbded8',
+      brightBlack: '#686a66',
+      brightRed: '#f54235',
+      brightGreen: '#99e343',
+      brightYellow: '#fdeb61',
+      brightBlue: '#84b0d8',
+      brightMagenta: '#bc94b7',
+      brightCyan: '#37e6e8',
+      brightWhite: '#f1f1f0',
     } as ITheme
   };
 
@@ -75,51 +75,51 @@ export class TerminalComponent implements AfterViewInit {
       this.enableWebglRenderer()
 
       this.socket = new WebSocket(this.getWSURL(), Config.WSServerProtocol);
-      
+
       // Attach The Sockets I/O to the terminal
-      const attachAddon = new AttachAddonComponent(this.socket,{bidirectional: true});
+      const attachAddon = new AttachAddonComponent(this.socket, { bidirectional: true });
       this.terminal.loadAddon(attachAddon);
 
       //Authenticate using Secret
       this.socket.onopen = () => {
         const termSecret = {
-          secret: localStorage.getItem('secret') 
+          secret: localStorage.getItem('secret')
         }
-        this.socket?.send(this.SF_AUTHENTICATE+JSON.stringify(termSecret))
-
-
+        this.socket?.send(this.SF_AUTHENTICATE + JSON.stringify(termSecret))
         // Resize Terminal for the first time
         this.fitAddon.fit();
+      }
+
+      this.socket.onclose = () => {
+        this.terminal.writeln("Terminal Disconnected!")
       }
 
       window.onresize = () => {
         this.fitAddon.fit();
       };
 
-      this.terminal.onResize(({cols,rows})=>{
+      this.terminal.onResize(({ cols, rows }) => {
         const terminal_size = {
           cols: cols,
           rows: rows,
         };
-        this.socket.binaryType= 'blob'
-        
-        this.socket.send(this.SF_RESIZE+JSON.stringify(terminal_size));
+        this.socket.binaryType = 'blob'
+
+        this.socket.send(this.SF_RESIZE + JSON.stringify(terminal_size));
       })
 
     }
   }
 
-  getWSURL = () :string =>{
+  getWSURL = (): string => {
     // Determine whether to use ws or wss
     let wsProto = "ws"
-    if (location.protocol=="https:"){
+    if (location.protocol == "https:") {
       wsProto = "wss"
     }
 
-    return wsProto+Config.WSServerUrl
+    return wsProto + Config.WSServerUrl
   }
-
-
 
   enableWebglRenderer = () => {
     try {
@@ -133,7 +133,7 @@ export class TerminalComponent implements AfterViewInit {
     }
   };
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.socket.close()
     this.termEle?.remove()
     this.webglAddon.dispose()

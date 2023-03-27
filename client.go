@@ -21,7 +21,7 @@ var clients = make(map[string]Client)
 var randVal = RandomStr(10) // Random str for derving clientId, doesnt change unless sfui is restarted
 
 // Return a new client, prepare necessary sockets
-func (sfui *SfUI) NewClient(ClientSecret string) (Client, error) {
+func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error) {
 	// Make and return a new client
 	client := Client{
 		ClientId:       getClientId(ClientSecret),
@@ -34,13 +34,13 @@ func (sfui *SfUI) NewClient(ClientSecret string) (Client, error) {
 		return client, werr
 	}
 
-	mcCmd, merr := sfui.prepareMasterSSHSocket(client.ClientId, ClientSecret)
+	mcCmd, merr := sfui.prepareMasterSSHSocket(client.ClientId, ClientSecret, ClientIp)
 	if merr != nil {
 		return client, merr
 	}
 	client.MasterSSHConnectionCmd = mcCmd
 
-	if gerr := sfui.prepareWsBridgeSocket(client.ClientId, ClientSecret); gerr != nil {
+	if gerr := sfui.prepareWsBridgeSocket(client.ClientId, ClientSecret, ClientIp); gerr != nil {
 		return client, gerr
 	}
 
@@ -70,12 +70,12 @@ func (sfui *SfUI) RemoveClientIfInactive(clientSecret string) {
 	}
 }
 
-func (sfui *SfUI) GetExistingClientOrMakeNew(ClientSecret string) (Client, error) {
+func (sfui *SfUI) GetExistingClientOrMakeNew(ClientSecret string, ClientIp string) (Client, error) {
 	client, ok := clients[getClientId(ClientSecret)]
 	if ok {
 		return client, nil
 	}
-	return sfui.NewClient(ClientSecret)
+	return sfui.NewClient(ClientSecret, ClientIp)
 }
 
 func (sfui *SfUI) GetClient(ClientSecret string) (Client, error) {

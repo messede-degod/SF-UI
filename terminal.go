@@ -36,6 +36,7 @@ const (
 	SFUI_CMD_PAUSE         = '2'
 	SFUI_CMD_RESUME        = '3'
 	SFUI_CMD_AUTHENTICATE  = '4'
+	SFUI_CMD_PING          = '5'
 	TERM_MAX_AUTH_FAILURES = 3
 )
 
@@ -164,7 +165,7 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 
 	// Get the  associated client or create a new one
 	// client variable below will get stale
-	client, cerr := sfui.GetExistingClientOrMakeNew(terminal.ClientSecret)
+	client, cerr := sfui.GetExistingClientOrMakeNew(terminal.ClientSecret, terminal.ClientIp)
 	if cerr != nil {
 		return cerr
 	}

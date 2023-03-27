@@ -18,6 +18,7 @@ import { FormsModule } from '@angular/forms';
 import { DesktopViewComponent } from './pages/desktop-view/desktop-view.component';
 import { PortsViewComponent } from './pages/ports-view/ports-view.component';
 import { WebViewComponent } from './pages/web-view/web-view.component';
+import { SaveSecretDialogComponent } from './components/save-secret-dialog/save-secret-dialog.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { WebViewComponent } from './pages/web-view/web-view.component';
     DesktopViewComponent,
     PortsViewComponent,
     WebViewComponent,
+    SaveSecretDialogComponent,
   ],
   imports: [
     BrowserModule,

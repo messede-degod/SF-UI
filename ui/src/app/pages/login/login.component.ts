@@ -4,6 +4,7 @@ import { HelpDialogComponent } from 'src/app/components/help-dialog/help-dialog.
 import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Config } from '../../config/config';
+import { SaveSecretDialogComponent } from 'src/app/components/save-secret-dialog/save-secret-dialog.component';
 
 @Component({
   selector: 'app-login',
@@ -24,7 +25,7 @@ export class LoginComponent {
       this.openHelpDialog()
     }
     let storedSecret = localStorage.getItem('secret')
-    if (storedSecret!=null){
+    if (storedSecret != null) {
       this.LoginWithSecret = true
       this.secret = storedSecret
       this.login()
@@ -42,6 +43,14 @@ export class LoginComponent {
     const dialogRef = this.dialog.open(HelpDialogComponent);
     dialogRef.afterClosed().subscribe(result => {
       localStorage.setItem('intro-shown', 'true')
+    });
+  }
+
+  showSaveSecretDialog(secret: string) {
+    const dialogRef = this.dialog.open(SaveSecretDialogComponent,{
+      data:{
+        secret: secret
+      }
     });
   }
 
@@ -85,11 +94,13 @@ export class LoginComponent {
       } else {
         let respBody = await rdata.json()
         localStorage.setItem('secret', respBody.secret)
+        // We are creating a new instance, prompt the user to save the secret
+        this.showSaveSecretDialog(respBody.secret)
       }
 
       this.router.navigate(['/dashboard'])
       return
-    }else{
+    } else {
       localStorage.removeItem('secret')
     }
 

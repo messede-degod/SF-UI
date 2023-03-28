@@ -62,7 +62,7 @@ func (sfui *SfUI) prepareMasterSSHSocket(clientId string, clientSecret string, c
 	return cmd, nil
 }
 
-func (sfui *SfUI) waitFormMasterSSHSocket(clientId string, sleepDuration time.Duration, tries int) error {
+func (sfui *SfUI) waitForMasterSSHSocket(clientId string, sleepDuration time.Duration, tries int) error {
 	clientDir := sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId
 	socketPath := clientDir + "/ssh.sock"
 
@@ -108,4 +108,8 @@ func (sfui *SfUI) getSlaveSSHTerminalCommand(clientId string, clientSecret strin
 	slaveSSHTerminalCommand = fmt.Sprintf(slaveSSHTerminalCommand, clientDir, clientSecret, clientIp, sfui.SfEndpoint)
 
 	return exec.Command("bash", "-c", slaveSSHTerminalCommand)
+}
+
+func (sfui *SfUI) getGUISocketPath(clientId string) string {
+	return sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId + "/gui.sock"
 }

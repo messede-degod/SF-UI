@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"syscall"
-	"time"
 	"unsafe"
 
 	"github.com/creack/pty"
@@ -43,7 +44,6 @@ const (
 type Terminal struct {
 	ClientSecret string
 	ClientIp     string
-	AuthFailures uint
 	WSConn       *websocket.Conn
 	Pty          *os.File
 	MsgBuf       []byte
@@ -79,7 +79,7 @@ func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
 
 		if err := sfui.secretValid(&TermRequest{
 			Secret:   clientSecret,
-			ClientIp: r.RemoteAddr,
+			ClientIp: strings.Split(r.RemoteAddr, ":")[0], // Remote addr is ip:port, we need only ip
 		}); err != nil { // Invalid Secret
 			ws.Write([]byte(err.Error()))
 			return
@@ -119,21 +119,27 @@ func (terminal *Terminal) setTermDimensions(rows uint16, cols uint16) {
 
 // Read Secret Sent by Client
 func (terminal *Terminal) ReadSecret() (secret string, err error) {
-	for terminal.AuthFailures < TERM_MAX_AUTH_FAILURES {
-		n, err := terminal.WSConn.Read(terminal.MsgBuf)
+	return readSecretFromWs(terminal.WSConn, &terminal.MsgBuf, TERM_MAX_AUTH_FAILURES)
+}
+
+func readSecretFromWs(wsConn *websocket.Conn, msgBuf *[]byte, maxAuthFailures int) (secret string, err error) {
+	authFailures := 0
+
+	for authFailures < maxAuthFailures {
+		n, err := wsConn.Read(*msgBuf)
 		if n > 0 && err == nil {
-			if terminal.MsgBuf[0] == SFUI_CMD_AUTHENTICATE { // Check the type of data we recieved
+			if (*msgBuf)[0] == SFUI_CMD_AUTHENTICATE { // Check the type of data we recieved
 				var termConfig TermConfig
-				if jerr := json.Unmarshal(terminal.MsgBuf[1:n], &termConfig); jerr == nil {
+				if jerr := json.Unmarshal((*msgBuf)[1:n], &termConfig); jerr == nil {
 					if termConfig.Secret != "" {
 						return termConfig.Secret, nil
 					}
 				}
 			}
 		}
-		terminal.AuthFailures += 1
+		authFailures += 1
 	}
-	return "", errors.New("Client did not supply valid secret (after 3 attempts)")
+	return "", errors.New(fmt.Sprintf("Client did not supply valid secret (after %d attempts)", TERM_MAX_AUTH_FAILURES))
 }
 
 // First byte in the chunk sent by the client is a indicator
@@ -173,12 +179,6 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 	client.IncTermCount() // Add to terminal  Quota (SFUI.MaxWsTerminals)
 	defer sfui.RemoveClientIfInactive(terminal.ClientSecret)
 	defer client.DecTermCount() // Remove from terminal Quota
-
-	// Wait untill the master SSH socket becomes available
-	merr := sfui.waitFormMasterSSHSocket(client.ClientId, time.Second*10, 2)
-	if merr != nil {
-		return merr
-	}
 
 	var err error
 	command := sfui.getSlaveSSHTerminalCommand(client.ClientId, terminal.ClientSecret, terminal.ClientIp)

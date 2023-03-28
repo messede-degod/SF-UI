@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os/exec"
 	"sync"
+	"time"
 )
 
 type Client struct {
@@ -39,6 +40,12 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 		return client, merr
 	}
 	client.MasterSSHConnectionCmd = mcCmd
+
+	// Wait untill the master SSH socket becomes available
+	mwerr := sfui.waitForMasterSSHSocket(client.ClientId, time.Second*10, 2)
+	if mwerr != nil {
+		return client, mwerr
+	}
 
 	if gerr := sfui.prepareWsBridgeSocket(client.ClientId, ClientSecret, ClientIp); gerr != nil {
 		return client, gerr
@@ -130,7 +137,7 @@ func (client *Client) DecTermCount() {
 }
 
 func (client *Client) ActivateDesktop() {
-	// mu is a pointer, it locks the original Client entry in "clients"
+	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
 	// first lock then read the fresh copy to prevent a dirty read
 	client.mu.Lock()
 	defer client.mu.Unlock()
@@ -142,7 +149,7 @@ func (client *Client) ActivateDesktop() {
 }
 
 func (client *Client) DeActivateDesktop() {
-	// mu is a pointer, it locks the original Client entry in "clients"
+	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
 	// first lock then read the fresh copy to prevent a dirty read
 	client.mu.Lock()
 	defer client.mu.Unlock()
@@ -151,4 +158,15 @@ func (client *Client) DeActivateDesktop() {
 	fclient := clients[client.ClientId]
 	fclient.DesktopActive = false
 	clients[client.ClientId] = fclient
+}
+
+func (client *Client) DesktopIsActivate() bool {
+	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+	// first lock then read the fresh copy to prevent a dirty read
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
+	// get a fresh copy of client
+	fclient := clients[client.ClientId]
+	return fclient.DesktopActive
 }

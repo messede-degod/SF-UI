@@ -155,6 +155,8 @@ func (terminal *Terminal) Read(msg []byte) (n int, err error) {
 				terminal.setTermDimensions(termConfig.Rows, termConfig.Cols)
 			}
 			return 0, nil
+		case SFUI_CMD_PING:
+			return 0, nil
 		}
 		copy(msg, terminal.MsgBuf[1:]) // Copy everything except the first byte
 		return n - 1, err

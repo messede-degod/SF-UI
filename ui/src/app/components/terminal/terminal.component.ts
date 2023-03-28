@@ -24,6 +24,7 @@ export class TerminalComponent implements AfterViewInit {
 
   SF_RESIZE: number = 1
   SF_AUTHENTICATE: number = 4
+  SF_PING: number = 5
 
 
   @Input() TermId: number = 0;
@@ -97,6 +98,11 @@ export class TerminalComponent implements AfterViewInit {
       window.onresize = () => {
         this.fitAddon.fit();
       };
+
+      // Send Pings at regular interval to prevent socket disconnection
+      setInterval(()=>{
+        this.socket.send(String(this.SF_PING))
+      },40*1000) // 40 secs
 
       this.terminal.onResize(({ cols, rows }) => {
         const terminal_size = {

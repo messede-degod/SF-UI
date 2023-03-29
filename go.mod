@@ -11,3 +11,7 @@ require (
 )
 
 require github.com/gorilla/websocket v1.5.0 // indirect
+
+replace github.com/koding/websocketproxy => github.com/messede-degod/websocketproxy v0.0.0-20230329122220-e7e6605bf195
+
+replace github.com/gorilla/websocket => github.com/messede-degod/websocket v0.0.0-20230329085455-f7bedd30414c

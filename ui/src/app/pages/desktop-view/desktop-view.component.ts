@@ -12,7 +12,10 @@ export class DesktopViewComponent {
   @Input() ShowFrame: boolean = false
 
   constructor(private sanitizer: DomSanitizer) {
+    let secret = localStorage.getItem("secret");
+    let wsPath = "%2Fxpraws%3Fsecret%3D"+secret
+
     this.IframeURL = sanitizer.bypassSecurityTrustResourceUrl(Config.ApiEndpoint
-      + "/assets/xpra_client/html5/index.html?path=/xpraws&password=abc");  
+      + "/assets/xpra_client/html5/index.html?path="+wsPath+"&password=abc");  
   }
 }

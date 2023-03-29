@@ -47,7 +47,7 @@ func (sfui *SfUI) workDirRemoveClient(clientId string) error {
 func (sfui *SfUI) prepareMasterSSHSocket(clientId string, clientSecret string, clientIp string) (*exec.Cmd, error) {
 	clientDir := sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId
 	masterSSHCommand := sfui.MasterSSHCommand
-	masterSSHCommand = fmt.Sprintf(masterSSHCommand, clientDir, clientSecret, clientIp, sfui.SfEndpoint)
+	masterSSHCommand = fmt.Sprintf(masterSSHCommand, clientDir, clientDir, clientSecret, clientIp, sfui.SfEndpoint)
 
 	cmd := exec.Command("bash", "-c", masterSSHCommand)
 
@@ -91,15 +91,15 @@ func (sfui *SfUI) destroyMasterSSHSocket(client *Client) error {
 	return err
 }
 
-func (sfui *SfUI) prepareWsBridgeSocket(clientId string, clientSecret string, clientIp string) error {
-	clientDir := sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId
-	prepareBridgeSSHCommand := sfui.GUIBridgeCommand
-	prepareBridgeSSHCommand = fmt.Sprintf(prepareBridgeSSHCommand, clientDir, clientDir, clientSecret, clientIp, sfui.SfEndpoint)
+// func (sfui *SfUI) prepareWsBridgeSocket(clientId string, clientSecret string, clientIp string) error {
+// 	clientDir := sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId
+// 	prepareBridgeSSHCommand := sfui.GUIBridgeCommand
+// 	prepareBridgeSSHCommand = fmt.Sprintf(prepareBridgeSSHCommand, clientDir, clientDir, clientSecret, clientIp, sfui.SfEndpoint)
 
-	cmd := exec.Command("bash", "-c", prepareBridgeSSHCommand)
-	go cmd.Run()
-	return nil
-}
+// 	cmd := exec.Command("bash", "-c", prepareBridgeSSHCommand)
+// 	go cmd.Run()
+// 	return nil
+// }
 
 // Provide a SSH connection command with respect to a clients master SSH socket
 func (sfui *SfUI) getSlaveSSHTerminalCommand(clientId string, clientSecret string, clientIp string) *exec.Cmd {

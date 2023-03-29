@@ -7,7 +7,6 @@ sf_ui_origin: http://127.0.0.1:7171
 disable_origin_check: true
 disable_desktop: false
 work_directory: /dev/shm
-master_ssh_command:         "sshpass -p segfault ssh -M -S %s/ssh.sock -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s"
+master_ssh_command:         "sshpass -p segfault ssh -M -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:2000 -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s"
 teardown_master_ssh_command: "sshpass -p segfault ssh -S %s/ssh.sock -O exit root@%s"
 slave_ssh_command:          "sshpass -p segfault ssh -S %s/ssh.sock -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s"
-gui_bridge_command:         "sshpass -p segfault ssh -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:2000  -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s"

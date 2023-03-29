@@ -47,10 +47,6 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 		return client, mwerr
 	}
 
-	if gerr := sfui.prepareWsBridgeSocket(client.ClientId, ClientSecret, ClientIp); gerr != nil {
-		return client, gerr
-	}
-
 	clients[client.ClientId] = client
 
 	return client, nil

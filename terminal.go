@@ -60,7 +60,7 @@ func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
 		defer ws.Close()
 
 		terminal := Terminal{
-			ClientIp: r.RemoteAddr,
+			ClientIp: strings.Split(r.RemoteAddr, ":")[0], // Remote addr is ip:port, we need only ip
 			WSConn:   ws,
 			MsgBuf:   make([]byte, 256),
 		}

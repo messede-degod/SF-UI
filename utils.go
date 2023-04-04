@@ -3,6 +3,8 @@ package main
 import (
 	"crypto/rand"
 	"math/big"
+	"net/http"
+	"strings"
 )
 
 func RandomStr(n int) string {
@@ -17,4 +19,14 @@ func RandomStr(n int) string {
 	}
 
 	return string(s)
+}
+
+func (sfui *SfUI) getClientAddr(r *http.Request) string {
+	if sfui.UseXForwaredForHeader {
+		fwAddr := r.Header.Get("X-Forwared-For")
+		if fwAddr != "" {
+			return fwAddr
+		}
+	}
+	return strings.Split(r.RemoteAddr, ":")[0] // Remote addr is ip:port, we need only ip
 }

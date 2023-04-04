@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/koding/websocketproxy"
@@ -26,7 +25,7 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 
 	// Get the  associated client or create a new one
 	// client variable below will get stale
-	client, cerr := sfui.GetExistingClientOrMakeNew(clientSecret, strings.Split(r.RemoteAddr, ":")[0])
+	client, cerr := sfui.GetExistingClientOrMakeNew(clientSecret, sfui.getClientAddr(r))
 	if cerr != nil {
 		w.Write([]byte(cerr.Error()))
 		return

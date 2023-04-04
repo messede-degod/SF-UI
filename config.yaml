@@ -5,6 +5,7 @@ debug: false
 sf_endpoint: "teso.segfault.net"
 sf_ui_origin: http://127.0.0.1:7171
 disable_origin_check: true
+use_x_forwarded_for_header: false
 disable_desktop: false
 work_directory: /dev/shm
 master_ssh_command:         "sshpass -p segfault ssh -M -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:2000 -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s"

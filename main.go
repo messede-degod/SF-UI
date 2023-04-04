@@ -19,11 +19,12 @@ type SfUI struct {
 	SlaveSSHCommand          string `yaml:"slave_ssh_command"`           // Command used to start a SSH shell using the master socket
 	GUIBridgeCommand         string `yaml:"gui_bridge_command"`          // Command used to setup a GUI port forward using the master socket
 
-	CompiledClientConfig []byte // Ui related config that has to be sent to client
-	SfEndpoint           string `yaml:"sf_endpoint"`          // Current Sf Endpoints Name
-	SfUIOrigin           string `yaml:"sf_ui_origin"`         // Where SFUI is deployed, for CSRF prevention, ex: https://web.segfault.net
-	DisableOriginCheck   bool   `yaml:"disable_origin_check"` // Disable Origin Checking
-	DisableDesktop       bool   `yaml:"disable_desktop"`      // Disable websocket based GUI desktop access
+	CompiledClientConfig  []byte // Ui related config that has to be sent to client
+	SfEndpoint            string `yaml:"sf_endpoint"`                // Current Sf Endpoints Name
+	SfUIOrigin            string `yaml:"sf_ui_origin"`               // Where SFUI is deployed, for CSRF prevention, ex: https://web.segfault.net
+	UseXForwaredForHeader bool   `yaml:"use_x_forwarded_for_header"` // Use the X-Forwared-For HTTP header, usefull when behind a reverse proxy
+	DisableOriginCheck    bool   `yaml:"disable_origin_check"`       // Disable Origin Checking
+	DisableDesktop        bool   `yaml:"disable_desktop"`            // Disable websocket based GUI desktop access
 	// Directory where SSH sockets are stored,
 	// Diretcory Structure:
 	// 		WorkDir/
@@ -81,7 +82,7 @@ func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		termReq := TermRequest{}
 		if json.Unmarshal(data, &termReq) == nil {
-			termReq.ClientIp = r.RemoteAddr
+			termReq.ClientIp = sfui.getClientAddr(r)
 			if termReq.NewInstance {
 				secret, err := sfui.generateSecret(&termReq)
 				if err == nil {

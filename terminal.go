@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strings"
 	"syscall"
 	"unsafe"
 
@@ -59,8 +58,10 @@ func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
 	websocket.Handler(func(ws *websocket.Conn) {
 		defer ws.Close()
 
+		clientIp := sfui.getClientAddr(r)
+
 		terminal := Terminal{
-			ClientIp: strings.Split(r.RemoteAddr, ":")[0], // Remote addr is ip:port, we need only ip
+			ClientIp: clientIp,
 			WSConn:   ws,
 			MsgBuf:   make([]byte, 256),
 		}
@@ -79,7 +80,7 @@ func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
 
 		if err := sfui.secretValid(&TermRequest{
 			Secret:   clientSecret,
-			ClientIp: strings.Split(r.RemoteAddr, ":")[0], // Remote addr is ip:port, we need only ip
+			ClientIp: clientIp,
 		}); err != nil { // Invalid Secret
 			ws.Write([]byte(err.Error()))
 			return

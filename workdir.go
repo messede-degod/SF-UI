@@ -37,29 +37,30 @@ func (sfui *SfUI) workDirAddClient(clientId string) error {
 		log.Println("Adding New workdir: ", sfui.WorkDirectory+WORK_SUB_DIR+"/"+clientId)
 	}
 
-	return os.Mkdir(sfui.WorkDirectory+WORK_SUB_DIR+"/"+clientId, os.ModePerm) // 0660 (oct) -> 384 (decimal)
+	return os.Mkdir(sfui.WorkDirectory+WORK_SUB_DIR+"/"+clientId, os.ModePerm) // Change to more secure perms
 }
 
 func (sfui *SfUI) workDirRemoveClient(clientId string) error {
 	return os.RemoveAll(sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId)
 }
 
-func (sfui *SfUI) prepareMasterSSHSocket(clientId string, clientSecret string, clientIp string) (*exec.Cmd, error) {
+func (sfui *SfUI) prepareMasterSSHSocket(clientId string, clientSecret string, clientIp string) (*exec.Cmd, *os.File, error) {
 	clientDir := sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId
 	masterSSHCommand := sfui.MasterSSHCommand
 	masterSSHCommand = fmt.Sprintf(masterSSHCommand, clientDir, clientDir, clientSecret, clientIp, sfui.SfEndpoint)
 
 	cmd := exec.Command("bash", "-c", masterSSHCommand)
 
+	mpty, ptyErr := pty.Start(cmd)
+
 	go func() {
-		mpty, err := pty.Start(cmd)
-		if err == nil {
+		if ptyErr == nil {
 			cmd.Wait()
 		}
 		mpty.Close()
 	}()
 
-	return cmd, nil
+	return cmd, mpty, ptyErr
 }
 
 func (sfui *SfUI) waitForMasterSSHSocket(clientId string, sleepDuration time.Duration, tries int) error {
@@ -86,8 +87,10 @@ func (sfui *SfUI) destroyMasterSSHSocket(client *Client) error {
 	cmd := exec.Command("bash", "-c", destroyMasterSSHCommand)
 	err := cmd.Run() // perform -O exit
 	// Kill master ssh connection
-	client.MasterSSHConnectionCmd.Process.Kill()
-	client.MasterSSHConnectionCmd.Process.Wait()
+	if client.MasterSSHConnectionCmd != nil { // Sometimes the connection might not have been established
+		client.MasterSSHConnectionCmd.Process.Kill()
+		client.MasterSSHConnectionCmd.Process.Wait()
+	}
 	return err
 }
 

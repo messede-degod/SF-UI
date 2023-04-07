@@ -4,42 +4,56 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"log"
+	"os"
 	"os/exec"
 	"sync"
 	"time"
 )
 
 type Client struct {
-	ClientId               string
-	mu                     *sync.Mutex
-	TerminalsCount         int
-	MasterSSHConnectionCmd *exec.Cmd
-	DesktopActive          bool
-	MaxTerms               int
+	ClientId                  string
+	mu                        *sync.Mutex
+	TerminalsCount            int
+	MasterSSHConnectionActive bool
+	MasterSSHConnectionCmd    *exec.Cmd
+	MasterSSHConnectionPty    *os.File
+	DesktopActive             bool
+	MaxTerms                  int
 }
 
-var clients = make(map[string]Client)
-var randVal = RandomStr(10) // Random str for derving clientId, doesnt change unless sfui is restarted
+var clients = make(map[string]Client) // Clients DB
+var cmu = &sync.Mutex{}               // Synchronize access to the clients DB above
+var randVal = RandomStr(10)           // Random str for deriving clientId, doesnt change unless sfui is restarted
 
 // Return a new client, prepare necessary sockets
 func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error) {
 	// Make and return a new client
 	client := Client{
-		ClientId:       getClientId(ClientSecret),
-		mu:             &sync.Mutex{},
-		TerminalsCount: 0,
-		MaxTerms:       sfui.MaxWsTerminals,
+		ClientId:                  getClientId(ClientSecret),
+		mu:                        &sync.Mutex{},
+		TerminalsCount:            0,
+		MasterSSHConnectionActive: false,
+		MaxTerms:                  sfui.MaxWsTerminals,
 	}
+
+	// Make a inital entry in the clients DB, this is to prevent a race condition
+	// where multiple SSH connection would be created when a master SSH connection
+	// is still being established.
+	cmu.Lock()
+	clients[client.ClientId] = client
+	cmu.Unlock()
 
 	if werr := sfui.workDirAddClient(client.ClientId); werr != nil {
 		return client, werr
 	}
 
-	mcCmd, merr := sfui.prepareMasterSSHSocket(client.ClientId, ClientSecret, ClientIp)
-	if merr != nil {
-		return client, merr
+	mCmd, mPty, mPtyErr := sfui.prepareMasterSSHSocket(client.ClientId, ClientSecret, ClientIp)
+	if mPtyErr != nil {
+		return client, mPtyErr
 	}
-	client.MasterSSHConnectionCmd = mcCmd
+	client.MasterSSHConnectionPty = mPty
+	client.MasterSSHConnectionCmd = mCmd
 
 	// Wait untill the master SSH socket becomes available
 	mwerr := sfui.waitForMasterSSHSocket(client.ClientId, time.Second*10, 2)
@@ -47,14 +61,23 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 		return client, mwerr
 	}
 
+	cmu.Lock()
+	client.MasterSSHConnectionActive = true
 	clients[client.ClientId] = client
+	cmu.Unlock()
 
 	return client, nil
 }
 
 func (sfui *SfUI) RemoveClient(client *Client) {
+	cmu.Lock()
+	defer cmu.Unlock()
+
 	sfui.destroyMasterSSHSocket(client)
-	sfui.workDirRemoveClient(client.ClientId)
+	wrerr := sfui.workDirRemoveClient(client.ClientId)
+	if wrerr != nil {
+		log.Println(wrerr)
+	}
 	delete(clients, client.ClientId)
 }
 
@@ -74,14 +97,27 @@ func (sfui *SfUI) RemoveClientIfInactive(clientSecret string) {
 }
 
 func (sfui *SfUI) GetExistingClientOrMakeNew(ClientSecret string, ClientIp string) (Client, error) {
-	client, ok := clients[getClientId(ClientSecret)]
-	if ok {
-		return client, nil
+	client, cerr := sfui.GetClient(ClientSecret)
+	if cerr != nil {
+		return sfui.NewClient(ClientSecret, ClientIp)
 	}
-	return sfui.NewClient(ClientSecret, ClientIp)
+
+	if !client.MasterSSHConnectionActive {
+		werr := sfui.waitForMasterSSHSocket(client.ClientId, 5, 2)
+		if werr != nil {
+			return client, werr
+		}
+		// master SSH socket is now active, grab a fresh copy of the client
+		client, cerr = sfui.GetClient(ClientSecret)
+	}
+
+	return client, cerr
 }
 
 func (sfui *SfUI) GetClient(ClientSecret string) (Client, error) {
+	cmu.Lock()
+	defer cmu.Unlock()
+
 	client, ok := clients[getClientId(ClientSecret)]
 	if ok {
 		return client, nil

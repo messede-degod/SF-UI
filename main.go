@@ -11,7 +11,6 @@ import (
 type SfUI struct {
 	MaxWsTerminals    int    `yaml:"max_ws_terminals"`    // Max terminals that can be allocated per client
 	ServerBindAddress string `yaml:"server_bind_address"` // Address to which the current app binds
-	XpraWSAddress     string `yaml:"xpra_ws_address"`     // Address at which the xpra ws server is listening
 	Debug             bool   `yaml:"debug"`               // Print debug information
 
 	MasterSSHCommand         string `yaml:"master_ssh_command"`          // Command used to setup the SSH Master Socket
@@ -68,6 +67,8 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 	case "/ws":
 		sfui.handleTerminalWs(w, r)
+	case "/desktop":
+		sfui.handleSetupDesktop(w, r)
 	case "/xpraws":
 		if !sfui.DisableDesktop {
 			sfui.handleDesktopWS(w, r)

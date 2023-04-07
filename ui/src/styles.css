@@ -364,7 +364,6 @@ body {
 
 .loading-xpra-indicator{
     position: absolute;
-    z-index: -99;
     left: 45vw;
     right: auto;
     top: 45vh;

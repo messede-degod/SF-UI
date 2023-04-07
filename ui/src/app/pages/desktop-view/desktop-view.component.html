@@ -1,6 +1,13 @@
 <div class="flex-col">
-    <div class="page-info-text loading-xpra-indicator">
-        Loading Xpra Client...
+    <div class="page-info-text loading-xpra-indicator"
+        [ngStyle]="{'z-index': DesktopStarted&&XpraClientReady ? '-99': '0'}">
+        <span *nfIf="!DesktopStarted&&!XpraClientReady">
+            Starting Desktop...
+        </span>
+        <span *nfIf="!XpraClientReady">
+            Loading Xpra Client...
+        </span>
     </div>
-    <iframe *ngIf="ShowFrame" class="desktop-view" [src]="IframeURL" frameborder="0"></iframe>
+    <iframe *ngIf="ShowFrame && DesktopStarted" [ngStyle]="{'z-index': !XpraClientReady ? '-99': '0'}" (load)="onXpraClientLoad()"
+        class="desktop-view" [src]="IframeURL" frameborder="0"></iframe>
 </div>

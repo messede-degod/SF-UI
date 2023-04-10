@@ -50,8 +50,8 @@ type setupDesktop struct {
 }
 
 var startCmd = map[string]string{
-	"xpra":  "ss -ltnp | grep \"2000\"; if [[ $? -ne 0  ]]; then startxweb ; fi \n",
-	"novnc": "ss -ltnp | grep \"2000\"; if [[ $? -ne 0  ]]; then startnovnc ; fi \n",
+	"xpra":  "bash -c 'ss -ltnp | grep \"2000\"; if [[ $? -ne 0  ]]; then /sf/bin/startxweb ; fi' & \n",
+	"novnc": "bash -c 'ss -ltnp | grep \"2000\"; if [[ $? -ne 0  ]]; then /sf/bin/startnovnc ; fi' & \n",
 }
 
 // start the GUI service on the instance(ex: startxweb), use the master connection

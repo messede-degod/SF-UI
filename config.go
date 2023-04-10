@@ -32,7 +32,7 @@ func getDefaultConfig() SfUI {
 		MaxWsTerminals:           10,
 		ServerBindAddress:        "127.0.0.1:7171",
 		Debug:                    false,
-		MasterSSHCommand:         "sshpass -p segfault ssh -M -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:2000 -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s",
+		MasterSSHCommand:         "sshpass -p segfault ssh -M -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:2000 -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s -t sh",
 		TearDownMasterSSHCommand: "sshpass -p segfault ssh -S %s/ssh.sock -O exit root@%s",
 		SlaveSSHCommand:          "sshpass -p segfault ssh -S %s/ssh.sock -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s",
 		SfEndpoint:               "teso.segfault.net",

@@ -25,7 +25,7 @@ func (sfui *SfUI) getClientAddr(r *http.Request) string {
 	if sfui.UseXForwardedForHeader {
 		fwAddr := r.Header.Get("X-Forwarded-For")
 		if fwAddr != "" {
-			return fwAddr
+			return strings.Replace(fwAddr, ":", "", -1) // Go returns address in v6 compatibility mode ':'
 		}
 	}
 	return strings.Split(r.RemoteAddr, ":")[0] // Remote addr is ip:port, we need only ip

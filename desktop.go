@@ -49,11 +49,6 @@ type setupDesktop struct {
 	ClientSecret string `json:"client_secret"`
 }
 
-var startCmd = map[string]string{
-	"xpra":  "bash -c 'ss -ltnp | grep \"2000\"; if [[ $? -ne 0  ]]; then /sf/bin/startxweb ; fi' & \n",
-	"novnc": "bash -c 'ss -ltnp | grep \"2000\"; if [[ $? -ne 0  ]]; then /sf/bin/startnovnc ; fi' & \n",
-}
-
 // start the GUI service on the instance(ex: startxweb), use the master connection
 // to issue commands.
 func (sfui *SfUI) handleSetupDesktop(w http.ResponseWriter, r *http.Request) {
@@ -81,8 +76,16 @@ func (sfui *SfUI) handleSetupDesktop(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			startCmd := ""
+			switch setupDesktopReq.DesktopType {
+			case "novnc":
+				startCmd = sfui.StartNoVNCCommand
+			default:
+				startCmd = sfui.StartXpraCommand
+			}
+
 			// Check for short writes
-			client.MasterSSHConnectionPty.WriteString(startCmd[setupDesktopReq.DesktopType])
+			client.MasterSSHConnectionPty.WriteString(startCmd)
 			client.MasterSSHConnectionPty.Sync()
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(`{"status":"OK"}`))

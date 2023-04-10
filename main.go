@@ -17,6 +17,8 @@ type SfUI struct {
 	TearDownMasterSSHCommand string `yaml:"teardown_master_ssh_command"` // Command used to teardown the SSH Master Socket.
 	SlaveSSHCommand          string `yaml:"slave_ssh_command"`           // Command used to start a SSH shell using the master socket
 	GUIBridgeCommand         string `yaml:"gui_bridge_command"`          // Command used to setup a GUI port forward using the master socket
+	StartXpraCommand         string `yaml:"start_xpra_command"`          // Command used to start xpra
+	StartNoVNCCommand        string `yaml:"start_novnc_command"`         // Command used to start noVNC
 
 	CompiledClientConfig   []byte // Ui related config that has to be sent to client
 	SfEndpoint             string `yaml:"sf_endpoint"`                // Current Sf Endpoints Name

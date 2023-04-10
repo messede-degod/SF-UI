@@ -1,10 +1,10 @@
 <div class="flex-col">
     <div class="page-info-text loading-xpra-indicator"
-        [ngStyle]="{'z-index': DesktopStarted&&XpraClientReady ? '-99': '0'}">
-        <span *nfIf="!DesktopStarted&&!XpraClientReady">
+        [ngStyle]="{'z-index': XpraClientReady ? '-99': '0'}">
+        <span *ngIf="!DesktopStarted">
             Starting Desktop...
         </span>
-        <span *nfIf="!XpraClientReady">
+        <span *ngIf="DesktopStarted">
             Loading Xpra Client...
         </span>
     </div>

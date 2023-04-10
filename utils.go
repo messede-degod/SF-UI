@@ -22,8 +22,8 @@ func RandomStr(n int) string {
 }
 
 func (sfui *SfUI) getClientAddr(r *http.Request) string {
-	if sfui.UseXForwaredForHeader {
-		fwAddr := r.Header.Get("X-Forwared-For")
+	if sfui.UseXForwardedForHeader {
+		fwAddr := r.Header.Get("X-Forwarded-For")
 		if fwAddr != "" {
 			return fwAddr
 		}

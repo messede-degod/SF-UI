@@ -38,7 +38,7 @@ func getDefaultConfig() SfUI {
 		SfEndpoint:               "teso.segfault.net",
 		SfUIOrigin:               "http://127.0.0.1:7171",
 		DisableOriginCheck:       true,
-		UseXForwaredForHeader:    false,
+		UseXForwardedForHeader:   false,
 		DisableDesktop:           false,
 		WorkDirectory:            "/dev/shm/",
 	}

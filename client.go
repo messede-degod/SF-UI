@@ -19,6 +19,7 @@ type Client struct {
 	MasterSSHConnectionCmd    *exec.Cmd
 	MasterSSHConnectionPty    *os.File
 	DesktopActive             bool
+	DesktopServiceActive      bool
 	MaxTerms                  int
 }
 
@@ -201,4 +202,27 @@ func (client *Client) DesktopIsActivate() bool {
 	// get a fresh copy of client
 	fclient := clients[client.ClientId]
 	return fclient.DesktopActive
+}
+
+func (client *Client) ActivateDesktopService() {
+	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+	// first lock then read the fresh copy to prevent a dirty read
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
+	// get a fresh copy of client
+	fclient := clients[client.ClientId]
+	fclient.DesktopServiceActive = true
+	clients[client.ClientId] = fclient
+}
+
+func (client *Client) DesktopServiceIsActivate() bool {
+	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+	// first lock then read the fresh copy to prevent a dirty read
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
+	// get a fresh copy of client
+	fclient := clients[client.ClientId]
+	return fclient.DesktopServiceActive
 }

@@ -41,6 +41,10 @@ func (sfui *SfUI) workDirAddClient(clientId string) error {
 }
 
 func (sfui *SfUI) workDirRemoveClient(clientId string) error {
+	if sfui.Debug {
+		log.Println("Removing workdir: ", sfui.WorkDirectory+WORK_SUB_DIR+"/"+clientId)
+	}
+
 	return os.RemoveAll(sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId)
 }
 

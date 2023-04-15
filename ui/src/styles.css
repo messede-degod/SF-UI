@@ -369,6 +369,31 @@ body {
     top: 45vh;
 }
 
+.disconnected-msg{
+    align-items: center;
+}
+
+.reconnect-button{
+    margin-top: 1rem;
+    background-color: rgb(95 97 97);
+    color: white;
+    cursor: pointer;
+    height: 2rem;
+    width: 6rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+}
+
+.reconnect-button:hover{
+    background-color: var(--inactive-bg);
+}
+
+.reconnect-button>span{
+    font-size: 1rem;
+}
+
 /* Login Page */
 .login-container {
     background-color: var(--background);

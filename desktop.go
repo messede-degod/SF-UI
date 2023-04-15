@@ -16,6 +16,7 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 	clientSecret := queryVals.Get("secret")
 
 	if !validSecret(clientSecret) {
+		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte(`unacceptable secret`))
 		return
 	}
@@ -29,6 +30,7 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if client.DesktopIsActivate() {
+		w.WriteHeader(http.StatusNotAcceptable)
 		w.Write([]byte(`can only have one desktop connection active at a time`))
 		return
 	}
@@ -71,8 +73,14 @@ func (sfui *SfUI) handleSetupDesktop(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if client.DesktopIsActivate() {
-				w.WriteHeader(http.StatusForbidden)
+				w.WriteHeader(http.StatusCreated)
 				w.Write([]byte(`{"status":"desktop connection is already active for client"}`))
+				return
+			}
+
+			if client.DesktopServiceIsActivate() { // Desktop Service is active but not a connection
+				w.WriteHeader(http.StatusNotAcceptable)
+				w.Write([]byte(`{"status":"desktop service is already active for client"}`))
 				return
 			}
 
@@ -87,6 +95,9 @@ func (sfui *SfUI) handleSetupDesktop(w http.ResponseWriter, r *http.Request) {
 			// Check for short writes
 			client.MasterSSHConnectionPty.WriteString(startCmd)
 			client.MasterSSHConnectionPty.Sync()
+
+			client.ActivateDesktopService()
+
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(`{"status":"OK"}`))
 			return

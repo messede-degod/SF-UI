@@ -153,9 +153,15 @@ body {
 .sidebar {
     justify-content: space-between;
     height: 100vh;
-    width: 6%;
+    width: 7rem;
     transition: width 2s;
     background-color: var(--background);
+}
+
+@media only screen and (max-width: 800px) {
+    .sidebar {
+        display: none;
+    }
 }
 
 .sidebar-show {
@@ -184,14 +190,12 @@ body {
 
 .menu-brand {
     display: flex;
-    justify-content: center;
-    align-items: center;
     width: 100%;
     height: var(--control-bar-height) !important;
     justify-content: center;
     align-items: center;
-    margin-bottom: 1.5vh;
-    margin-top: 3.8vh;
+    margin-bottom: 1rem;
+    margin-top: 3rem;
     animation: fadeIn 0.5s;
 }
 
@@ -199,14 +203,20 @@ body {
     margin: 0 !important;
     height: var(--control-bar-height) !important;
     width: 6vw;
-    font-size: 2.5vh !important;
+    font-size: 3rem !important;
     background-color: var(--background) !important;
     animation: fadeIn 0.5s;
     overflow: hidden;
 }
 
+@media only screen and (max-width: 800px) {
+    .menu-brand-small {
+        display: none;
+    }
+}
+
 .menu-brand-small>h6 {
-    font-size: 2.3vw !important;
+    font-size: 3rem !important;
     margin-top: 1.2vh !important;
     margin-bottom: 0 !important;
 }
@@ -218,7 +228,7 @@ body {
 
 
 .menu-brand>h6 {
-    font-size: 4.2vw;
+    font-size: 5rem;
     font-family: 'PT Sans', sans-serif;
     color: var(--brand-red);
 }
@@ -229,7 +239,7 @@ body {
 
 .menu-brand>span {
     font-family: 'Source Sans Pro', sans-serif;
-    font-size: 0.75vw;
+    font-size: 0.8rem;
     margin-top: 1.5vh;
 }
 
@@ -246,8 +256,8 @@ body {
 
 
 .menu-button {
-    width: 70%;
-    height: 3.6vw;
+    width: 5rem;
+    height: 4rem;
     margin-top: 1.5rem;
     margin-left: 0.5rem;
     margin-right: 0.5rem;
@@ -296,7 +306,7 @@ body {
 .terminal-tab {
     width: 7.2rem;
     transition: width 5s;
-    height: 1.9vh;
+    height: 1.2rem;
     margin-top: 1.2vh;
     margin-right: 0.9vh;
     padding: 0.2rem;
@@ -331,7 +341,7 @@ body {
 
 .terminal-window-add {
     width: 1.5rem !important;
-    height: 1.9vh !important;
+    height: 1.2rem !important;
     justify-content: center !important;
 }
 
@@ -360,6 +370,13 @@ body {
     justify-content: center;
     align-items: center;
     font-size: xx-large;
+}
+
+@media only screen and (max-width: 800px) {
+    .page-info-text{
+        margin: 2rem;
+        line-height: 3rem;
+    }
 }
 
 .loading-xpra-indicator{
@@ -435,15 +452,11 @@ body {
 
 .login-btn-container {
     display: flex;
-    margin-top: 3vh;
+    margin-top: 2.5rem;
     justify-content: space-evenly;
     align-items: center;
     flex-direction: row;
-    height: 4vh;
-    width: 15vw;
-    padding: 0.2rem;
-    padding-left: 0.8rem;
-    padding-right: 0.6rem;
+    width: 18rem;
 }
 
 .login-btn-container>div>button {
@@ -500,6 +513,15 @@ body {
 .help-content {
     font-size: large !important;
     margin: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+@media only screen and (max-width: 800px) {
+    .help-content{
+        height: 25rem;
+        overflow: scroll;
+    }
 }
 
 .sub-list {

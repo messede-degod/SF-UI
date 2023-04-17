@@ -24,7 +24,7 @@ func (sfui *SfUI) cleanWorkDir() error {
 	}
 	// Remove sfui directory within the work directory
 	os.RemoveAll(sfui.WorkDirectory + WORK_SUB_DIR)
-	return os.Mkdir(sfui.WorkDirectory+WORK_SUB_DIR, os.ModePerm) // 0660 (oct) -> 384 (decimal)
+	return os.Mkdir(sfui.WorkDirectory+WORK_SUB_DIR, 0700)
 }
 
 func (sfui *SfUI) workDirAddClient(clientId string) error {

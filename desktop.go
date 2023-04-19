@@ -21,6 +21,8 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer sfui.RemoveClientIfInactive(clientSecret)
+
 	// Get the  associated client or create a new one
 	// client variable below will get stale
 	client, cerr := sfui.GetExistingClientOrMakeNew(clientSecret, sfui.getClientAddr(r))
@@ -36,7 +38,6 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client.ActivateDesktop()
-	defer sfui.RemoveClientIfInactive(clientSecret)
 	defer client.DeActivateDesktop()
 
 	u, _ := url.Parse("unix://" + sfui.getGUISocketPath(client.ClientId))

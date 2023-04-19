@@ -172,6 +172,8 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 		return errors.New("unacceptable secret")
 	}
 
+	defer sfui.RemoveClientIfInactive(terminal.ClientSecret)
+
 	// Get the  associated client or create a new one
 	// client variable below will get stale
 	client, cerr := sfui.GetExistingClientOrMakeNew(terminal.ClientSecret, terminal.ClientIp)
@@ -179,8 +181,7 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 		return cerr
 	}
 
-	client.IncTermCount() // Add to terminal  Quota (SFUI.MaxWsTerminals)
-	defer sfui.RemoveClientIfInactive(terminal.ClientSecret)
+	client.IncTermCount()       // Add to terminal  Quota (SFUI.MaxWsTerminals)
 	defer client.DecTermCount() // Remove from terminal Quota
 
 	var err error

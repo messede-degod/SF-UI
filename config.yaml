@@ -1,7 +1,7 @@
 max_ws_terminals: 10
 server_bind_address: 127.0.0.1:7171
 xpra_ws_address: ws://127.0.0.1:65000/
-debug: true
+debug: false
 sf_endpoint: "teso.segfault.net"
 sf_ui_origin: http://127.0.0.1:7171
 disable_origin_check: true

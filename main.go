@@ -3,9 +3,13 @@ package main
 import (
 	"embed"
 	"encoding/json"
+	"flag"
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 type SfUI struct {
@@ -42,15 +46,84 @@ var SfuiVersion string = "0.1.1"
 var staticfiles embed.FS
 
 func main() {
+	if ActionInvoked := handleCmdLineFlags(); ActionInvoked {
+		return
+	}
+
 	sfui := ReadConfig()
+	log.Printf("SFUI [Version : %s] [Built on : %s]\n", SfuiVersion, buildTime)
+
+	rlErr := obtainRunLock()
+	if rlErr != nil {
+		log.Println(rlErr)
+		return
+	}
+	// release runLock in cleanUp()
+
 	gerr := sfui.cleanWorkDir()
 	if gerr != nil {
 		log.Fatal(gerr)
 	}
 
-	log.Printf("SFUI [Version : %s] [Built on : %s]\n", SfuiVersion, buildTime)
+	sfui.handleSignals()
+
 	log.Printf("Listening on http://%s ....\n", sfui.ServerBindAddress)
 	http.ListenAndServe(sfui.ServerBindAddress, http.HandlerFunc(sfui.requestHandler))
+}
+
+func (sfui *SfUI) handleSignals() {
+	sigs := make(chan os.Signal, 1)
+	// catch all signals
+	signal.Notify(sigs)
+
+	go func() {
+		for sig := range sigs {
+			switch sig {
+			case syscall.SIGINT:
+				fallthrough
+			case syscall.SIGTERM:
+				fallthrough
+			case syscall.SIGHUP:
+				sfui.cleanUp()
+				os.Exit(0)
+			}
+		}
+	}()
+}
+
+func handleCmdLineFlags() (ActionInvoked bool) {
+	// Handle CmdLine Flags
+	var install bool
+	var uninstall bool
+
+	flag.BoolVar(&install, "install", false, "install SFUI")
+	flag.BoolVar(&uninstall, "uninstall", false, "uninstall SFUI")
+	flag.Parse()
+
+	if install {
+		ierr := InstallService()
+		if ierr != nil {
+			log.Println(ierr.Error())
+		}
+		ActionInvoked = true
+	}
+
+	if uninstall {
+		uierr := UnInstallService()
+		if uierr != nil {
+			log.Println(uierr.Error())
+		}
+		ActionInvoked = true
+	}
+
+	return ActionInvoked
+}
+
+func (sfui *SfUI) cleanUp() {
+	sfui.DisableClientAccess()
+	log.Println("Disconnecting all clients...")
+	sfui.RemoveAllClients()
+	releaseRunLock()
 }
 
 func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {

@@ -14,9 +14,9 @@ A UI frontend for the services provided by [segfault]("https://thc.org/segfault"
 - Run `make` to build the complete application, binary can be found in the bin directory.
 - Run `make prod` to build a production ready static binary (Run make UI if neccessary beforehand).
 
-## Running
+## Install & Run
 
-Run `./bin/sfui`, visit the endpoint shown, in browser to access SFUI.
+Run `./bin/sfui -install` to install sfui, visit `http://127.0.0.1:7171` in browser to access SFUI. From here on use systemctl to control sfui.
 
 ## How it works
 ```
@@ -31,6 +31,7 @@ SFUI starts by accepting a  secret and a domain (ex: segfault.net, de.segfault.n
 Application currently embeds the UI files into binary, using go's embed feature (this is for convenience).
 In production it may be preferable to serve the UI content using a webserver like nginx, See `other/nginx/Readme.md` for further instructions.
 
+Consider increasing `ulimit` if serving large number of clients
 
 ## Acknowledgement
 

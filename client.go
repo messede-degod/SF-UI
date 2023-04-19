@@ -23,6 +23,7 @@ type Client struct {
 	MaxTerms                  int
 }
 
+var AcceptClients = true
 var clients = make(map[string]Client) // Clients DB
 var cmu = &sync.Mutex{}               // Synchronize access to the clients DB above
 var randVal = RandomStr(10)           // Random str for deriving clientId, doesnt change unless sfui is restarted
@@ -42,6 +43,10 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 	// where multiple SSH connection would be created when a master SSH connection
 	// is still being established.
 	cmu.Lock()
+	if !AcceptClients {
+		cmu.Unlock()
+		return client, errors.New("Not Accepting New Clients !")
+	}
 	clients[client.ClientId] = client
 	cmu.Unlock()
 
@@ -225,4 +230,19 @@ func (client *Client) DesktopServiceIsActivate() bool {
 	// get a fresh copy of client
 	fclient := clients[client.ClientId]
 	return fclient.DesktopServiceActive
+}
+
+// Stop New Clients from obtaining service
+func (sfui *SfUI) DisableClientAccess() {
+	cmu.Lock()
+	AcceptClients = false
+	cmu.Unlock()
+}
+
+// Disable client access before calling this function
+func (sfui *SfUI) RemoveAllClients() {
+	for cid := range clients {
+		client := clients[cid]
+		sfui.RemoveClient(&client)
+	}
 }

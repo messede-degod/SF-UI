@@ -1,0 +1,13 @@
+[Unit]
+Description=SF-UI - Segfault UI Service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Restart=always
+Type=simple
+ExecStart=%s
+WorkingDirectory=%s
+
+[Install]
+WantedBy=multi-user.target

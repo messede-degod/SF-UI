@@ -240,7 +240,7 @@ body {
 .menu-brand>span {
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 0.8rem;
-    margin-top: 1.5vh;
+    margin-top: 2rem;
 }
 
 
@@ -442,7 +442,7 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: row;
-    height: 4vh;
+    /* height: 2.8rem; */
     padding: 0.2rem;
     padding-left: 0.8rem;
     padding-right: 0.6rem;
@@ -475,8 +475,8 @@ body {
 
 
 .input-secret>input {
-    width: 13vw;
-    height: 2.8vh;
+    width: 14rem;
+    height: 2.2rem;
     border: 0;
     outline: none;
     color: var(--input-text-color);
@@ -521,6 +521,9 @@ body {
     .help-content{
         height: 25rem;
         overflow: scroll;
+    }
+    .input-secret>input {
+        width: 10rem;
     }
 }
 

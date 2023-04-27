@@ -240,7 +240,7 @@ body {
 .menu-brand>span {
     font-family: 'Source Sans Pro', sans-serif;
     font-size: 0.8rem;
-    margin-top: 2rem;
+    margin-top: 1.2rem;
 }
 
 
@@ -421,18 +421,18 @@ body {
 }
 
 .login-container>div>h6 {
-    font-size: 16vh !important;
+    font-size: 9rem !important;
 }
 
 #brandInfo {
-    margin-top: 5vh;
-    font-size: 2.3vh !important;
+    margin-top: 3rem;
+    font-size: 1.3rem !important;
 }
 
 .login-info {
-    margin-top: 2vh;
+    margin-top: 1.2rem;
     font-family: 'Source Sans Pro', sans-serif;
-    font-size: 2vh;
+    font-size: 1.2rem;
     text-align: center;
 }
 

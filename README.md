@@ -44,4 +44,3 @@ This project uses :
 -   creack/pty
 -   xtermjs/xterm.js
 -   Xpra-org/xpra-html5
--   koding/websocketproxy

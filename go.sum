@@ -1,9 +1,5 @@
 github.com/creack/pty v1.1.18 h1:n56/Zwd5o6whRC5PMGretI4IdRLlmBXYNjScPaBgsbY=
 github.com/creack/pty v1.1.18/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
-github.com/messede-degod/websocket v0.0.0-20230329085455-f7bedd30414c h1:iYsW4oz/gWzodC2temAAwlxPnhUEqZMTZZoe3dG79vQ=
-github.com/messede-degod/websocket v0.0.0-20230329085455-f7bedd30414c/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
-github.com/messede-degod/websocketproxy v0.0.0-20230329122220-e7e6605bf195 h1:G1N493vWXcs/MLX5qcpiYPL0S7MNWOIZ3FUctrC3/aA=
-github.com/messede-degod/websocketproxy v0.0.0-20230329122220-e7e6605bf195/go.mod h1:tEuCImg/b5Oa1kzpq7xXjDrvA3FX3T7JjlUNmSOh4Uk=
 golang.org/x/net v0.6.0 h1:L4ZwwTvKW9gr0ZMS1yrHD9GZhIuVjOBBnaKH+SPQK0Q=
 golang.org/x/net v0.6.0/go.mod h1:2Tu9+aMcznHK/AK1HMvgo6xiTLG5rD5rZLDS+rp2Bjs=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=

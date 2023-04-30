@@ -4,10 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
-
-	"github.com/koding/websocketproxy"
 )
 
 func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
@@ -40,11 +37,13 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 	client.ActivateDesktop()
 	defer client.DeActivateDesktop()
 
-	u, _ := url.Parse("unix://" + sfui.getGUISocketPath(client.ClientId))
-	wp := websocketproxy.NewUnixProxy(u) // Get rid of this dependency
-	wp.Upgrader = websocketproxy.DefaultUpgrader
-	wp.Upgrader.CheckOrigin = sfui.originAcceptable
-	wp.ServeHTTP(w, r)
+	proxy, perr := NewHttpToUnixProxy(sfui.getGUISocketPath(client.ClientId))
+	if perr != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(perr.Error()))
+		return
+	}
+	proxy.ServeHTTP(w, r)
 }
 
 type setupDesktop struct {

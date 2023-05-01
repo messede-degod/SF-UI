@@ -63,17 +63,9 @@ func (sfui *SfUI) handleSetupFileBrowser(w http.ResponseWriter, r *http.Request)
 				return
 			}
 
-			if client.FileBrowserServiceIsActivate() {
-				w.WriteHeader(http.StatusCreated)
-				w.Write([]byte(`{"status":"filebrowser service is already active for client"}`))
-				return
-			}
-
 			// TODO : Check for short writes
 			client.MasterSSHConnectionPty.WriteString("startfb")
 			client.MasterSSHConnectionPty.Sync()
-
-			client.ActivateFileBrowserService()
 
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(`{"status":"OK"}`))

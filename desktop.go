@@ -78,12 +78,6 @@ func (sfui *SfUI) handleSetupDesktop(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			if client.DesktopServiceIsActivate() { // Desktop Service is active but not a connection
-				w.WriteHeader(http.StatusNotAcceptable)
-				w.Write([]byte(`{"status":"desktop service is already active for client"}`))
-				return
-			}
-
 			startCmd := ""
 			switch setupDesktopReq.DesktopType {
 			case "novnc":
@@ -95,8 +89,6 @@ func (sfui *SfUI) handleSetupDesktop(w http.ResponseWriter, r *http.Request) {
 			// Check for short writes
 			client.MasterSSHConnectionPty.WriteString(startCmd)
 			client.MasterSSHConnectionPty.Sync()
-
-			client.ActivateDesktopService()
 
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(`{"status":"OK"}`))

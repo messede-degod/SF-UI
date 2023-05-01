@@ -41,16 +41,19 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 		MaxTerms:                  sfui.MaxWsTerminals,
 	}
 
-	// Make a inital entry in the clients DB, this is to prevent a race condition
-	// where multiple SSH connection would be created when a master SSH connection
-	// is still being established.
 	if !AcceptClients {
 		return client, errors.New("Not Accepting New Clients !")
 	}
-
+	// Make a inital entry in the clients DB, this is to prevent a race condition
+	// where multiple SSH connection would be created when a master SSH connection
+	// is still being established.
 	cmu.Lock()
 	clients[client.ClientId] = client
 	cmu.Unlock()
+
+	// Prevent use of a unprepared client
+	client.mu.Lock()
+	defer client.mu.Unlock()
 
 	if werr := sfui.workDirAddClient(client.ClientId); werr != nil {
 		return client, werr
@@ -127,6 +130,11 @@ func (sfui *SfUI) GetExistingClientOrMakeNew(ClientSecret string, ClientIp strin
 		if werr != nil {
 			return client, werr
 		}
+
+		// serialize access to client, since it can be updated inbetween by NewClient()
+		client.mu.Lock()
+		defer client.mu.Unlock()
+
 		// master SSH socket is now active, grab a fresh copy of the client
 		client, cerr = sfui.GetClient(ClientSecret)
 	}

@@ -26,6 +26,7 @@ export class TerminalComponent implements AfterViewInit {
   SF_AUTHENTICATE: number = 4
   SF_PING: number = 5
 
+  keepAliveInterval!: NodeJS.Timer 
 
   @Input() TermId: number = 0;
   @Input() AuthToken: string = ""; // To authenticate against ttyd
@@ -100,7 +101,7 @@ export class TerminalComponent implements AfterViewInit {
       };
 
       // Send Pings at regular interval to prevent socket disconnection
-      setInterval(()=>{
+      this.keepAliveInterval = setInterval(()=>{
         this.socket.send(String(this.SF_PING))
       },40*1000) // 40 secs
 
@@ -140,6 +141,7 @@ export class TerminalComponent implements AfterViewInit {
   };
 
   ngOnDestroy() {
+    clearInterval(this.keepAliveInterval)
     this.socket.close()
     this.termEle?.remove()
     this.webglAddon.dispose()

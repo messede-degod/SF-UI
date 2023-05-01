@@ -18,7 +18,7 @@ export class FilesViewComponent {
 
   constructor(private sanitizer: DomSanitizer, private snackBar: MatSnackBar) {
     this.FbIframeURL = sanitizer.bypassSecurityTrustResourceUrl(
-      "/assets/filebrowser_client/#/" + localStorage.getItem("secret")
+      "/assets/filebrowser_client/index.html#/" + localStorage.getItem("secret")
       + ',' + localStorage.getItem("theme")
       + ',' + Config.ApiEndpoint
     );
@@ -45,9 +45,11 @@ export class FilesViewComponent {
     })
       .then((rdata) => {
         if (rdata.status == 200 || rdata.status == 201) {
+          console.log("act 1")
           this.FileBrowserActive = true
           this.FileBrowserDisconnected = false
         } else {
+          console.log("act 2")
           this.FileBrowserDisconnected = true
           this.snackBar.open("Could not start filebrowser!", "OK", {
             duration: 5 * 1000
@@ -55,6 +57,7 @@ export class FilesViewComponent {
         }
       })
       .catch(() => {
+        console.log("act 3")
         this.FileBrowserDisconnected = true
         this.snackBar.open("Could not start filebrowser!", "OK", {
           duration: 5 * 1000

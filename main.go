@@ -127,7 +127,7 @@ func (sfui *SfUI) cleanUp() {
 	releaseRunLock()
 }
 
-var isFbPath = regexp.MustCompile(`(?m)\/filebrowser.*`).MatchString
+var isFbPath = regexp.MustCompile(`(?m)^filebrowser.*`).MatchString
 
 func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 	if sfui.Debug {

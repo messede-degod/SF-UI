@@ -46,30 +46,38 @@ export class DesktopViewComponent {
       "method": "POST",
       "body": JSON.stringify(data)
     })
-    let rdata = await response
+      .then(async (rdata) => {
+        if (rdata.status == 200) {
+          // Desktop Service was started, need to start xpra
+          this.DesktopStarted = false
+          this.XpraClientReady = false
+          // Wait for Xpra to start on remote instance
+          await new Promise(f => setTimeout(f, 5000));
+          this.DesktopStarted = true
+        } else if (rdata.status == 406) {
+          // no active connection reload xpra
+          this.DesktopStarted = false
+          this.XpraClientReady = false
+          // Trigger reload of xpra
+          await new Promise(f => setTimeout(f, 1000));
+          this.DesktopStarted = true
 
-    if (rdata.status == 200) {
-      // Desktop Service was started, need to start xpra
-      this.DesktopStarted = false
-      this.XpraClientReady = false
-      // Wait for Xpra to start on remote instance
-      await new Promise(f => setTimeout(f, 5000));
-      this.DesktopStarted = true
-    } else if (rdata.status == 406) {
-      // no active connection reload xpra
-      this.DesktopStarted = false
-      this.XpraClientReady = false
-      // Trigger reload of xpra
-      await new Promise(f => setTimeout(f, 1000));
-      this.DesktopStarted = true
+        } else if (rdata.status == 201) {
+          // connection is active do nothing
+        } else {
+          this.snackBar.open("Could not start desktop!", "OK", {
+            duration: 5 * 1000
+          });
+        }
+      })
+      .catch(()=>{
+        this.DesktopDisconnected = true
+        this.snackBar.open("Could not start desktop!", "OK", {
+          duration: 5 * 1000
+        });
+      })
 
-    } else if (rdata.status == 201) {
-      // connection is active do nothing
-    } else {
-      this.snackBar.open("Could not start desktop!", "OK", {
-        duration: 5 * 1000
-      });
-    }
+
 
   }
 
@@ -79,7 +87,7 @@ export class DesktopViewComponent {
     this.startDesktop()
   }
 
-  XpraStateChange = () =>  {
+  XpraStateChange = () => {
     this.XpraClientReady = true
 
 

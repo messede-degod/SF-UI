@@ -102,10 +102,6 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 func (sfui *SfUI) RemoveClientIfInactive(clientSecret string) {
 	// Obtain a fresh copy of the client
 
-	if sfui.Debug {
-		return
-	}
-
 	client, err := sfui.GetClient(clientSecret)
 	if err == nil {
 		client.mu.Lock()

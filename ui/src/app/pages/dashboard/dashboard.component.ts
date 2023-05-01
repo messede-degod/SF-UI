@@ -35,7 +35,7 @@ export class DashboardComponent {
     if (this.activeMenu == "desktop" && !this.desktopRequested) {
       this.desktopRequested = true
     }
-    if (this.activeMenu == "files" && !this.desktopRequested) {
+    if (this.activeMenu == "files" && !this.filesRequested) {
       this.filesRequested = true
     }
   }

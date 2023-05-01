@@ -179,7 +179,7 @@ body {
     background-color: var(--content-background);
 }
 
-.desktop-view {
+.desktop-view,.files-view {
     height: 100vh;
 }
 
@@ -404,7 +404,7 @@ body {
 }
 
 .reconnect-button:hover{
-    background-color: var(--inactive-bg);
+    background-color: rgb(133, 135, 135);
 }
 
 .reconnect-button>span{

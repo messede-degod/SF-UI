@@ -18,6 +18,7 @@ import { DesktopViewComponent } from '../desktop-view/desktop-view.component';
 import { PortsViewComponent } from '../ports-view/ports-view.component';
 import { WebViewComponent } from '../web-view/web-view.component';
 import { SaveSecretDialogComponent } from '../../components/save-secret-dialog/save-secret-dialog.component';
+import { FilesViewComponent } from '../files-view/files-view.component';
 
 
 @NgModule({
@@ -32,6 +33,7 @@ import { SaveSecretDialogComponent } from '../../components/save-secret-dialog/s
     PortsViewComponent,
     WebViewComponent,
     SaveSecretDialogComponent,
+    FilesViewComponent,
   ],
   imports: [
     CommonModule,

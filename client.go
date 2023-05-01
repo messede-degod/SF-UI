@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"log"
+	"net/http/httputil"
 	"os"
 	"os/exec"
 	"sync"
@@ -18,9 +19,11 @@ type Client struct {
 	MasterSSHConnectionActive bool
 	MasterSSHConnectionCmd    *exec.Cmd
 	MasterSSHConnectionPty    *os.File
-	DesktopActive             bool
+	DesktopActive             bool // Whether a active desktop ws connection exists
 	DesktopServiceActive      bool
 	MaxTerms                  int
+	FileBrowserProxy          *httputil.ReverseProxy
+	FileBrowserServiceActive  bool
 }
 
 var AcceptClients = true
@@ -42,11 +45,11 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 	// Make a inital entry in the clients DB, this is to prevent a race condition
 	// where multiple SSH connection would be created when a master SSH connection
 	// is still being established.
-	cmu.Lock()
 	if !AcceptClients {
-		cmu.Unlock()
 		return client, errors.New("Not Accepting New Clients !")
 	}
+
+	cmu.Lock()
 	clients[client.ClientId] = client
 	cmu.Unlock()
 
@@ -66,6 +69,13 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 	if mwerr != nil {
 		return client, mwerr
 	}
+
+	FileBrowserProxy, perr := NewHttpToUnixProxy(sfui.getFileBrowserSocketPath(client.ClientId))
+	if perr != nil {
+		return client, perr
+	}
+
+	client.FileBrowserProxy = FileBrowserProxy
 
 	cmu.Lock()
 	client.MasterSSHConnectionActive = true
@@ -91,6 +101,11 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 // consider them as inactive and tear down the master SSH connection
 func (sfui *SfUI) RemoveClientIfInactive(clientSecret string) {
 	// Obtain a fresh copy of the client
+
+	if sfui.Debug {
+		return
+	}
+
 	client, err := sfui.GetClient(clientSecret)
 	if err == nil {
 		client.mu.Lock()
@@ -230,6 +245,29 @@ func (client *Client) DesktopServiceIsActivate() bool {
 	// get a fresh copy of client
 	fclient := clients[client.ClientId]
 	return fclient.DesktopServiceActive
+}
+
+func (client *Client) ActivateFileBrowserService() {
+	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+	// first lock then read the fresh copy to prevent a dirty read
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
+	// get a fresh copy of client
+	fclient := clients[client.ClientId]
+	fclient.FileBrowserServiceActive = true
+	clients[client.ClientId] = fclient
+}
+
+func (client *Client) FileBrowserServiceIsActivate() bool {
+	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+	// first lock then read the fresh copy to prevent a dirty read
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
+	// get a fresh copy of client
+	fclient := clients[client.ClientId]
+	return fclient.FileBrowserServiceActive
 }
 
 // Stop New Clients from obtaining service

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"regexp"
 	"syscall"
 )
 
@@ -126,6 +127,8 @@ func (sfui *SfUI) cleanUp() {
 	releaseRunLock()
 }
 
+var isFbPath = regexp.MustCompile(`(?m)\/filebrowser.*`).MatchString
+
 func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 	if sfui.Debug {
 		// log.Println(r.RemoteAddr, " ", r.URL, " ", r.UserAgent())
@@ -148,7 +151,14 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 		if !sfui.DisableDesktop {
 			sfui.handleDesktopWS(w, r)
 		}
+	case "/filebrowser":
+		sfui.handleSetupFileBrowser(w, r)
 	default:
+		// /filebrowser/*
+		if isFbPath(r.URL.Path) {
+			sfui.handleFileBrowser(w, r)
+			return
+		}
 		handleUIRequest(w, r)
 	}
 }

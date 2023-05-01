@@ -17,7 +17,7 @@ export class DashboardComponent {
 
   router!: Router
   desktopRequested: boolean = false
-
+  filesRequested: boolean = false
 
   constructor(router: Router) {
     this.router = router
@@ -25,14 +25,18 @@ export class DashboardComponent {
     if (!Config.DesktopDisabled) {
       this.menuItems.push({ ilink: '../assets/icons/desk.svg', name: "desktop" })
     }
-    this.menuItems.push({ ilink: '../assets/icons/ports.svg', name: "ports" })
-    this.menuItems.push({ ilink: '../assets/icons/web.svg', name: "web" })
+    this.menuItems.push({ ilink: '../assets/icons/files.svg', name: "files" })
+    // this.menuItems.push({ ilink: '../assets/icons/ports.svg', name: "ports" })
+    // this.menuItems.push({ ilink: '../assets/icons/web.svg', name: "web" })
   }
 
   setActiveMenu(name: string) {
     this.activeMenu = name
     if (this.activeMenu == "desktop" && !this.desktopRequested) {
       this.desktopRequested = true
+    }
+    if (this.activeMenu == "files" && !this.desktopRequested) {
+      this.filesRequested = true
     }
   }
 }

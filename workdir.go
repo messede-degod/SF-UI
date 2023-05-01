@@ -51,7 +51,7 @@ func (sfui *SfUI) workDirRemoveClient(clientId string) error {
 func (sfui *SfUI) prepareMasterSSHSocket(clientId string, clientSecret string, clientIp string) (*exec.Cmd, *os.File, error) {
 	clientDir := sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId
 	masterSSHCommand := sfui.MasterSSHCommand
-	masterSSHCommand = fmt.Sprintf(masterSSHCommand, clientDir, clientDir, clientSecret, clientIp, sfui.SfEndpoint)
+	masterSSHCommand = fmt.Sprintf(masterSSHCommand, clientDir, clientDir, clientDir, clientSecret, clientIp, sfui.SfEndpoint)
 
 	cmd := exec.Command("bash", "-c", masterSSHCommand)
 
@@ -119,4 +119,8 @@ func (sfui *SfUI) getSlaveSSHTerminalCommand(clientId string, clientSecret strin
 
 func (sfui *SfUI) getGUISocketPath(clientId string) string {
 	return sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId + "/gui.sock"
+}
+
+func (sfui *SfUI) getFileBrowserSocketPath(clientId string) string {
+	return sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId + "/fb.sock"
 }

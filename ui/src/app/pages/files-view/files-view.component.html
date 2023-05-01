@@ -1,0 +1,15 @@
+<div class="flex-col">
+    <div class="page-info-text loading-xpra-indicator" [ngStyle]="{'z-index': FileBrowserActive ? '-99': '0'}">
+        <span *ngIf="!FileBrowserActive && !FileBrowserDisconnected">
+            Starting FileBrowser...
+        </span>
+        <div *ngIf="FileBrowserDisconnected" class="flex-col disconnected-msg">
+            <span>Disconnected!</span>
+            <div class="reconnect-button" (click)="startFileBrowser()">
+                <span>Reconnect</span>
+            </div>
+        </div>
+    </div>
+    <iframe *ngIf="ShowFrame && FileBrowserActive" class="files-view" [src]="FbIframeURL" frameborder="0">
+    </iframe>
+</div>

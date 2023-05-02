@@ -31,7 +31,10 @@ ui/yarn-error.log
 .history/*
 
 # Miscellaneous
+filebrowser-ui/node_modules
+filebrowser-ui/dist
 ui/.angular/cache
+ui/src/assets/filebrowser_client
 .sass-cache/
 /connect.lock
 /coverage

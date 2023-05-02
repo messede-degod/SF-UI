@@ -3,9 +3,9 @@ Deploying  UI files (html,css,js etc) with nginx is recommended for production d
 
 
 ## Copy UI files
-- Run `make UI` if you have not already.
+- Run `make filebrowser` and then `make UI` if you have not already.
 - Copy the UI files to web root, `cp - r ui/dist/sf-ui/*  /var/www/html/`
-- Adjust your nginx configurations  web root config  if necessary.
+- Adjust your nginx configurations web root if necessary.
 
 ## Enable websocket proxypass
   - Edit `/etc/nginx.conf`
@@ -40,7 +40,7 @@ Deploying  UI files (html,css,js etc) with nginx is recommended for production d
                 proxy_pass http://127.0.0.1:7171;
         }
 ```
-- Adjust the listening ip and port to match  SF-UIs listening address.
+- Adjust the listening ip and port to match  SF-UIs listening address (default is 127.0.0.1:7171).
 - Run `sudo nginx -s reload` to reload nginx and apply the settings.
 
 

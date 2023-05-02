@@ -4,7 +4,7 @@
 
 A UI frontend for the services provided by [segfault]("https://thc.org/segfault").
 
-  
+![segfault](https://user-images.githubusercontent.com/59089310/235642385-f9a6896a-f7ae-4306-ae70-675fe8ea48f0.gif)
 
 ## Install Dependencies
 

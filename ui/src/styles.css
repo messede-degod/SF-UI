@@ -1,78 +1,4 @@
 /* You can add global styles to this file, and also import other style files */
-* {
-    margin: 0;
-    padding: 0;
-}
-
-html,
-body {
-    height: 100%;
-}
-
-body {
-    font-family: Roboto, "Helvetica Neue", sans-serif;
-}
-
-@font-face {
-    font-family: 'Material Icons';
-    font-style: normal;
-    font-weight: 400;
-    src: url('assets/fonts/material-icons.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 300;
-    font-display: swap;
-    src: url('assets/fonts/roboto-300.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('assets/fonts/roboto-400.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 500;
-    font-display: swap;
-    src: url('assets/fonts/roboto-500.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'Source Sans Pro';
-    font-style: italic;
-    font-weight: 400;
-    font-display: swap;
-    src: url('assets/fonts/source-sans-pro-i-400.ttf') format('truetype');
-}
-
-@font-face {
-    font-family: 'PT Sans';
-    font-style: italic;
-    font-weight: 700;
-    font-display: swap;
-    src: url('assets/fonts/pt-sans-700.ttf') format('truetype');
-}
-
-.material-icons {
-    font-family: 'Material Icons';
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    line-height: 1;
-    letter-spacing: normal;
-    text-transform: none;
-    display: inline-block;
-    white-space: nowrap;
-    word-wrap: normal;
-    direction: ltr;
-}
 
 .flex-row {
     display: flex;
@@ -99,7 +25,7 @@ body {
     --input-text-color: black;
     --control-bar-height: 2.5rem;
     --start-new-btn-text: white;
-    --enter-secret-btn-text: white;
+    --enter-secret-btn-text: black;
 }
 
 
@@ -118,7 +44,7 @@ body {
     --input-text-color: white;
     --control-bar-height: 2.5rem;
     --start-new-btn-text: black;
-    --enter-secret-btn-text: white;
+    --enter-secret-btn-text: black;
 }
 
 .hidden {
@@ -200,7 +126,16 @@ body {
     align-items: center;
     margin-bottom: 1rem;
     margin-top: 3rem;
-    animation: fadeIn 0.5s;
+}
+
+.menu-brand>h6 {
+    font-size: 5rem;
+    font-family: 'PT Sans', sans-serif;
+    color: var(--brand-red);
+}
+
+.menu-brand>h6::first-letter {
+    color: var(--brand-black);
 }
 
 .menu-brand-small {
@@ -220,7 +155,6 @@ body {
 
 .menu-brand-small>h6 {
     font-size: 2rem !important;
-    /* margin-top: 1.2vh !important; */
     margin-bottom: 0 !important;
 }
 
@@ -229,18 +163,9 @@ body {
 }
 
 
-.menu-brand>h6 {
-    font-size: 5rem;
-    font-family: 'PT Sans', sans-serif;
-    color: var(--brand-red);
-}
-
-.menu-brand>h6::first-letter {
-    color: var(--brand-black);
-}
-
 .menu-brand>span {
-    font-family: 'Source Sans Pro', sans-serif;
+    font-family: sans-serif;
+    font-style: italic;
     font-size: 0.8rem;
     margin-top: 1.2rem;
 }
@@ -383,7 +308,7 @@ body {
 .loading-xpra-indicator {
     position: absolute;
     height: 100vh;
-    width: calc( 100vw - 7rem );
+    width: calc(100vw - 7rem);
 }
 
 .disconnected-msg {
@@ -391,7 +316,7 @@ body {
     line-height: 1.2;
 }
 
-.disconnected-msg>i{
+.disconnected-msg>i {
     font-size: 1.3rem !important;
     line-height: 2;
 }
@@ -437,18 +362,18 @@ body {
 
 .login-info {
     margin-top: 1.2rem;
-    font-family: 'Source Sans Pro', sans-serif;
+    font-family: sans-serif;
+    font-style: italic;
     font-size: 1.2rem;
     text-align: center;
 }
 
 .input-secret {
     display: flex;
-    margin-top: 2rem;
+    margin-top: 0.8rem;
     justify-content: center;
     align-items: center;
     flex-direction: row;
-    /* height: 2.8rem; */
     padding: 0.2rem;
     padding-left: 0.8rem;
     padding-right: 0.6rem;
@@ -458,7 +383,7 @@ body {
 
 .login-btn-container {
     display: flex;
-    margin-top: 2.5rem;
+    margin-top: 0.8rem;
     justify-content: space-evenly;
     align-items: center;
     flex-direction: row;
@@ -533,7 +458,7 @@ body {
         width: 10rem;
     }
 
-    .terminal-control{
+    .terminal-control {
         margin-left: 0.5rem;
     }
 }

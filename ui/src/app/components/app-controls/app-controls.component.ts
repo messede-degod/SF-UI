@@ -1,4 +1,4 @@
-import { Component, Injectable } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { DashboardComponent } from 'src/app/pages/dashboard/dashboard.component';
 import { TerminalViewComponent } from 'src/app/pages/terminal-view/terminal-view.component'

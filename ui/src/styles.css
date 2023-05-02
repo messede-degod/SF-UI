@@ -382,13 +382,18 @@ body {
 
 .loading-xpra-indicator {
     position: absolute;
-    left: 45vw;
-    right: auto;
-    top: 45vh;
+    height: 100vh;
+    width: calc( 100vw - 7rem );
 }
 
 .disconnected-msg {
     align-items: center;
+    line-height: 1.2;
+}
+
+.disconnected-msg>i{
+    font-size: 1.3rem !important;
+    line-height: 2;
 }
 
 .reconnect-button {

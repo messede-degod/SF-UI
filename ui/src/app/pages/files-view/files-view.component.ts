@@ -9,19 +9,20 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./files-view.component.css']
 })
 export class FilesViewComponent {
-  FbIframeURL: SafeUrl
+  FbIframeURL!: SafeUrl
   @Input() ShowFrame: boolean = false
+  @Input() InView: boolean = false
   FileBrowserActive: boolean = false
   FileBrowserDisconnected: boolean = false
+  FileBrowserNeedsTerminal: boolean = false
   FirstStart: boolean = true
+  CurrentTheme: string | null = ""
+  DOMsanitizer!: DomSanitizer
 
 
   constructor(private sanitizer: DomSanitizer, private snackBar: MatSnackBar) {
-    this.FbIframeURL = sanitizer.bypassSecurityTrustResourceUrl(
-      "/assets/filebrowser_client/index.html#/" + localStorage.getItem("secret")
-      + ',' + localStorage.getItem("theme")
-      + ',' + Config.ApiEndpoint
-    );
+    this.DOMsanitizer = sanitizer
+    this.setFrameUrl()
   }
 
   ngOnChanges() {
@@ -29,6 +30,25 @@ export class FilesViewComponent {
       this.startFileBrowser()
       this.FirstStart = false
     }
+    // Update Filebrowser if theme has changed
+    if (this.InView) {
+      if (this.CurrentTheme != localStorage.getItem("theme")) {
+        this.setFrameUrl()
+      }
+    }
+  }
+
+  async setFrameUrl() {
+    let indexFile = "index.html"
+    this.CurrentTheme = localStorage.getItem("theme")
+    if (this.CurrentTheme == "dark") {
+      indexFile = "index-dark.html"
+    }
+
+    this.FbIframeURL = this.DOMsanitizer.bypassSecurityTrustResourceUrl(
+      "/assets/filebrowser_client/" + indexFile + "#/" + localStorage.getItem("secret")
+      + ',' + Config.ApiEndpoint
+    );
   }
 
   async startFileBrowser() {
@@ -39,17 +59,21 @@ export class FilesViewComponent {
       client_secret: clientSecret
     }
 
-    let response = fetch(Config.ApiEndpoint + "/filebrowser", {
+    fetch(Config.ApiEndpoint + "/filebrowser", {
       "method": "POST",
       "body": JSON.stringify(data)
     })
       .then((rdata) => {
-        if (rdata.status == 200 || rdata.status == 201) {
-          console.log("act 1")
+        if (rdata.status == 200) {
           this.FileBrowserActive = true
           this.FileBrowserDisconnected = false
-        } else {
-          console.log("act 2")
+        }
+        else if (rdata.status == 451) {
+          this.FileBrowserActive = false
+          this.FileBrowserDisconnected = false
+          this.FileBrowserNeedsTerminal = true
+        }
+        else {
           this.FileBrowserDisconnected = true
           this.snackBar.open("Could not start filebrowser!", "OK", {
             duration: 5 * 1000
@@ -57,7 +81,6 @@ export class FilesViewComponent {
         }
       })
       .catch(() => {
-        console.log("act 3")
         this.FileBrowserDisconnected = true
         this.snackBar.open("Could not start filebrowser!", "OK", {
           duration: 5 * 1000

@@ -1,10 +1,17 @@
 <div class="flex-col">
     <div class="page-info-text loading-xpra-indicator" [ngStyle]="{'z-index': FileBrowserActive ? '-99': '0'}">
-        <span *ngIf="!FileBrowserActive && !FileBrowserDisconnected">
+        <span *ngIf="!FileBrowserActive && !FileBrowserDisconnected && !FileBrowserNeedsTerminal">
             Starting FileBrowser...
         </span>
         <div *ngIf="FileBrowserDisconnected" class="flex-col disconnected-msg">
             <span>Disconnected!</span>
+            <div class="reconnect-button" (click)="startFileBrowser()">
+                <span>Reconnect</span>
+            </div>
+        </div>
+        <div *ngIf="FileBrowserNeedsTerminal" class="flex-col disconnected-msg">
+            <span>Disconnected!</span>
+            <i>Please Start A Terminal Before Using Filebrowser</i>
             <div class="reconnect-button" (click)="startFileBrowser()">
                 <span>Reconnect</span>
             </div>

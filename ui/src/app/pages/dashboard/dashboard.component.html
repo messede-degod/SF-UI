@@ -30,6 +30,6 @@
       <desktop-view [ShowFrame]="desktopRequested" [ngClass]="{'hidden': activeMenu!='desktop'}"></desktop-view>
       <!-- <ports-view [ngClass]="{'hidden': activeMenu!='ports'}"></ports-view> -->
       <!-- <web-view [ngClass]="{'hidden': activeMenu!='web'}"></web-view> -->
-      <files-view [ShowFrame]="filesRequested" [ngClass]="{'hidden': activeMenu!='files'}"></files-view>
+      <files-view [ShowFrame]="filesRequested" [InView]="activeMenu=='files'" [ngClass]="{'hidden': activeMenu!='files'}"></files-view>
     </section>
   </div>

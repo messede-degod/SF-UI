@@ -21,8 +21,7 @@ func (sfui *SfUI) handleFileBrowser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if validSecret(clientSecret) {
-		client, err := sfui.GetExistingClientOrMakeNew(clientSecret,
-			strings.Split(r.RemoteAddr, ":")[0])
+		client, err := sfui.GetClient(clientSecret)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, err.Error())))
@@ -56,15 +55,31 @@ func (sfui *SfUI) handleSetupFileBrowser(w http.ResponseWriter, r *http.Request)
 
 			// Get the  associated client or create a new one
 			// client variable below will get stale
-			client, cerr := sfui.GetExistingClientOrMakeNew(setupFileBrowserReq.ClientSecret,
-				strings.Split(r.RemoteAddr, ":")[0])
+			client, cerr := sfui.GetClient(setupFileBrowserReq.ClientSecret)
 			if cerr != nil {
-				w.Write([]byte(cerr.Error()))
+				w.WriteHeader(http.StatusUnavailableForLegalReasons)
+				w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, cerr.Error())))
 				return
 			}
 
+			if !client.MasterSSHConnectionActive {
+				werr := sfui.waitForMasterSSHSocket(client.ClientId, 5, 2)
+				if werr != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, werr.Error())))
+					return
+				}
+
+				// serialize access to client, since it can be updated inbetween by NewClient()
+				client.mu.Lock()
+				defer client.mu.Unlock()
+
+				// master SSH socket is now active, grab a fresh copy of the client
+				client, cerr = sfui.GetClient(setupFileBrowserReq.ClientSecret)
+			}
+
 			// TODO : Check for short writes
-			client.MasterSSHConnectionPty.WriteString("startfb")
+			client.MasterSSHConnectionPty.WriteString(sfui.StartFileBrowserCommand)
 			client.MasterSSHConnectionPty.Sync()
 
 			w.WriteHeader(http.StatusOK)

@@ -13,3 +13,4 @@ teardown_master_ssh_command: "sshpass -p segfault ssh -S %s/ssh.sock -O exit roo
 slave_ssh_command: 'sshpass -p segfault ssh -S %s/ssh.sock -o "SetEnv SECRET=%s REMOTE_ADDR=%s" root@%s'
 start_xpra_command: "bash -c 'ss -ltnp | grep \"2000\"; if [[ $? -ne 0  ]]; then /sf/bin/startxweb ; fi' & \n"
 start_novnc_command: "bash -c 'ss -ltnp | grep \"2000\"; if [[ $? -ne 0  ]]; then /sf/bin/startnovnc ; fi' & \n"
+start_filebrowser_command: "bash -c 'ss -ltnp | grep \"2900\"; if [[ $? -ne 0  ]]; then /sf/bin/startfb ; fi' & \n"

@@ -43,6 +43,7 @@ func getDefaultConfig() SfUI {
 		WorkDirectory:            "/dev/shm/",
 		StartXpraCommand:         "bash -c 'ss -ltnp | grep \"2000\"; if [[ $? -ne 0  ]]; then /sf/bin/startxweb ; fi' & \n",
 		StartNoVNCCommand:        "bash -c 'ss -ltnp | grep \"2000\"; if [[ $? -ne 0  ]]; then /sf/bin/startnovnc ; fi' & \n",
+		StartFileBrowserCommand:  "bash -c 'ss -ltnp | grep \"2900\"; if [[ $? -ne 0  ]]; then /sf/bin/startfb ; fi' & \n",
 	}
 }
 

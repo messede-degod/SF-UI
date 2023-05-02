@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"log"
 	"net/http/httputil"
 	"os"
 	"os/exec"
@@ -44,6 +43,11 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 	if !AcceptClients {
 		return client, errors.New("Not Accepting New Clients !")
 	}
+
+	// Prevent use of a unprepared client
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
 	// Make a inital entry in the clients DB, this is to prevent a race condition
 	// where multiple SSH connection would be created when a master SSH connection
 	// is still being established.
@@ -51,16 +55,14 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 	clients[client.ClientId] = client
 	cmu.Unlock()
 
-	// Prevent use of a unprepared client
-	client.mu.Lock()
-	defer client.mu.Unlock()
-
 	if werr := sfui.workDirAddClient(client.ClientId); werr != nil {
+		sfui.RemoveClient(&client)
 		return client, werr
 	}
 
 	mCmd, mPty, mPtyErr := sfui.prepareMasterSSHSocket(client.ClientId, ClientSecret, ClientIp)
 	if mPtyErr != nil {
+		sfui.RemoveClient(&client)
 		return client, mPtyErr
 	}
 	client.MasterSSHConnectionPty = mPty
@@ -69,11 +71,13 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 	// Wait untill the master SSH socket becomes available
 	mwerr := sfui.waitForMasterSSHSocket(client.ClientId, time.Second*10, 2)
 	if mwerr != nil {
+		sfui.RemoveClient(&client)
 		return client, mwerr
 	}
 
 	FileBrowserProxy, perr := NewHttpToUnixProxy(sfui.getFileBrowserSocketPath(client.ClientId))
 	if perr != nil {
+		sfui.RemoveClient(&client)
 		return client, perr
 	}
 
@@ -92,10 +96,7 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 	defer cmu.Unlock()
 
 	sfui.destroyMasterSSHSocket(client)
-	wrerr := sfui.workDirRemoveClient(client.ClientId)
-	if wrerr != nil {
-		log.Println(wrerr)
-	}
+	sfui.workDirRemoveClient(client.ClientId)
 	delete(clients, client.ClientId)
 }
 
@@ -103,11 +104,6 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 // consider them as inactive and tear down the master SSH connection
 func (sfui *SfUI) RemoveClientIfInactive(clientSecret string) {
 	// Obtain a fresh copy of the client
-
-	if sfui.Debug {
-		return
-	}
-
 	client, err := sfui.GetClient(clientSecret)
 	if err == nil {
 		client.mu.Lock()

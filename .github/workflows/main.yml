@@ -24,11 +24,8 @@ jobs:
       - name: Install npm modules
         run: cd ui && npm install
         
-      - name: Make UI
-        run: make UI
-        
-      - name: Make Binary
-        run: make prod
+      - name: Make All
+        run: make all
         
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v3

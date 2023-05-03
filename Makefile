@@ -8,7 +8,7 @@ DATE=$(shell date -u)
 .PHONY:	all
 all: | filebrowser UI prod
 
-make: main.go
+dev: main.go
 	@go build -o $(BIN_DIR)/$(BIN_NAME) -ldflags '-X "main.buildTime=$(DATE)"'
 
 .PHONY: prod

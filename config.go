@@ -52,9 +52,9 @@ func getcompiledClientConfig(sfui SfUI) []byte {
 	// Store it byte format, to prevent json marshalling on every request
 	// See handleUIConfig()
 	compConfig := []byte(fmt.Sprintf(
-		`{"max_terminals":"%d","auto_login":false,"desktop_disabled":%s}`,
+		`{"max_terminals":"%d","sf_endpoint":"%s","desktop_disabled":%s}`,
 		sfui.MaxWsTerminals,
-		// strconv.FormatBool(!sfui.AddSfUIArgs),   // Redirect client directly to dashboard if not in global mode.
+		sfui.SfEndpoint,
 		strconv.FormatBool(sfui.DisableDesktop), // Hide the GUI Option in UI
 	))
 	return compConfig

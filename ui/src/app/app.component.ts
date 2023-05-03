@@ -27,6 +27,7 @@ export class AppComponent {
         this.router.navigate(['/dashboard'])
       }
       Config.DesktopDisabled = config.desktop_disabled
+      Config.SfEndpoint = config.sf_endpoint
     } else {
       this.snackBar.open("Failed to fetch config from server !", "OK", {
         duration: 2 * 1000

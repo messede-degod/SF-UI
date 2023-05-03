@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Config } from 'src/app/config/config';
 
 @Component({
   selector: 'app-help-dialog',
@@ -6,5 +7,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./help-dialog.component.css']
 })
 export class HelpDialogComponent {
-
+  SfEndpoint: string = Config.SfEndpoint
 }

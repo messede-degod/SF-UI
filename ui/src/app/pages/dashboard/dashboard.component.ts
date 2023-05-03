@@ -32,9 +32,6 @@ export class DashboardComponent {
 
   setActiveMenu(name: string) {
     this.activeMenu = name
-    if (this.activeMenu == "desktop" && !this.desktopRequested) {
-      this.desktopRequested = true
-    }
     if (this.activeMenu == "files" && !this.filesRequested) {
       this.filesRequested = true
     }

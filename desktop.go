@@ -59,6 +59,7 @@ func (sfui *SfUI) handleSetupDesktop(w http.ResponseWriter, r *http.Request) {
 		setupDesktopReq := setupDesktop{}
 		if json.Unmarshal(data, &setupDesktopReq) == nil {
 			if !validSecret(setupDesktopReq.ClientSecret) {
+				w.WriteHeader(http.StatusNotAcceptable)
 				w.Write([]byte(`unacceptable secret`))
 				return
 			}
@@ -68,6 +69,7 @@ func (sfui *SfUI) handleSetupDesktop(w http.ResponseWriter, r *http.Request) {
 			client, cerr := sfui.GetExistingClientOrMakeNew(setupDesktopReq.ClientSecret,
 				strings.Split(r.RemoteAddr, ":")[0])
 			if cerr != nil {
+				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(cerr.Error()))
 				return
 			}

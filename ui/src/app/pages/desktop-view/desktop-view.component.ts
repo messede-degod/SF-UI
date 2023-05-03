@@ -10,14 +10,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class DesktopViewComponent {
   IframeURL: SafeUrl
-  @Input() ShowFrame: boolean = false
+  DesktopRequested: boolean = false
   DesktopStarted: boolean = false
   DesktopDisconnected: boolean = false
   XpraClientReady: boolean = false
   LastPage: string = ""
   DesktopConnected: boolean = false
-  FirstStart: boolean = true
-
 
   constructor(private sanitizer: DomSanitizer, private snackBar: MatSnackBar) {
     let secret = localStorage.getItem("secret");
@@ -25,13 +23,6 @@ export class DesktopViewComponent {
 
     this.IframeURL = sanitizer.bypassSecurityTrustResourceUrl("/assets/xpra_client/html5/index.html?server=" + Config.ApiHost
       + "&port=" + Config.ApiPort + "&path=" + wsPath + "&password=abc");
-  }
-
-  ngOnChanges() {
-    if (this.ShowFrame && this.FirstStart) {
-      this.startDesktop()
-      this.FirstStart = false
-    }
   }
 
   async startDesktop() {
@@ -65,20 +56,23 @@ export class DesktopViewComponent {
         } else if (rdata.status == 201) {
           // connection is active do nothing
         } else {
+          this.DesktopDisconnected = true
           this.snackBar.open("Could not start desktop!", "OK", {
             duration: 5 * 1000
           });
         }
       })
-      .catch(()=>{
+      .catch(() => {
         this.DesktopDisconnected = true
         this.snackBar.open("Could not start desktop!", "OK", {
           duration: 5 * 1000
         });
       })
+  }
 
-
-
+  requestDesktop(){
+    this.DesktopRequested = true
+    this.reconnectToDesktop()
   }
 
   reconnectToDesktop() {
@@ -89,7 +83,6 @@ export class DesktopViewComponent {
 
   XpraStateChange = () => {
     this.XpraClientReady = true
-
 
     let iw = document.getElementById("DesktopFrame") as HTMLIFrameElement
 

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter,Output } from '@angular/core';
 
 @Component({
   selector: 'terminal-view',
@@ -11,9 +11,14 @@ export class TerminalViewComponent {
   terminalWindows: Array<any> = [
     { id: 1, name: "" }, // Default tab that is open on first launch
   ]
+  noOfTerminals: Number = 1;
+  @Output() noOfTerminalsChange = new EventEmitter<Number>();
 
   setActiveTerminal(termId: number){
     this.activeTerminalId = termId
   }
 
+  setNoOfTerminals(termNos: Number){
+    this.noOfTerminalsChange.emit(termNos)
+  }
 }

@@ -18,6 +18,7 @@ export class DashboardComponent {
   router!: Router
   desktopRequested: boolean = false
   filesRequested: boolean = false
+  noOfTerminals: Number = 1
 
   constructor(router: Router) {
     this.router = router
@@ -35,5 +36,9 @@ export class DashboardComponent {
     if (this.activeMenu == "files" && !this.filesRequested) {
       this.filesRequested = true
     }
+  }
+
+  setNoOfTerminals(termNos: Number){
+    this.noOfTerminals = termNos
   }
 }

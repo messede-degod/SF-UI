@@ -18,7 +18,7 @@ export class FilesViewComponent {
   FirstStart: boolean = true
   CurrentTheme: string | null = ""
   DOMsanitizer!: DomSanitizer
-
+  @Input() noOfTerminals: Number = 0
 
   constructor(private sanitizer: DomSanitizer, private snackBar: MatSnackBar) {
     this.DOMsanitizer = sanitizer
@@ -26,6 +26,11 @@ export class FilesViewComponent {
   }
 
   ngOnChanges() {
+    if (this.noOfTerminals==0){
+      this.FileBrowserNeedsTerminal = true
+    }else{
+      this.FileBrowserNeedsTerminal = false
+    }
     if (this.ShowFrame && this.FirstStart) {
       this.startFileBrowser()
       this.FirstStart = false

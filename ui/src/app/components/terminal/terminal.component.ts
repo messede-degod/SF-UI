@@ -82,8 +82,12 @@ export class TerminalComponent implements AfterViewInit {
       const attachAddon = new AttachAddonComponent(this.socket, { bidirectional: true });
       this.terminal.loadAddon(attachAddon);
 
+      this.terminal.writeln("Connecting to SFUI Socket...")
+
       //Authenticate using Secret
       this.socket.onopen = () => {
+        this.terminal.clear()
+        
         const termSecret = {
           secret: localStorage.getItem('secret')
         }

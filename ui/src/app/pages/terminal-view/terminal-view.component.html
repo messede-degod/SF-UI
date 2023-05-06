@@ -5,7 +5,7 @@
     </div>
     <div class="controls-view flex-row">
         <terminal-controls [activeTerminalId]="activeTerminalId" (activeTerminalIdChange)="setActiveTerminal($event)"
-            [(terminalWindows)]="terminalWindows">
+            [(terminalWindows)]="terminalWindows" (noOfTerminalsChange)="setNoOfTerminals($event)">
         </terminal-controls>
         <app-controls></app-controls>
     </div>

@@ -41,9 +41,9 @@ func getDefaultConfig() SfUI {
 		UseXForwardedForHeader:   false,
 		DisableDesktop:           false,
 		WorkDirectory:            "/dev/shm/",
-		StartXpraCommand:         "bash -c 'ss -ltnp | grep 2000; if [[ $? -ne 0  ]]; then /sf/bin/startxweb ; fi' & \n",
-		StartNoVNCCommand:        "bash -c 'ss -ltnp | grep 2000; if [[ $? -ne 0  ]]; then /sf/bin/startnovnc ; fi' & \n",
-		StartFileBrowserCommand:  "bash -c 'ss -ltnp | grep 2900; if [[ $? -ne 0  ]]; then /sf/bin/startfb ; fi' & \n",
+		StartXpraCommand:         "bash -c 'ss -ltnp | grep 2000; if [[ $? -ne 0  ]]; then /sf/bin/startxweb && sleep infinity; fi' & \n",
+		StartNoVNCCommand:        "bash -c 'ss -ltnp | grep 2000; if [[ $? -ne 0  ]]; then /sf/bin/startnovnc && sleep infinity; fi' & \n",
+		StartFileBrowserCommand:  "bash -c 'ss -ltnp | grep 2900; if [[ $? -ne 0  ]]; then /sf/bin/startfb && sleep infinity; fi' & \n",
 	}
 }
 

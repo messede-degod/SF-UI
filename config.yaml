@@ -11,6 +11,6 @@ work_directory: /dev/shm
 master_ssh_command: 'sshpass -p segfault ssh -M -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:2000 -L %s/fb.sock:127.0.0.1:2900 -o "SetEnv SECRET=%s REMOTE_ADDR=%s" root@%s -t sh'
 teardown_master_ssh_command: "sshpass -p segfault ssh -S %s/ssh.sock -O exit root@%s"
 slave_ssh_command: 'sshpass -p segfault ssh -S %s/ssh.sock -o "SetEnv SECRET=%s REMOTE_ADDR=%s" root@%s'
-start_xpra_command: "bash -c 'ss -ltnp | grep \"2000\"; if [[ $? -ne 0  ]]; then /sf/bin/startxweb ; fi' & \n"
-start_novnc_command: "bash -c 'ss -ltnp | grep \"2000\"; if [[ $? -ne 0  ]]; then /sf/bin/startnovnc ; fi' & \n"
-start_filebrowser_command: "bash -c 'ss -ltnp | grep \"2900\"; if [[ $? -ne 0  ]]; then /sf/bin/startfb ; fi' & \n"
+start_xpra_command: "bash -c 'ss -ltnp | grep 2000; if [[ $? -ne 0  ]]; then /sf/bin/startxweb ; fi' & \n"
+start_novnc_command: "bash -c 'ss -ltnp | grep 2000; if [[ $? -ne 0  ]]; then /sf/bin/startnovnc ; fi' & \n"
+start_filebrowser_command: "bash -c 'ss -ltnp | grep 2900; if [[ $? -ne 0  ]]; then /sf/bin/startfb ; fi' & \n"

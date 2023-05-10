@@ -78,20 +78,20 @@ Consider increasing `ulimit` if serving large number of clients
 
 This project is inspired by :
 
-- ttydtsl0922/ttyd
+- [ttydtsl0922/ttyd](https://github.com/tsl0922/ttyd/tree/main/html/src)
 
-- yudai/gotty
+- [yudai/gotty](https://github.com/yudai/gotty)
 
-- hackerschoice/segfault
+- [hackerschoice/segfault](https://github.com/hackerschoice/segfault)
 
   
 
 This project uses :
 
-- creack/pty
+- [creack/pty](https://github.com/creack/pty) 
 
-- xtermjs/xterm.js
+- [xtermjs/xterm.js](https://xtermjs.org) 
 
-- Xpra-org/xpra-html5
+- [Xpra-org/xpra-html5](https://github.com/Xpra-org/xpra-html5)
 
-- filebrowser/filebrowser
+- [filebrowser/filebrowser](https://github.com/filebrowser/filebrowser)

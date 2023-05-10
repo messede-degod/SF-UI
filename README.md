@@ -93,3 +93,5 @@ This project uses :
 - xtermjs/xterm.js
 
 - Xpra-org/xpra-html5
+
+- filebrowser/filebrowser

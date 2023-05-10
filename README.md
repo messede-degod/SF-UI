@@ -46,7 +46,7 @@ Run `./bin/sfui -install` to install sfui, visit `http://127.0.0.1:7171` in brow
 
 ```
 
-Websockets SSH-Over-TCP
+             Websockets          SSH-Over-TCP
 
 WebBrowser <------------> SFUI <-------------> Segfault
 
@@ -54,7 +54,7 @@ WebBrowser <------------> SFUI <-------------> Segfault
 
 SFUI starts by accepting a secret and a domain (ex: segfault.net, de.segfault.net .etc) from the user, it then establishes a connection to the given segfault domain using the secret (this is similar to running `ssh -o "SetEnv SECRET=aabbccddefgh" root@segfault.net`), once the SSH connection is established, SFUI attaches the obatined SSH shell to a websocket endpoint (`/ws`),
 
-[xterm.js]("https://xtermjs.org") then allows the web browser to interact with the websocket, hence enabling the user to interact with the shell.
+[xterm.js](https://xtermjs.org) then allows the web browser to interact with the websocket, hence enabling the user to interact with the shell.
 
   
 

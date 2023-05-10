@@ -60,6 +60,9 @@ export class TerminalComponent implements AfterViewInit {
   };
 
   constructor() {
+    if(window.innerWidth<800){
+      this.terminalOptions.fontSize = 14
+    }
     this.terminal = new Terminal(this.terminalOptions);
     this.fitAddon = new FitAddon();
     this.textEncoder = new TextEncoder();

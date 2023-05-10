@@ -461,6 +461,12 @@
     .terminal-control {
         margin-left: 0.5rem;
     }
+
+    .sidebar-control,
+    .terminal-window-add-disabled {
+        display: none !important;
+    }
+
 }
 
 .sub-list {

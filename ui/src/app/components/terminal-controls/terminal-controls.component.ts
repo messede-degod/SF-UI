@@ -15,10 +15,16 @@ export class TerminalControlsComponent {
   closedTermTab: number = -1
   noOfTerminals: Number = 1;
   @Output() noOfTerminalsChange = new EventEmitter<number>();
+  MaxTerms: number = Config.MaxOpenTerminals
+
+  constructor(){
+    if(window.innerWidth<800){
+      this.MaxTerms = 2
+    }
+  }
 
   newTerminal() {
-    if (this.terminalWindows.length == Config.MaxOpenTerminals) {
-      this.MaxTerminalsOpen = true
+    if (this.MaxTerminalsOpen) {
       return
     }
 
@@ -33,6 +39,11 @@ export class TerminalControlsComponent {
     this.terminalWindows.push({ id: newTermId, name: "" })
     this.setTerminalActive(newTermId)
     this.noOfTerminalsChange.emit(this.terminalWindows.length)
+
+    if (this.terminalWindows.length == this.MaxTerms) {
+      this.MaxTerminalsOpen = true
+      return
+    }
   }
 
   async removeTerminal(termId: number) {

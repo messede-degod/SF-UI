@@ -27,6 +27,11 @@ func (sfui *SfUI) handleFileBrowser(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, err.Error())))
 			return
 		}
+		if client.FileBrowserProxy == nil { // Proxy can timeout after certain time
+			w.WriteHeader(http.StatusGatewayTimeout)
+			w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, err.Error())))
+			return
+		}
 
 		r.URL.Path = strings.Replace(r.URL.Path, "/filebrowser", "", 1)
 		client.FileBrowserProxy.ServeHTTP(w, r)

@@ -193,7 +193,6 @@ export class TerminalService {
     private handleTerminalClose() {
         this.activeTerms -= 1
         if (this.activeTerms < 1) {
-            console.log("emitting inactive")
             this.isactive.emit(false)
         }
     }
@@ -201,7 +200,6 @@ export class TerminalService {
     private handleTerminalOpen() {
         this.activeTerms += 1
         if (this.activeTerms > 0) {
-            console.log("emitting active")
             this.isactive.emit(true)
         }
     }

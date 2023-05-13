@@ -15,7 +15,7 @@
             <i>Please Start A Terminal Before Using Filebrowser</i>
         </div>
     </div>
-    <iframe *ngIf="ShowFrame && FileBrowserActive && !FileBrowserNeedsTerminal" class="files-view" [src]="FbIframeURL"
+    <iframe *ngIf="FileBrowserActive && !FileBrowserNeedsTerminal" class="files-view" [src]="FbIframeURL"
         frameborder="0">
     </iframe>
 </div>

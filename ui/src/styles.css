@@ -463,10 +463,10 @@
     }
 
     .sidebar-control,
-    .terminal-window-add-disabled {
+    .terminal-window-add-disabled,
+    .fullscreen-control {
         display: none !important;
     }
-
 }
 
 .sub-list {

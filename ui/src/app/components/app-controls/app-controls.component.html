@@ -7,7 +7,7 @@
       <img *ngIf="curTheme!='dark'" src="../assets/icons/dark-mode.svg" alt="">
       <img *ngIf="curTheme=='dark'" src="../assets/icons/light-mode.svg" alt="">
     </div>
-    <div class="terminal-tab terminal-window-add inactive-bg" (click)="toggleFullscreen()">
+    <div class="terminal-tab terminal-window-add inactive-bg fullscreen-control" (click)="toggleFullscreen()">
       <img *ngIf="!fullScreen" src="../assets/icons/fullscreen.svg" alt="">
       <img *ngIf="fullScreen" src="../assets/icons/close-fullscreen.svg" alt="">
     </div>

@@ -1,26 +1,17 @@
 <div class="flex-col">
-    <div class="page-info-text loading-xpra-indicator" [ngStyle]="{'z-index': XpraClientReady ? '-99': '0'}">
+    <div class="page-info-text loading-xpra-indicator" [ngStyle]="{'z-index': NoVNCClientReady ? '-99': '0'}">
         <div *ngIf="!DesktopRequested" class="flex-col disconnected-msg">
-            <span>XPRA Desktop</span>
+            <span>Desktop</span>
             <div class="reconnect-button" (click)="requestDesktop()">
                 <span>Start</span>
             </div>
         </div>
-        <span *ngIf="!DesktopStarted && !DesktopDisconnected && DesktopRequested">
-            Starting Desktop...
+        <span *ngIf="DesktopRequested && !NoVNCClientReady">
+            Loading NoVNC Client...
         </span>
-        <span *ngIf="DesktopStarted && !DesktopDisconnected && DesktopRequested">
-            Loading Xpra Client...
-        </span>
-        <div *ngIf="DesktopDisconnected && DesktopRequested" class="flex-col disconnected-msg">
-            <span>Disconnected!</span>
-            <div class="reconnect-button" (click)="reconnectToDesktop()">
-                <span>Reconnect</span>
-            </div>
-        </div>
     </div>
-    <iframe id="DesktopFrame" *ngIf="DesktopRequested && DesktopStarted"
-        [ngStyle]="{'z-index': !XpraClientReady ? '-99': '0'}" (load)="XpraStateChange()" (unload)="XpraStateChange()"
+    <iframe id="DesktopFrame" *ngIf="DesktopRequested"
+        [ngStyle]="{'z-index': !NoVNCClientReady ? '-99': '0'}" (load)="stateChange()"
         class="desktop-view" [src]="IframeURL" frameborder="0">
     </iframe>
 </div>

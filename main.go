@@ -23,7 +23,7 @@ type SfUI struct {
 	SlaveSSHCommand          string `yaml:"slave_ssh_command"`           // Command used to start a SSH shell using the master socket
 	GUIBridgeCommand         string `yaml:"gui_bridge_command"`          // Command used to setup a GUI port forward using the master socket
 	StartXpraCommand         string `yaml:"start_xpra_command"`          // Command used to start xpra
-	StartNoVNCCommand        string `yaml:"start_novnc_command"`         // Command used to start noVNC
+	StartVNCCommand          string `yaml:"start_vnc_command"`           // Command used to start VNC
 	StartFileBrowserCommand  string `yaml:"start_filebrowser_command"`   // Command used to start filebrowser
 
 	CompiledClientConfig   []byte // Ui related config that has to be sent to client
@@ -146,9 +146,7 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 	case "/ws":
 		sfui.handleTerminalWs(w, r)
-	case "/desktop":
-		sfui.handleSetupDesktop(w, r)
-	case "/xpraws":
+	case "/desktopws":
 		if !sfui.DisableDesktop {
 			sfui.handleDesktopWS(w, r)
 		}

@@ -10,96 +10,30 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class DesktopViewComponent {
   IframeURL: SafeUrl
+
   DesktopRequested: boolean = false
-  DesktopStarted: boolean = false
-  DesktopDisconnected: boolean = false
-  XpraClientReady: boolean = false
+  NoVNCClientReady: boolean = false
+
   LastPage: string = ""
-  DesktopConnected: boolean = false
 
   constructor(private sanitizer: DomSanitizer, private snackBar: MatSnackBar) {
     let secret = localStorage.getItem("secret");
-    let wsPath = "%2Fxpraws%3Fsecret%3D" + secret
+    let shouldEncrypt = document.location.protocol == 'https:' ? 'true' : 'false'
+    let desktopType = "novnc"
+    let wsPath = "desktopws%3Fsecret%3D" + secret + "%26type%3D" + desktopType
 
-    this.IframeURL = sanitizer.bypassSecurityTrustResourceUrl("/assets/xpra_client/html5/index.html?server=" + Config.ApiHost
-      + "&port=" + Config.ApiPort + "&path=" + wsPath + "&password=abc");
+    // this.IframeURL = sanitizer.bypassSecurityTrustResourceUrl("/assets/xpra_client/html5/index.html?server=" + Config.ApiHost
+    //   + "&port=" + Config.ApiPort + "&path=" + wsPath + "&password=abc");
+    this.IframeURL = sanitizer.bypassSecurityTrustResourceUrl("/assets/novnc_client/vnc.html?path=" + wsPath
+      + "&host=" + Config.ApiHost + "&port=" + Config.ApiPort + "&encrypt=" + shouldEncrypt
+      + "&autoconnect=true&shared=true&reconnect=false&logging=error&resize=scale");
   }
 
-  async startDesktop() {
-    let clientSecret = localStorage.getItem("secret")
-
-    let data = {
-      desktop_type: "xpra",
-      client_secret: clientSecret
-    }
-
-    let response = fetch(Config.ApiEndpoint + "/desktop", {
-      "method": "POST",
-      "body": JSON.stringify(data)
-    })
-      .then(async (rdata) => {
-        if (rdata.status == 200) {
-          // Desktop Service was started, need to start xpra
-          this.DesktopStarted = false
-          this.XpraClientReady = false
-          // Wait for Xpra to start on remote instance
-          await new Promise(f => setTimeout(f, 5000));
-          this.DesktopStarted = true
-        } else if (rdata.status == 406) {
-          // no active connection reload xpra
-          this.DesktopStarted = false
-          this.XpraClientReady = false
-          // Trigger reload of xpra
-          await new Promise(f => setTimeout(f, 1000));
-          this.DesktopStarted = true
-
-        } else if (rdata.status == 201) {
-          // connection is active do nothing
-        } else {
-          this.DesktopDisconnected = true
-          this.snackBar.open("Could not start desktop!", "OK", {
-            duration: 5 * 1000
-          });
-        }
-      })
-      .catch(() => {
-        this.DesktopDisconnected = true
-        this.snackBar.open("Could not start desktop!", "OK", {
-          duration: 5 * 1000
-        });
-      })
-  }
-
-  requestDesktop(){
+  requestDesktop() {
     this.DesktopRequested = true
-    this.reconnectToDesktop()
   }
 
-  reconnectToDesktop() {
-    this.DesktopDisconnected = false
-    this.DesktopStarted = false
-    this.startDesktop()
-  }
-
-  XpraStateChange = () => {
-    this.XpraClientReady = true
-
-    let iw = document.getElementById("DesktopFrame") as HTMLIFrameElement
-
-    if (iw != null) {
-      if (iw.contentWindow != null) {
-        let pn = iw.contentWindow.location.pathname
-        let ps = pn.split("/")
-        let currentPage = ps[ps.length - 1]
-
-        if (this.LastPage == "index.html" && currentPage == "connect.html") {
-          this.DesktopDisconnected = true
-          this.XpraClientReady = false
-        }
-
-
-        this.LastPage = currentPage
-      }
-    }
+  stateChange = () => {
+    this.NoVNCClientReady = true
   }
 }

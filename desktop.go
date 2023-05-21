@@ -1,16 +1,16 @@
 package main
 
 import (
-	"encoding/json"
-	"io"
 	"net/http"
-	"strings"
+	"os"
+	"time"
 )
 
 func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 	//Get Secret
 	queryVals := r.URL.Query()
 	clientSecret := queryVals.Get("secret")
+	desktopType := queryVals.Get("type")
 
 	if !validSecret(clientSecret) {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -37,66 +37,23 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 	client.ActivateDesktop()
 	defer client.DeActivateDesktop()
 
-	proxy, perr := NewHttpToUnixProxy(sfui.getGUISocketPath(client.ClientId))
-	if perr != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(perr.Error()))
-		return
-	}
-	proxy.ServeHTTP(w, r)
+	sfui.startDesktopService(client.MasterSSHConnectionPty, desktopType, time.Second*3)
+
+	websockify(sfui.getGUISocketPath(client.ClientId),
+		[]byte("RFB")).ServeHTTP(w, r)
 }
 
-type setupDesktop struct {
-	DesktopType  string `json:"desktop_type"` // xpra,novnc
-	ClientSecret string `json:"client_secret"`
-}
-
-// start the GUI service on the instance(ex: startxweb), use the master connection
-// to issue commands.
-func (sfui *SfUI) handleSetupDesktop(w http.ResponseWriter, r *http.Request) {
-	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
-	if err == nil {
-		setupDesktopReq := setupDesktop{}
-		if json.Unmarshal(data, &setupDesktopReq) == nil {
-			if !validSecret(setupDesktopReq.ClientSecret) {
-				w.WriteHeader(http.StatusNotAcceptable)
-				w.Write([]byte(`unacceptable secret`))
-				return
-			}
-
-			// Get the  associated client or create a new one
-			// client variable below will get stale
-			client, cerr := sfui.GetExistingClientOrMakeNew(setupDesktopReq.ClientSecret,
-				strings.Split(r.RemoteAddr, ":")[0])
-			if cerr != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(cerr.Error()))
-				return
-			}
-
-			if client.DesktopIsActivate() {
-				w.WriteHeader(http.StatusCreated)
-				w.Write([]byte(`{"status":"desktop connection is already active for client"}`))
-				return
-			}
-
-			startCmd := ""
-			switch setupDesktopReq.DesktopType {
-			case "novnc":
-				startCmd = sfui.StartNoVNCCommand
-			default:
-				startCmd = sfui.StartXpraCommand
-			}
-
-			// Check for short writes
-			client.MasterSSHConnectionPty.WriteString(startCmd)
-			client.MasterSSHConnectionPty.Sync()
-
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"status":"OK"}`))
-			return
-		}
+// Issue appropriate desktop start command(Type) using Pty and Wait for a certain duration
+// so that the said command can come alive
+func (sfui *SfUI) startDesktopService(Pty *os.File, Type string, Wait time.Duration) {
+	startCmd := ""
+	switch Type {
+	case "xpra":
+		startCmd = sfui.StartXpraCommand
+	default:
+		startCmd = sfui.StartVNCCommand
 	}
-	w.WriteHeader(http.StatusInternalServerError)
-	w.Write([]byte(`{"status":"Internal Server Error"}`))
+	Pty.WriteString(startCmd)
+	Pty.Sync()
+	time.Sleep(Wait)
 }

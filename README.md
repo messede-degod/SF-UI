@@ -86,7 +86,7 @@ This project is inspired by :
 
 - [hackerschoice/segfault](https://github.com/hackerschoice/segfault)
 
-  
+- [pgaskin/easy-novnc](https://github.com/pgaskin/easy-novnc)
 
 This project uses :
 

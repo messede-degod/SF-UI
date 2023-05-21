@@ -3,6 +3,7 @@ package main
 import (
 	"mime"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
@@ -11,6 +12,8 @@ func (sfui *SfUI) handleUIConfig(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(sfui.CompiledClientConfig)
 }
+
+var noVNCPath = regexp.MustCompile(`\/assets\/novnc_client.*`).MatchString
 
 func handleUIRequest(w http.ResponseWriter, r *http.Request) {
 	pagePrefix := "ui/dist/sf-ui"
@@ -23,10 +26,15 @@ func handleUIRequest(w http.ResponseWriter, r *http.Request) {
 		page = pagePrefix + r.URL.Path
 	}
 
-	// Enable Caching for everything other than index.html
-	if page != pagePrefix+"/index.html" {
+	// Enable Caching for everything other than index.html and novnc files
+	isNoVNCPath := noVNCPath(page)
+	addCacheHeaders := (page != pagePrefix+"/index.html") && !isNoVNCPath
+
+	if addCacheHeaders {
 		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
 		w.Header().Add("Cache-Control", "public max-age=31535996 immutable")
+	} else if isNoVNCPath {
+		w.Header().Add("Cache-Control", "no-cache")
 	}
 
 	// Read the requested file from the FS

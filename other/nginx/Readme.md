@@ -28,7 +28,7 @@ Deploying  UI files (html,css,js etc) with nginx is recommended for production d
                 try_files $uri $uri/ =404;
         }
 
-        location ~ /(ws|xpraws) {
+        location ~ /(ws|desktopws) {
             proxy_pass http://127.0.0.1:7171;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;

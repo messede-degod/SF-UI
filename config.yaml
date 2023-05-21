@@ -1,16 +1,16 @@
 max_ws_terminals: 10
 server_bind_address: 127.0.0.1:7171
 xpra_ws_address: ws://127.0.0.1:65000/
-debug: true
+debug: false
 sf_endpoint: "teso.segfault.net"
 sf_ui_origin: http://127.0.0.1:7171
 disable_origin_check: true
 use_x_forwarded_for_header: false
 disable_desktop: false
 work_directory: /dev/shm
-master_ssh_command: 'sshpass -p segfault ssh -M -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:2000 -L %s/fb.sock:127.0.0.1:2900 -o "SetEnv SECRET=%s REMOTE_ADDR=%s" root@%s -t bash'
+master_ssh_command: 'sshpass -p segfault ssh -M -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:5900 -L %s/fb.sock:127.0.0.1:2900 -o "SetEnv SECRET=%s REMOTE_ADDR=%s" root@%s -t bash'
 teardown_master_ssh_command: "sshpass -p segfault ssh -S %s/ssh.sock -O exit root@%s"
 slave_ssh_command: 'sshpass -p segfault ssh -S %s/ssh.sock -o "SetEnv SECRET=%s REMOTE_ADDR=%s" root@%s'
 start_xpra_command: "[[ $(ss -lnt) == *2000* ]] || /sf/bin/startxweb \n"
-start_novnc_command: "[[ $(ss -lnt) == *2000* ]] || /sf/bin/startnovnc \n"
+start_vnc_command: "[[ $(ss -lnt) == *5900* ]] || /sf/bin/startxvnc \n"
 start_filebrowser_command: "[[ $(ss -lnt) == *2900* ]] || /sf/bin/startfb \n"

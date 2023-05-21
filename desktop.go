@@ -39,8 +39,7 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 
 	sfui.startDesktopService(client.MasterSSHConnectionPty, desktopType, time.Second*3)
 
-	websockify(sfui.getGUISocketPath(client.ClientId),
-		[]byte("RFB")).ServeHTTP(w, r)
+	vncWebSockify(sfui.getGUISocketPath(client.ClientId), false).ServeHTTP(w, r)
 }
 
 // Issue appropriate desktop start command(Type) using Pty and Wait for a certain duration

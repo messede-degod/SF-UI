@@ -54,7 +54,6 @@ export default class Cursor {
             this._target.addEventListener('mouseup', this._eventHandlers.mouseup, options);
         }
 
-        console.log("attach clear")
         this.clear();
     }
 
@@ -78,7 +77,6 @@ export default class Cursor {
 
     change(rgba, hotx, hoty, w, h) {
         if ((w === 0) || (h === 0)) {
-            console.log("change Clearing...")
             this.clear();
             return;
         }

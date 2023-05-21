@@ -85,7 +85,7 @@ class SfTerminal {
             //Authenticate using Secret
             this.socket.onopen = () => {
                 this.terminal.clear()
-
+                this.terminal.writeln("Connecting to instance...")
                 const termSecret = {
                     secret: localStorage.getItem('secret')
                 }

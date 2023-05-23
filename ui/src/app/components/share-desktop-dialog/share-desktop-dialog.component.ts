@@ -16,6 +16,7 @@ export class ShareDesktopDialogComponent {
   viewOnly: boolean = true
   sharelink: string = ""
   enablingShare: boolean = false
+  disablingShare: boolean = false
 
   constructor(private shareDesktopService: ShareDesktopService, private snackBar: MatSnackBar) {
     this.shareDesktopService = shareDesktopService
@@ -48,6 +49,7 @@ export class ShareDesktopDialogComponent {
       }
       this.enablingShare = false
     } else {
+      this.disablingShare = true
       let dresponse = await this.shareDesktopService.disableSharing()
       if (dresponse==0||dresponse==1) {
         this.isActive = false
@@ -57,6 +59,7 @@ export class ShareDesktopDialogComponent {
           duration: 4 * 1000
         });
       }
+      this.disablingShare = false
     }
   }
 }

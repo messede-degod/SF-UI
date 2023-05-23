@@ -23,7 +23,8 @@
                 <p class="flex-col">Your shared desktop link</p>
             </div>
             <code class="share-link">{{sharelink}}</code>
-            <button mat-raised-button color="warn" class="share-btn" (click)="toggleSharing()">Disable</button>
+            <button mat-raised-button *ngIf="!disablingShare" color="warn" class="share-btn" (click)="toggleSharing()">Disable</button>
+            <button mat-raised-button *ngIf="disablingShare" color="warn" class="share-btn" >Disabling...</button>
         </div>
     </div>
     <mat-dialog-actions align="end">

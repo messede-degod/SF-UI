@@ -1,0 +1,18 @@
+.share-btn {
+    margin-top: 1rem;
+}
+
+.share-area {
+    max-height: 15rem;
+    justify-content: space-between;
+}
+
+.share-enable{
+    height: 8rem;
+}
+
+.share-link {
+    max-width: 16rem;
+    overflow-wrap: anywhere;
+    user-select: all;
+}

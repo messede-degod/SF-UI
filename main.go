@@ -150,8 +150,15 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 		if !sfui.DisableDesktop {
 			sfui.handleDesktopWS(w, r)
 		}
+	case "/sharedDesktopWs":
+		if !sfui.DisableDesktop {
+			sfui.handleSharedDesktopWS(w, r)
+		}
 	case "/filebrowser":
 		sfui.handleSetupFileBrowser(w, r)
+	case "/desktop/share":
+		sfui.handleSetupDesktopSharing(w, r)
+		w.Header().Add("Content-Type", "application/json")
 	default:
 		// /filebrowser/*
 		if isFbPath(r.URL.Path) {

@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+type DesktopShare struct {
+	isShared bool
+	viewOnly bool
+}
+
 type Client struct {
 	ClientId                  string
 	mu                        *sync.Mutex
@@ -22,6 +27,10 @@ type Client struct {
 	MaxTerms                  int
 	FileBrowserProxy          *httputil.ReverseProxy
 	FileBrowserServiceActive  bool
+	ShareDesktop              bool
+	SharedDesktopIsViewOnly   bool
+	SharedDesktopSecret       string
+	CloseSharedDesktopConn    chan interface{}
 }
 
 var AcceptClients = true
@@ -103,6 +112,11 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 // If a client has no active terminals or a GUI connection
 // consider them as inactive and tear down the master SSH connection
 func (sfui *SfUI) RemoveClientIfInactive(clientSecret string) {
+
+	if sfui.Debug {
+		return
+	}
+
 	// Obtain a fresh copy of the client
 	client, err := sfui.GetClient(clientSecret)
 	if err == nil {
@@ -143,6 +157,17 @@ func (sfui *SfUI) GetClient(ClientSecret string) (Client, error) {
 	defer cmu.Unlock()
 
 	client, ok := clients[getClientId(ClientSecret)]
+	if ok {
+		return client, nil
+	}
+	return client, errors.New("No such client")
+}
+
+func (sfui *SfUI) GetClientById(ClientId string) (Client, error) {
+	cmu.Lock()
+	defer cmu.Unlock()
+
+	client, ok := clients[ClientId]
 	if ok {
 		return client, nil
 	}
@@ -225,6 +250,37 @@ func (client *Client) DesktopIsActivate() bool {
 	// get a fresh copy of client
 	fclient := clients[client.ClientId]
 	return fclient.DesktopActive
+}
+
+func (client *Client) ActivateDesktopSharing(viewOnly bool, SharedSecret string) {
+	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+	// first lock then read the fresh copy to prevent a dirty read
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
+	// get a fresh copy of client
+	fclient := clients[client.ClientId]
+	if !fclient.ShareDesktop {
+		fclient.ShareDesktop = true
+		fclient.SharedDesktopIsViewOnly = viewOnly
+		fclient.SharedDesktopSecret = SharedSecret
+		fclient.CloseSharedDesktopConn = make(chan interface{})
+		clients[client.ClientId] = fclient
+	}
+}
+
+func (client *Client) DeactivateDesktopSharing() {
+	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+	// first lock then read the fresh copy to prevent a dirty read
+	client.mu.Lock()
+	defer client.mu.Unlock()
+	// get a fresh copy of client
+	if client.ShareDesktop {
+		fclient := clients[client.ClientId]
+		close(fclient.CloseSharedDesktopConn)
+		fclient.ShareDesktop = false
+		clients[client.ClientId] = fclient
+	}
 }
 
 // Stop New Clients from obtaining service

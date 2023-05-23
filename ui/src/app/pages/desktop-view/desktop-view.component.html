@@ -10,8 +10,10 @@
             Loading NoVNC Client...
         </span>
     </div>
-    <iframe id="DesktopFrame" *ngIf="DesktopRequested"
-        [ngStyle]="{'z-index': !NoVNCClientReady ? '-99': '0'}" (load)="stateChange()"
-        class="desktop-view" [src]="IframeURL" frameborder="0">
+    <div class="share-overlay flex-col" *ngIf="DesktopRequested" (click)="openShareDialog()">
+        <img src="/assets/icons/share.svg" alt="share" class="share-icon">
+    </div>
+    <iframe id="DesktopFrame" *ngIf="DesktopRequested" [ngStyle]="{'z-index': !NoVNCClientReady ? '-99': '0'}"
+        (load)="stateChange()" class="desktop-view" [src]="IframeURL" frameborder="0">
     </iframe>
 </div>

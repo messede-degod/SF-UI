@@ -15,10 +15,10 @@ import (
 
 // websockify returns an http.Handler which proxies websocket requests to a VNC server
 // address.
-func vncWebSockify(to string, viewOnly bool) http.Handler {
+func vncWebSockify(to string, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}) http.Handler {
 	return websocket.Server{
 		Handshake: wsProxyHandshake,
-		Handler:   wsProxyHandler(to, viewOnly),
+		Handler:   wsProxyHandler(to, viewOnly, isSharedConnection, closeConnection),
 	}
 }
 
@@ -60,7 +60,7 @@ func (viewOnlyConn *ViewOnlyConn) Read(msg []byte) (n int, err error) {
 
 // wsProxyHandler is a websocket.Handler which proxies to a unix address with a
 // magic byte check.
-func wsProxyHandler(to string, viewOnly bool) websocket.Handler {
+func wsProxyHandler(to string, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}) websocket.Handler {
 	return func(ws *websocket.Conn) {
 		conn, err := net.Dial("unix", to)
 		if err != nil {
@@ -85,9 +85,26 @@ func wsProxyHandler(to string, viewOnly bool) websocket.Handler {
 			go copyCh(ws, conn, done)
 		}
 
-		err = <-done
-		if err != nil {
-			logf(true, "%v\n", err)
+		if isSharedConnection { // if shared, close connection when user disabled sharing(i.e closeConnection channel is closed)
+		outer:
+			for {
+				select {
+				case err = <-done:
+					if err != nil {
+						logf(true, "%v\n", err)
+					}
+					break outer
+				case _, ok := <-closeConnection:
+					if !ok {
+						break outer
+					}
+				}
+			}
+		} else { // if not a shared connection, exit only when error occurs
+			err = <-done
+			if err != nil {
+				logf(true, "%v\n", err)
+			}
 		}
 
 		conn.Close()

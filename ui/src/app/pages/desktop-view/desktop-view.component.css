@@ -1,0 +1,23 @@
+.share-overlay{
+    width: 1rem;
+    height: 3.5rem;
+    z-index: 5;
+    margin-top: 8vh;
+    position: absolute;
+    background-color: rgb(83, 99, 122);
+    cursor: pointer;
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+    justify-content: center;
+}
+
+.share-overlay:hover{
+    background-color: rgb(72, 85, 103);
+}
+
+.share-icon{
+    width: 1rem;
+    height: 1rem;
+    filter: brightness(0) saturate(100%) invert(96%) sepia(100%) saturate(0%) hue-rotate(144deg) brightness(110%) contrast(100%);
+}

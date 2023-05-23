@@ -1,0 +1,14 @@
+.share-msg {
+    font-size: xx-large;
+    color: white;
+}
+
+.share-area {
+    justify-content: center;
+    height: 100vh;
+}
+
+.shared-desktop-view{
+    height: 100vh;
+    flex: 1;
+}

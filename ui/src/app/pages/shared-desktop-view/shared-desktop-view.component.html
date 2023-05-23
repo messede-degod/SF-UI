@@ -1,0 +1,30 @@
+<div class="flex-col share-area" *ngIf="!shareAvailable">
+    <div class="flex-col disconnected-msg" *ngIf="!loading && !serverError && !shareExpired">
+        <span class="share-msg">SFUI shared desktop</span>
+        <div class="reconnect-button" (click)="loadSharedDesktop()">
+            <span>View</span>
+        </div>
+    </div>
+    <div class="flex-col disconnected-msg" *ngIf="loading">
+        <span class="share-msg">Loading Shared Desktop...</span>
+    </div>
+    <div class="flex-col disconnected-msg" *ngIf="serverError">
+        <span class="share-msg">Server Error</span>
+        <div class="reconnect-button" (click)="loadSharedDesktop()">
+            <span>Retry</span>
+        </div>
+    </div>
+    <div class="flex-col disconnected-msg" *ngIf="shareExpired">
+        <span class="share-msg">Share Has Expired</span>
+    </div>
+</div>
+<div class="flex-col share-area" *ngIf="shareAvailable&&!NoVNCClientReady">
+    <div class="flex-col disconnected-msg">
+        <span class="share-msg">Loading NoVNC Client...</span>
+    </div>
+</div>
+<div class="flex-row" [ngStyle]="{'z-index': shareAvailable&&NoVNCClientReady ? '0': '-99'}">
+    <iframe id="DesktopFrame" *ngIf="shareAvailable" (load)="stateChange()" class="shared-desktop-view"
+        [src]="IframeURL" frameborder="0">
+    </iframe>
+</div>

@@ -1,7 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { Config } from 'src/app/config/config';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { ShareDesktopDialogComponent } from 'src/app/components/share-desktop-dialog/share-desktop-dialog.component';
 
 @Component({
   selector: 'desktop-view',
@@ -16,7 +18,7 @@ export class DesktopViewComponent {
 
   LastPage: string = ""
 
-  constructor(private sanitizer: DomSanitizer, private snackBar: MatSnackBar) {
+  constructor(private sanitizer: DomSanitizer, private snackBar: MatSnackBar, public dialog: MatDialog) {
     let secret = localStorage.getItem("secret");
     let shouldEncrypt = document.location.protocol == 'https:' ? 'true' : 'false'
     let desktopType = "novnc"
@@ -33,7 +35,11 @@ export class DesktopViewComponent {
     this.DesktopRequested = true
   }
 
-  stateChange = () => {
+  stateChange() {
     this.NoVNCClientReady = true
+  }
+
+  openShareDialog() {
+    const dialogRef = this.dialog.open(ShareDesktopDialogComponent);
   }
 }

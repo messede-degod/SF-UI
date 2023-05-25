@@ -16,7 +16,7 @@
     background-color: rgb(72, 85, 103);
 }
 
-.share-icon{
+.share-desktop-icon{
     width: 1rem;
     height: 1rem;
     filter: brightness(0) saturate(100%) invert(96%) sepia(100%) saturate(0%) hue-rotate(144deg) brightness(110%) contrast(100%);

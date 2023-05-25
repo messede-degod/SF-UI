@@ -11,7 +11,7 @@
         </span>
     </div>
     <div class="share-overlay flex-col" *ngIf="DesktopRequested&&NoVNCClientReady" (click)="openShareDialog()">
-        <img src="../../../assets/icons/share.svg" alt="share" class="share-icon">
+        <img src="../../../assets/icons/share.svg" alt="share" class="share-desktop-icon">
     </div>
     <iframe id="DesktopFrame" *ngIf="DesktopRequested" [ngStyle]="{'z-index': !NoVNCClientReady ? '-99': '0'}"
         (load)="stateChange()" class="desktop-view" [src]="IframeURL" frameborder="0">

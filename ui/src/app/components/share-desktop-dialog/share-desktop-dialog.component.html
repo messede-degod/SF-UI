@@ -12,9 +12,9 @@
                     (change)="toggleViewOnly()" />
                 <b>View Only</b>
             </div>
-            <button mat-raised-button *ngIf="!enablingShare" color="primary" class="share-btn"
+            <button mat-raised-button *ngIf="!enablingShare" class="enable-btn"
                 (click)="toggleSharing()">Enable</button>
-            <button mat-raised-button *ngIf="enablingShare" color="primary" class="share-btn">Enabling...</button>
+            <button mat-raised-button *ngIf="enablingShare"  class="enable-btn">Enabling...</button>
         </div>
 
         <div class="flex-col share-area" *ngIf="isActive">
@@ -23,8 +23,8 @@
                 <p class="flex-col">Your shared desktop link</p>
             </div>
             <code class="share-link">{{sharelink}}</code>
-            <button mat-raised-button *ngIf="!disablingShare" color="warn" class="share-btn" (click)="toggleSharing()">Disable</button>
-            <button mat-raised-button *ngIf="disablingShare" color="warn" class="share-btn" >Disabling...</button>
+            <button mat-raised-button *ngIf="!disablingShare" class="disable-btn" (click)="toggleSharing()">Disable</button>
+            <button mat-raised-button *ngIf="disablingShare"  class="disable-btn" >Disabling...</button>
         </div>
     </div>
     <mat-dialog-actions align="end">

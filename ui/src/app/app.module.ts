@@ -9,12 +9,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
-import { ShareDesktopDialogComponent } from './components/share-desktop-dialog/share-desktop-dialog.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ShareDesktopDialogComponent,
   ],
   imports: [
     BrowserModule,

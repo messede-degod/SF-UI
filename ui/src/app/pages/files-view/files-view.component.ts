@@ -18,6 +18,7 @@ export class FilesViewComponent {
   FileBrowserActive: boolean = false
   FileBrowserDisconnected: boolean = false
   FileBrowserNeedsTerminal: boolean = true
+  FileBrowserReady: boolean = false
   FirstStart: boolean = true
   CurrentTheme: string | null = ""
   DOMsanitizer!: DomSanitizer
@@ -105,5 +106,9 @@ export class FilesViewComponent {
         });
       })
 
+  }
+
+  stateChange() {
+    this.FileBrowserReady = true
   }
 }

@@ -1,6 +1,6 @@
 <div class="flex-col">
     <div class="page-info-text loading-xpra-indicator"
-        [ngStyle]="{'z-index': FileBrowserActive && !FileBrowserNeedsTerminal ? '-99': '0'}">
+        [ngStyle]="{'z-index': FileBrowserActive && !FileBrowserNeedsTerminal && FileBrowserReady ? '-99': '0'}">
         <span *ngIf="!FileBrowserActive && !FileBrowserDisconnected && !FileBrowserNeedsTerminal">
             Starting FileBrowser...
         </span>
@@ -14,8 +14,11 @@
             <span>Attention!</span>
             <i>Please Start A Terminal Before Using Filebrowser</i>
         </div>
+        <span *ngIf="FileBrowserActive && !FileBrowserNeedsTerminal && !FileBrowserReady">
+            Loading FileBrowser...
+        </span>
     </div>
     <iframe *ngIf="FileBrowserActive && !FileBrowserNeedsTerminal" class="files-view" [src]="FbIframeURL"
-        frameborder="0">
+        [ngStyle]="{'z-index':FileBrowserReady ! ? '0': '-99'}" frameborder="0" (load)="stateChange()">
     </iframe>
 </div>

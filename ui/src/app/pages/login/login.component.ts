@@ -47,8 +47,8 @@ export class LoginComponent {
   }
 
   showSaveSecretDialog(secret: string) {
-    const dialogRef = this.dialog.open(SaveSecretDialogComponent,{
-      data:{
+    const dialogRef = this.dialog.open(SaveSecretDialogComponent, {
+      data: {
         secret: secret
       }
     });
@@ -112,8 +112,8 @@ export class LoginComponent {
 
   LoginWithSecret: boolean = false
 
-  async loginWithSecret() {
-    this.LoginWithSecret = true
+  async toggleLoginWithSecret() {
+    this.LoginWithSecret = !this.LoginWithSecret
   }
 
 }

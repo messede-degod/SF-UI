@@ -343,85 +343,10 @@
 }
 
 /* Login Page */
-.login-container {
-    background-color: var(--background);
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.login-container>div>h6 {
-    font-size: 9rem !important;
-}
 
 #brandInfo {
     margin-top: 3rem;
     font-size: 1.3rem !important;
-}
-
-.login-info {
-    margin-top: 1.2rem;
-    font-family: sans-serif;
-    font-style: italic;
-    font-size: 1.2rem;
-    text-align: center;
-}
-
-.input-secret {
-    display: flex;
-    margin-top: 0.8rem;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
-    padding: 0.2rem;
-    padding-left: 0.8rem;
-    padding-right: 0.6rem;
-    background-color: var(--active-bg);
-    border-radius: 26px;
-}
-
-.login-btn-container {
-    display: flex;
-    margin-top: 0.8rem;
-    justify-content: space-evenly;
-    align-items: center;
-    flex-direction: row;
-    width: 18rem;
-}
-
-.login-btn-container>div>button {
-    border-radius: 20px !important;
-}
-
-.start-new-btn {
-    background-color: var(--brand-black) !important;
-    color: var(--start-new-btn-text) !important;
-}
-
-.enter-secret-btn {
-    background-color: var(--brand-red) !important;
-    color: var(--enter-secret-btn-text) !important;
-}
-
-
-.input-secret>input {
-    width: 14rem;
-    height: 2.2rem;
-    border: 0;
-    outline: none;
-    color: var(--input-text-color);
-    background-color: var(--active-bg);
-}
-
-.input-secret>img {
-    height: 2rem;
-    filter: var(--term-tab-icon);
-    border-radius: 999px;
-}
-
-.input-secret>img:hover {
-    filter: var(--active-bg);
 }
 
 /* End Login Page */

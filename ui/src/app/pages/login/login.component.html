@@ -1,26 +1,38 @@
-<div class="flex-col login-container">
-    <div class="menu-brand flex-col">
-        <h6>SF</h6>
-        <span id="brandInfo">by hackerschoice</span>
+<div class="main-container flex-col">
+    <div class="main-section">
+        <div class="flex-col login-container">
+            <div class="menu-brand flex-col">
+                <h6>SF</h6>
+                <span id="brandInfo">by hackerschoice</span>
+            </div>
+            <div *ngIf="LoginWithSecret" class="input-secret">
+                <input type="password" [(ngModel)]="secret" placeholder="Secret..." required (keyup.enter)="login()">
+                <img src="../../../assets/icons/question.svg" alt="" (click)="openHelpDialog()">
+            </div>
+
+            <div *ngIf="!LoginWithSecret" class="flex-col login-btn-container">
+                <div>
+                    <button mat-raised-button class="start-new-btn" (click)="login()">New Server</button>
+                </div>
+                <div>
+                    <button mat-raised-button class="enter-secret-btn" (click)="toggleLoginWithSecret()">Existing
+                        Server</button>
+                </div>
+            </div>
+            <div class="login-info">
+                <span *ngIf="LoginWithSecret">
+                    Enter your Segfault secret<br>to start using...
+                </span>
+                <div *ngIf="LoginWithSecret" class="go-back" (click)="toggleLoginWithSecret()">
+                    <span><u><- Go Back</u></span>
+                </div>
+                <span *ngIf="!LoginWithSecret">
+                    Free root shells for you...
+                </span>
+            </div>
+        </div>
     </div>
-    <div *ngIf="LoginWithSecret" class="input-secret">
-        <input type="password" [(ngModel)]="secret" placeholder="Secret..." required (keyup.enter)="login()">
+    <div class="help-menu">
         <img src="../../../assets/icons/question.svg" alt="" (click)="openHelpDialog()">
-    </div>
-    <div *ngIf="!LoginWithSecret" class="login-btn-container">
-        <div>
-            <button mat-raised-button class="start-new-btn" (click)="login()">Start New</button>
-        </div>
-        <div>
-            <button mat-raised-button class="enter-secret-btn" (click)="loginWithSecret()">Enter Secret</button>
-        </div>
-    </div>
-    <div class="login-info">
-        <span *ngIf="LoginWithSecret">
-            Enter your Segfault secret<br>to start using...
-        </span>
-        <span *ngIf="!LoginWithSecret">
-            Free root shells for you...
-        </span>
     </div>
 </div>

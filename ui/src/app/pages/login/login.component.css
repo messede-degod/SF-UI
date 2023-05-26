@@ -1,0 +1,101 @@
+.go-back {
+    margin: 1rem;
+    cursor: pointer;
+}
+
+.login-btn-container {
+    display: flex;
+    margin-top: 0.8rem;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: column;
+    height: 8rem;
+}
+
+.login-btn-container>div>button {
+    border-radius: 20px !important;
+}
+
+.start-new-btn {
+    width: 10rem;
+    background-color: var(--brand-black) !important;
+    color: var(--start-new-btn-text) !important;
+}
+
+.enter-secret-btn {
+    width: 10rem;
+    background-color: var(--brand-red) !important;
+    color: var(--enter-secret-btn-text) !important;
+}
+
+
+.input-secret>input {
+    width: 14rem;
+    height: 2.2rem;
+    border: 0;
+    outline: none;
+    color: var(--input-text-color);
+    background-color: var(--active-bg);
+}
+
+.input-secret>img,
+.help-menu>img {
+    height: 2rem;
+    width: 2rem;
+    filter: var(--term-tab-icon);
+    border-radius: 999px;
+}
+
+.input-secret>img:hover,
+.help-menu>img:hover {
+    filter: var(--active-bg);
+}
+
+.login-info {
+    margin-top: 1.2rem;
+    font-family: sans-serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.input-secret {
+    display: flex;
+    margin-top: 0.8rem;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    padding: 0.2rem;
+    padding-left: 0.8rem;
+    padding-right: 0.6rem;
+    background-color: var(--active-bg);
+    border-radius: 26px;
+}
+
+.login-container {
+    justify-content: center;
+    align-items: center;
+}
+
+.main-container {
+    background-color: var(--background);
+    height: 100vh;
+}
+
+.main-section {
+    flex: 1;
+    display: flex;
+    height: 95vh;
+    justify-content: center;
+}
+
+.login-container>div>h6 {
+    font-size: 9rem !important;
+}
+
+.help-menu {
+    background-color: var(--background);
+    display: flex;
+    margin: 0.5rem;
+    flex-direction: row-reverse;
+}

@@ -16,8 +16,7 @@ import { TerminalService } from 'src/app/services/terminal.service';
 export class TerminalComponent implements AfterViewInit {
   @Input() TermId: number = 0;
 
-  terminalService: TerminalService
-  constructor(terminalService: TerminalService) {
+  constructor(private terminalService: TerminalService) {
     this.terminalService = terminalService
   }
 

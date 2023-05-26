@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { DashboardComponent } from 'src/app/pages/dashboard/dashboard.component';
 import { TerminalViewComponent } from 'src/app/pages/terminal-view/terminal-view.component'
+import { TerminalService } from 'src/app/services/terminal.service';
 
 @Component({
   selector: 'app-controls',
@@ -10,17 +11,15 @@ import { TerminalViewComponent } from 'src/app/pages/terminal-view/terminal-view
 })
 export class AppControlsComponent {
   router!: Router
-  dashboardComponent!: DashboardComponent
-  terminalViewComponent: TerminalViewComponent
 
-  constructor(router:  Router,dashboardComponent: DashboardComponent,terminalViewComponent: TerminalViewComponent){
+  constructor(router: Router,
+     private dashboardComponent: DashboardComponent,
+    private terminalViewComponent: TerminalViewComponent) {
     this.router = router
-    this.dashboardComponent = dashboardComponent
-    this.terminalViewComponent= terminalViewComponent
-    if(localStorage.getItem('theme')=='dark'){
+    if (localStorage.getItem('theme') == 'dark') {
       this.setTheme('dark')
     }
-    if(localStorage.getItem('sidebarVisible')=='false'){
+    if (localStorage.getItem('sidebarVisible') == 'false') {
       this.toggleSidebar()
     }
   }
@@ -35,10 +34,10 @@ export class AppControlsComponent {
     this.setTheme(theme)
   }
 
-  setTheme(theme: string){
+  setTheme(theme: string) {
     this.curTheme = theme
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme',theme)
+    localStorage.setItem('theme', theme)
   }
 
   fullScreen: boolean = false
@@ -51,19 +50,19 @@ export class AppControlsComponent {
     this.fullScreen = !this.fullScreen
   }
 
-  logout(){
+  logout() {
     localStorage.removeItem("secret")
     this.router.navigate(['/login'])
   }
 
   sidebarVisible: boolean = true
-  async toggleSidebar(){
+  async toggleSidebar() {
     this.sidebarVisible = !this.sidebarVisible
     await new Promise(f => setTimeout(f, 150));
     this.dashboardComponent.sidebarVisible = this.sidebarVisible
     this.dashboardComponent.sidebarFirstLoad = false
     this.terminalViewComponent.showLogo = !this.sidebarVisible
-    localStorage.setItem('sidebarVisible',this.sidebarVisible+"")
+    localStorage.setItem('sidebarVisible', this.sidebarVisible + "")
   }
 
 }

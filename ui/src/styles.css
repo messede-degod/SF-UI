@@ -10,43 +10,6 @@
     flex-direction: column;
 }
 
-
-:root {
-    --background: #ffff;
-    --content-background: #474747;
-    --brand-red: #e05a16;
-    --brand-black: black;
-    --active-bg: #dbd8d8ed;
-    --inactive-bg: #f2f2f2e1;
-    --term-tab: #696565;
-    --term-tab-icon: brightness(0) saturate(100%) invert(49%) sepia(7%) saturate(111%) hue-rotate(187deg) brightness(98%) contrast(94%);
-    --menu-btn-icon: brightness(0) saturate(100%) invert(98%) sepia(0%) saturate(1152%) hue-rotate(312deg) brightness(82%) contrast(67%);
-    caret-color: black;
-    --input-text-color: black;
-    --control-bar-height: 2.5rem;
-    --start-new-btn-text: white;
-    --enter-secret-btn-text: black;
-}
-
-
-[data-theme="dark"] {
-    color: white;
-    --background: #181a1b;
-    --content-background: #353a3c;
-    --brand-red: #eb7134;
-    --brand-black: white;
-    --active-bg: rgb(45 49 51 / 93%);
-    --inactive-bg: rgb(31 34 35 / 88%);
-    --term-tab: rgba(171, 183, 188, 0.93);
-    --term-tab-icon: brightness(0) saturate(100%) invert(49%) sepia(7%) saturate(111%) hue-rotate(187deg) brightness(98%) contrast(94%);
-    --menu-btn-icon: brightness(0) saturate(100%) invert(98%) sepia(0%) saturate(1152%) hue-rotate(312deg) brightness(82%) contrast(67%);
-    caret-color: white;
-    --input-text-color: white;
-    --control-bar-height: 2.5rem;
-    --start-new-btn-text: black;
-    --enter-secret-btn-text: black;
-}
-
 .hidden {
     display: none !important;
 }

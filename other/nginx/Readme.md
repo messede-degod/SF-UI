@@ -4,7 +4,7 @@ Deploying  UI files (html,css,js etc) with nginx is recommended for production d
 
 ## Copy UI files
 - Run `make filebrowser` and then `make UI` if you have not already.
-- Copy the UI files to web root, `cp - r ui/dist/sf-ui/*  /var/www/html/`
+- Copy the UI files to web root, `cp -r ui/dist/sf-ui/*  /var/www/html/`
 - Adjust your nginx configurations web root if necessary.
 
 ## Enable websocket proxypass

@@ -11,11 +11,6 @@ import (
 	"time"
 )
 
-type DesktopShare struct {
-	isShared bool
-	viewOnly bool
-}
-
 type Client struct {
 	ClientId                  string
 	mu                        *sync.Mutex
@@ -27,10 +22,15 @@ type Client struct {
 	MaxTerms                  int
 	FileBrowserProxy          *httputil.ReverseProxy
 	FileBrowserServiceActive  bool
-	ShareDesktop              bool
+	ShareDesktop              bool // Whether desktop sharing is active
 	SharedDesktopIsViewOnly   bool
 	SharedDesktopSecret       string
-	CloseSharedDesktopConn    chan interface{}
+	SharedDesktopConn         chan interface{} // Channel when closed kills all shared desktop connections
+	// Channel when closed prevents master SSH connection from being killed by RemoveClientIfInactive,
+	// that is unless a ClientInactivityTimeout is first reached, open channel indicated a inactive client
+	// closed channel indicates a active client
+	ClientConn   chan interface{}
+	ClientActive bool // Atleast one active connection exists
 }
 
 var AcceptClients = true
@@ -47,6 +47,8 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 		TerminalsCount:            0,
 		MasterSSHConnectionActive: false,
 		MaxTerms:                  sfui.MaxWsTerminals,
+		ClientConn:                make(chan interface{}), // Initially no active connections exist
+		ClientActive:              true,
 	}
 
 	if !AcceptClients {
@@ -110,23 +112,33 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 }
 
 // If a client has no active terminals or a GUI connection
-// consider them as inactive and tear down the master SSH connection
+// consider them as inactive , wait for ClientInactivityTimeout
+// and then tear down the master SSH connection
 func (sfui *SfUI) RemoveClientIfInactive(clientSecret string) {
-
-	if sfui.Debug {
-		return
-	}
-
-	// Obtain a fresh copy of the client
-	client, err := sfui.GetClient(clientSecret)
-	if err == nil {
-		client.mu.Lock()
-		if client.TerminalsCount == 0 && !client.DesktopActive {
-			sfui.RemoveClient(&client)
-		} else { // If we removed client in the previous block there will be nothing left to unlock
-			client.mu.Unlock()
+	go func() {
+		// Obtain a fresh copy of the client
+		client, err := sfui.GetClient(clientSecret)
+		if err == nil {
+			if client.TerminalsCount == 0 && !client.DesktopActive {
+			outer:
+				for {
+					select {
+					case <-time.After(time.Minute * time.Duration(sfui.ClientInactivityTimeout)):
+						// After timeout
+						client.mu.Lock()
+						sfui.RemoveClient(&client)
+						// Once removed there is nothing left to unlock
+						break outer
+					case _, ok := <-client.ClientConn:
+						// New connection from client
+						if !ok {
+							break outer
+						}
+					}
+				}
+			}
 		}
-	}
+	}()
 }
 
 func (sfui *SfUI) GetExistingClientOrMakeNew(ClientSecret string, ClientIp string) (Client, error) {
@@ -183,6 +195,8 @@ func getClientId(ClientSecret string) string {
 }
 
 func (client *Client) IncTermCount() error {
+	defer client.MarkClientIfActive()
+
 	// mu is a pointer, it locks the original Client entry in "clients"
 	// first lock then read the fresh copy to prevent a dirty read
 	client.mu.Lock()
@@ -202,6 +216,8 @@ func (client *Client) IncTermCount() error {
 }
 
 func (client *Client) DecTermCount() {
+	defer client.MarkClientIfInactive()
+
 	// mu is a pointer, it locks the original Client entry in "clients"
 	// first lock then read the fresh copy to prevent a dirty read
 	client.mu.Lock()
@@ -218,6 +234,8 @@ func (client *Client) DecTermCount() {
 }
 
 func (client *Client) ActivateDesktop() {
+	defer client.MarkClientIfActive()
+
 	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
 	// first lock then read the fresh copy to prevent a dirty read
 	client.mu.Lock()
@@ -230,6 +248,8 @@ func (client *Client) ActivateDesktop() {
 }
 
 func (client *Client) DeActivateDesktop() {
+	defer client.MarkClientIfInactive()
+
 	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
 	// first lock then read the fresh copy to prevent a dirty read
 	client.mu.Lock()
@@ -264,7 +284,7 @@ func (client *Client) ActivateDesktopSharing(viewOnly bool, SharedSecret string)
 		fclient.ShareDesktop = true
 		fclient.SharedDesktopIsViewOnly = viewOnly
 		fclient.SharedDesktopSecret = SharedSecret
-		fclient.CloseSharedDesktopConn = make(chan interface{})
+		fclient.SharedDesktopConn = make(chan interface{})
 		clients[client.ClientId] = fclient
 	}
 }
@@ -277,9 +297,41 @@ func (client *Client) DeactivateDesktopSharing() {
 	// get a fresh copy of client
 	if client.ShareDesktop {
 		fclient := clients[client.ClientId]
-		close(fclient.CloseSharedDesktopConn)
+		close(fclient.SharedDesktopConn)
 		fclient.ShareDesktop = false
 		clients[client.ClientId] = fclient
+	}
+}
+
+// If no active client connection exist, open the ClientConn channel
+func (client *Client) MarkClientIfInactive() {
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
+	fclient := clients[client.ClientId]
+
+	if fclient.TerminalsCount == 0 && !fclient.DesktopActive {
+		if fclient.ClientActive {
+			fclient.ClientActive = false
+			fclient.ClientConn = make(chan interface{})
+			clients[client.ClientId] = fclient
+		}
+	}
+}
+
+// If no active client connection exist, close the ClientConn channel
+func (client *Client) MarkClientIfActive() {
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
+	fclient := clients[client.ClientId]
+
+	if fclient.TerminalsCount > 0 || fclient.DesktopActive {
+		if !fclient.ClientActive {
+			fclient.ClientActive = true
+			close(fclient.ClientConn)
+			clients[client.ClientId] = fclient
+		}
 	}
 }
 

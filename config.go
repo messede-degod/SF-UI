@@ -44,6 +44,7 @@ func getDefaultConfig() SfUI {
 		StartXpraCommand:         "[[ $(ss -lnt) == *2000* ]] || /sf/bin/startxweb \n",
 		StartVNCCommand:          "[[ $(ss -lnt) == *5900* ]] || /sf/bin/startxvnc \n",
 		StartFileBrowserCommand:  "[[ $(ss -lnt) == *2900* ]] || /sf/bin/startfb \n",
+		ClientInactivityTimeout:  3,
 	}
 }
 

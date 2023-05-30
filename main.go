@@ -38,7 +38,8 @@ type SfUI struct {
 	//			|-sfui/		(created by sfui- container for client dirs)
 	//				|-perClientUniqDir/ (a unique string derived from secret)
 	//						- gui.sock (ssh -L ./gui.sock:127.0.0.1:2000 root@segfault.net)
-	WorkDirectory string `yaml:"work_directory"`
+	WorkDirectory           string `yaml:"work_directory"`
+	ClientInactivityTimeout int    `yaml:"client_inactivity_timeout"` // Minutes after which the clients master SSH connection is killed
 }
 
 var buildTime string

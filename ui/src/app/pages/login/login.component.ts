@@ -14,6 +14,7 @@ import { SaveSecretDialogComponent } from 'src/app/components/save-secret-dialog
 export class LoginComponent {
   router!: Router
   rippleColor: string = "primary"
+  loadingDashBoard: boolean = false
 
   constructor(public dialog: MatDialog, private snackBar: MatSnackBar, router: Router) {
     this.router = router
@@ -87,6 +88,7 @@ export class LoginComponent {
     })
     let rdata = await response
     if (rdata.status == 200) {
+      this.loadingDashBoard = true
       this.logginInMsg.dismiss()
 
       if (this.LoginWithSecret) {

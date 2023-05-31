@@ -99,3 +99,12 @@
     margin: 0.5rem;
     flex-direction: row-reverse;
 }
+
+.loading-dashboard{
+    font-family: 'PT Sans';
+}
+.loading-dash-spinner{
+        width: 1.2rem !important;
+        height: 1.2rem !important;
+        margin-right: 0.5rem;
+}

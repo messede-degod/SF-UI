@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { Config } from 'src/app/config/config';
 import { DashboardComponent } from 'src/app/pages/dashboard/dashboard.component';
 import { TerminalViewComponent } from 'src/app/pages/terminal-view/terminal-view.component'
 import { TerminalService } from 'src/app/services/terminal.service';
@@ -13,7 +14,7 @@ export class AppControlsComponent {
   router!: Router
 
   constructor(router: Router,
-     private dashboardComponent: DashboardComponent,
+    private dashboardComponent: DashboardComponent,
     private terminalViewComponent: TerminalViewComponent) {
     this.router = router
     if (localStorage.getItem('theme') == 'dark') {
@@ -50,7 +51,17 @@ export class AppControlsComponent {
     this.fullScreen = !this.fullScreen
   }
 
-  logout() {
+  async logout() {
+    var logoutData = {
+      "secret": localStorage.getItem("secret"),
+    }
+
+    let response = fetch(Config.ApiEndpoint + "/logout", {
+      "method": "POST",
+      "body": JSON.stringify(logoutData)
+    })
+    let rdata = await response
+
     localStorage.removeItem("secret")
     this.router.navigate(['/login'])
   }

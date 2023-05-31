@@ -120,20 +120,17 @@ func (sfui *SfUI) RemoveClientIfInactive(clientSecret string) {
 		client, err := sfui.GetClient(clientSecret)
 		if err == nil {
 			if client.TerminalsCount == 0 && !client.DesktopActive {
-			outer:
-				for {
-					select {
-					case <-time.After(time.Minute * time.Duration(sfui.ClientInactivityTimeout)):
-						// After timeout
-						client.mu.Lock()
-						sfui.RemoveClient(&client)
-						// Once removed there is nothing left to unlock
-						break outer
-					case _, ok := <-client.ClientConn:
-						// New connection from client
-						if !ok {
-							break outer
-						}
+				select {
+				case <-time.After(time.Minute * time.Duration(sfui.ClientInactivityTimeout)):
+					// After timeout
+					client.mu.Lock()
+					sfui.RemoveClient(&client)
+					// Once removed there is nothing left to unlock
+					break
+				case _, ok := <-client.ClientConn:
+					// New connection from client
+					if !ok {
+						break
 					}
 				}
 			}

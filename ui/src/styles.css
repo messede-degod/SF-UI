@@ -42,7 +42,7 @@
 .sidebar {
     justify-content: space-between;
     height: 100vh;
-    width: 7rem;
+    width: 5.5rem;
     transition: width 2s;
     background-color: var(--background);
 }
@@ -92,7 +92,7 @@
 }
 
 .menu-brand>h6 {
-    font-size: 5rem;
+    font-size: 4rem;
     font-family: 'PT Sans', sans-serif;
     color: var(--brand-red);
 }
@@ -129,8 +129,8 @@
 .menu-brand>span {
     font-family: sans-serif;
     font-style: italic;
-    font-size: 0.8rem;
-    margin-top: 1.2rem;
+    font-size: 0.6rem;
+    margin-top: 1rem;
 }
 
 
@@ -146,8 +146,8 @@
 
 
 .menu-button {
-    width: 5rem;
-    height: 4rem;
+    width: 4rem;
+    height: 3rem;
     margin-top: 1.5rem;
     margin-left: 0.5rem;
     margin-right: 0.5rem;
@@ -159,6 +159,7 @@
 
 .menu-button>div>img {
     filter: var(--menu-btn-icon);
+    height: 2.8rem;
 }
 
 .controls-view {
@@ -352,7 +353,8 @@
 
     .sidebar-control,
     .terminal-window-add-disabled,
-    .fullscreen-control {
+    .fullscreen-control,
+    .change-font-size-control {
         display: none !important;
     }
 }

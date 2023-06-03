@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Config } from 'src/app/config/config';
+import { TerminalService } from 'src/app/services/terminal.service';
 
 @Component({
   selector: 'terminal-controls',
@@ -70,7 +71,7 @@ export class TerminalControlsComponent {
     this.noOfTerminalsChange.emit(this.terminalWindows.length)
   }
 
-  setTerminalActive(termId: number) {
+  async setTerminalActive(termId: number) {
     this.activeTerminalId = termId
     this.activeTerminalIdChange.emit(this.activeTerminalId)
   }

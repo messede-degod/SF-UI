@@ -13,9 +13,10 @@ A UI frontend for the services provided by [segfault]("https://thc.org/segfault"
 - Run the container: `sudo docker compose up -d`
 - Access SFUI at `http://localhost:7171`
 
-## Install Dependencies
 
-  
+## Regular Installation
+
+### Install Deps
 
 - Install Basics: `sudo apt install -y npm make golang`
 
@@ -23,13 +24,10 @@ A UI frontend for the services provided by [segfault]("https://thc.org/segfault"
 
 - Install JS Deps: `cd ui && npm install`
 
-  
-
-## Building
+### Building
 
 - Run `make all` to build the complete application, binary can be found in the bin directory.
 
-  
 
 ### Recipes to build individual components
 
@@ -41,9 +39,7 @@ A UI frontend for the services provided by [segfault]("https://thc.org/segfault"
 
   
 
-## Install & Run
-
-  
+### Install & Run
 
 Run `./bin/sfui -install` to install sfui, visit `http://127.0.0.1:7171` in browser to access SFUI. From here on use systemctl to control sfui.
 

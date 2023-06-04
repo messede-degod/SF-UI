@@ -30,12 +30,6 @@ clean:
 	@rm -rf ./ui/dist/sf-ui
 	@rm -rf ./filebrowser-ui/dist/*
 
-xpra-update:
-	@rm -rf /tmp/xpra-html5
-	@git  -C /tmp  clone --depth 1  https://github.com/Xpra-org/xpra-html5
-	@cp -r /tmp/xpra-html5/LICENSE  ./ui/src/assets/xpra_client/LICENSE
-	@cp -r /tmp/xpra-html5/html5  ./ui/src/assets/xpra_client/
-
 .PHONY: filebrowser
 filebrowser:
 	@cd filebrowser-ui && npm ci && NODE_OPTIONS=--openssl-legacy-provider npm run build

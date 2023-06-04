@@ -102,7 +102,7 @@ class SfTerminal {
             // Send Pings at regular interval to prevent socket disconnection
             let keepAliveInterval = setInterval(() => {
                 this.socket.send(String(this.SF_PING))
-            }, 40 * 1000) // 40 secs
+            }, 25 * 1000) // 40 secs
 
             this.socket.onclose = () => {
                 clearInterval(keepAliveInterval)

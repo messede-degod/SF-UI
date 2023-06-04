@@ -29,9 +29,10 @@ RUN strip sfui
 
 # Run SfUI
 FROM alpine:latest
-RUN apk add bash openssh
+RUN apk add bash openssh sshpass
 WORKDIR /app/
 COPY --from=backend /backend/sfui ./
 COPY config.yaml ./
+COPY other/ssh/known_hosts /root/.ssh/
 EXPOSE 7171
 ENTRYPOINT ["/app/sfui"]

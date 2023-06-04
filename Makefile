@@ -38,6 +38,6 @@ xpra-update:
 
 .PHONY: filebrowser
 filebrowser:
-	@cd filebrowser-ui && npm ci && npm run build
+	@cd filebrowser-ui && npm ci && NODE_OPTIONS=--openssl-legacy-provider npm run build
 	@rm -rf ui/src/assets/filebrowser_client/*
 	@cp -r filebrowser-ui/dist/* ui/src/assets/filebrowser_client/

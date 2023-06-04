@@ -1,0 +1,7 @@
+.github/*
+filebrowser-ui/dist/*
+filebrowser-ui/node_modules/*
+other/nginx/*
+other/screenshot/*
+ui/dist/*
+ui/node_modules/*

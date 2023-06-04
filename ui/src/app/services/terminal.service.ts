@@ -26,7 +26,7 @@ class SfTerminal {
     disconnected: EventEmitter<any> = new EventEmitter();
 
     terminalOptions: ITerminalOptions = {
-        fontSize: 20,
+        fontSize: 16,
         cursorBlink: true,
         fontFamily: 'Consolas,Liberation Mono,Menlo,Courier,monospace',
         theme: {
@@ -165,12 +165,19 @@ export class TerminalService {
     terminals: Map<number, SfTerminal> = new Map()
     activeTerms: number = 0
     isactive: EventEmitter<any> = new EventEmitter();
+    fontSize: number = 16
+
+    constructor() {
+        let localFontSize = localStorage.getItem("font-size")
+        this.fontSize = localFontSize === null ? 16 : Number(localFontSize)
+    }
 
     createNewTerminal(termId: number) {
         this.removeTerminal(termId)
         let sfTerminal = new SfTerminal(termId)
+        sfTerminal.terminal.options.fontSize = this.fontSize
         sfTerminal.create()
-        
+
         sfTerminal.disconnected.subscribe(() => {
             this.handleTerminalClose()
         })
@@ -187,6 +194,28 @@ export class TerminalService {
         if (sfTerminal != undefined) {
             sfTerminal.removeTerminal()
             this.terminals.delete(termId)
+        }
+    }
+
+    changeTerminalFontSize(fontSize: number) {
+        this.terminals.forEach(sfTerminal => {
+            sfTerminal.terminal.options.fontSize = fontSize
+            sfTerminal.terminal.refresh(0, sfTerminal.terminal.rows - 1)
+            sfTerminal.fitAddon.fit()
+        });
+        this.fontSize = fontSize
+    }
+
+    saveFontSize(){
+        localStorage.setItem("font-size", String(this.fontSize))
+    }
+
+    refresh(termId: number) {
+        let sfTerminal = this.terminals.get(termId)
+        if (sfTerminal != undefined) {
+            sfTerminal.terminal.options.fontSize = this.fontSize
+            sfTerminal.terminal.refresh(0, sfTerminal.terminal.rows - 1)
+            sfTerminal.fitAddon.fit()
         }
     }
 

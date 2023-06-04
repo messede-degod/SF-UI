@@ -86,18 +86,15 @@ func wsProxyHandler(to string, viewOnly bool, isSharedConnection bool, closeConn
 		}
 
 		if isSharedConnection { // if shared, close connection when user disabled sharing(i.e closeConnection channel is closed)
-		outer:
-			for {
-				select {
-				case err = <-done:
-					if err != nil {
-						logf(true, "%v\n", err)
-					}
-					break outer
-				case _, ok := <-closeConnection:
-					if !ok {
-						break outer
-					}
+			select {
+			case err = <-done:
+				if err != nil {
+					logf(true, "%v\n", err)
+				}
+				break
+			case _, ok := <-closeConnection:
+				if !ok {
+					break
 				}
 			}
 		} else { // if not a shared connection, exit only when error occurs

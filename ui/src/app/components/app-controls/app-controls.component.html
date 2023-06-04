@@ -3,15 +3,18 @@
     <img *ngIf="sidebarVisible" src="../assets/icons/panel-close.svg" alt="">
     <img *ngIf="!sidebarVisible" src="../assets/icons/panel-open.svg" alt="">
   </div>
-    <div class="terminal-tab terminal-window-add inactive-bg" (click)="toggleTheme()">
-      <img *ngIf="curTheme!='dark'" src="../assets/icons/dark-mode.svg" alt="">
-      <img *ngIf="curTheme=='dark'" src="../assets/icons/light-mode.svg" alt="">
-    </div>
-    <div class="terminal-tab terminal-window-add inactive-bg fullscreen-control" (click)="toggleFullscreen()">
-      <img *ngIf="!fullScreen" src="../assets/icons/fullscreen.svg" alt="">
-      <img *ngIf="fullScreen" src="../assets/icons/close-fullscreen.svg" alt="">
-    </div>
-    <div class="terminal-tab terminal-window-add inactive-bg" (click)="logout()">
-      <img src="../assets/icons/logout.svg" alt="">
-    </div>
+  <div class="terminal-tab terminal-window-add inactive-bg change-font-size-control" (click)="changeFontSize()">
+    <img src="../assets/icons/font-size.svg" alt="">
   </div>
+  <div class="terminal-tab terminal-window-add inactive-bg" (click)="toggleTheme()">
+    <img *ngIf="curTheme!='dark'" src="../assets/icons/dark-mode.svg" alt="">
+    <img *ngIf="curTheme=='dark'" src="../assets/icons/light-mode.svg" alt="">
+  </div>
+  <div class="terminal-tab terminal-window-add inactive-bg fullscreen-control" (click)="toggleFullscreen()">
+    <img *ngIf="!fullScreen" src="../assets/icons/fullscreen.svg" alt="">
+    <img *ngIf="fullScreen" src="../assets/icons/close-fullscreen.svg" alt="">
+  </div>
+  <div class="terminal-tab terminal-window-add inactive-bg" (click)="logout()">
+    <img src="../assets/icons/logout.svg" alt="">
+  </div>
+</div>

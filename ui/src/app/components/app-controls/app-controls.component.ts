@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { Config } from 'src/app/config/config';
 import { DashboardComponent } from 'src/app/pages/dashboard/dashboard.component';
 import { TerminalViewComponent } from 'src/app/pages/terminal-view/terminal-view.component'
 import { TerminalService } from 'src/app/services/terminal.service';
+import { ChangeFontSizeDialogComponent } from '../change-font-size-dialog/change-font-size-dialog.component';
 
 @Component({
   selector: 'app-controls',
@@ -13,8 +16,10 @@ export class AppControlsComponent {
   router!: Router
 
   constructor(router: Router,
-     private dashboardComponent: DashboardComponent,
-    private terminalViewComponent: TerminalViewComponent) {
+    private dashboardComponent: DashboardComponent,
+    private terminalViewComponent: TerminalViewComponent,
+    private terminalService: TerminalService,
+    public dialog: MatDialog) {
     this.router = router
     if (localStorage.getItem('theme') == 'dark') {
       this.setTheme('dark')
@@ -50,7 +55,17 @@ export class AppControlsComponent {
     this.fullScreen = !this.fullScreen
   }
 
-  logout() {
+  async logout() {
+    var logoutData = {
+      "secret": localStorage.getItem("secret"),
+    }
+
+    let response = fetch(Config.ApiEndpoint + "/logout", {
+      "method": "POST",
+      "body": JSON.stringify(logoutData)
+    })
+    let rdata = await response
+
     localStorage.removeItem("secret")
     this.router.navigate(['/login'])
   }
@@ -63,6 +78,13 @@ export class AppControlsComponent {
     this.dashboardComponent.sidebarFirstLoad = false
     this.terminalViewComponent.showLogo = !this.sidebarVisible
     localStorage.setItem('sidebarVisible', this.sidebarVisible + "")
+  }
+
+  changeFontSize() {
+    const dialogRef = this.dialog.open(ChangeFontSizeDialogComponent);
+    dialogRef.afterClosed().subscribe(() => {
+      this.terminalService.saveFontSize()
+    })
   }
 
 }

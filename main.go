@@ -38,7 +38,8 @@ type SfUI struct {
 	//			|-sfui/		(created by sfui- container for client dirs)
 	//				|-perClientUniqDir/ (a unique string derived from secret)
 	//						- gui.sock (ssh -L ./gui.sock:127.0.0.1:2000 root@segfault.net)
-	WorkDirectory string `yaml:"work_directory"`
+	WorkDirectory           string `yaml:"work_directory"`
+	ClientInactivityTimeout int    `yaml:"client_inactivity_timeout"` // Minutes after which the clients master SSH connection is killed
 }
 
 var buildTime string
@@ -141,6 +142,8 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 	case "/secret":
 		sfui.handleSecret(w, r)
 		w.Header().Add("Content-Type", "application/json")
+	case "/logout":
+		sfui.handleLogout(w, r)
 	case "/config":
 		sfui.handleUIConfig(w, r)
 		w.Header().Add("Content-Type", "application/json")
@@ -194,6 +197,38 @@ func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {
 				termRes := TermResponse{
 					Status: "OK",
 					// SfEndpoint: sfui.SfEndpoint,
+				}
+				response, _ := json.Marshal(termRes)
+				w.Write(response)
+				return
+			}
+		}
+	}
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte(`{"status":"Internal Server Error"}`))
+}
+
+func (sfui *SfUI) handleLogout(w http.ResponseWriter, r *http.Request) {
+	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
+	if err == nil {
+		termReq := TermRequest{}
+		if json.Unmarshal(data, &termReq) == nil {
+			if validSecret(termReq.Secret) {
+				// Remove the client connection
+				client, err := sfui.GetClient(termReq.Secret)
+				if err == nil { // Client exists
+					client.mu.Lock()
+					fclient := clients[client.ClientId]
+					if !fclient.ClientActive { // Make sure RemoveClientIfInactive doesnt try to remove the client once more
+						close(fclient.ClientConn) // Marking client as active to prevent RemoveClientIfInactive from running
+					}
+					sfui.RemoveClient(&client)
+					// No need to unlock client since its now deleted
+				}
+
+				w.WriteHeader(http.StatusOK)
+				termRes := TermResponse{
+					Status: "OK",
 				}
 				response, _ := json.Marshal(termRes)
 				w.Write(response)

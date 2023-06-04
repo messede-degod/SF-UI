@@ -13,3 +13,4 @@ slave_ssh_command: 'sshpass -p segfault ssh -S %s/ssh.sock -o "SetEnv SECRET=%s 
 start_xpra_command: "[[ $(ss -lnt) == *2000* ]] || /sf/bin/startxweb \n"
 start_vnc_command: "[[ $(ss -lnt) == *5900* ]] || /sf/bin/startxvnc \n"
 start_filebrowser_command: "[[ $(ss -lnt) == *2900* ]] || /sf/bin/startfb \n"
+client_inactivity_timeout: 1

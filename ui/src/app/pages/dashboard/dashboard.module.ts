@@ -22,6 +22,8 @@ import { SaveSecretDialogComponent } from '../../components/save-secret-dialog/s
 import { FilesViewComponent } from '../files-view/files-view.component';
 import { ShareDesktopDialogComponent } from '../../components/share-desktop-dialog/share-desktop-dialog.component';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { ChangeFontSizeDialogComponent } from '../../components/change-font-size-dialog/change-font-size-dialog.component';
+import { MatSliderModule } from '@angular/material/slider';
 
 // import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -39,7 +41,9 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     WebViewComponent,
     SaveSecretDialogComponent,
     FilesViewComponent,
-    ShareDesktopDialogComponent
+    ShareDesktopDialogComponent,
+    ChangeFontSizeDialogComponent,
+
   ],
   imports: [
     CommonModule,
@@ -49,7 +53,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     MatButtonModule,
     MatSnackBarModule,
     MatSlideToggleModule,
-    FormsModule
+    FormsModule,
+    MatSliderModule
   ]
 })
 export class DashboardModule { }

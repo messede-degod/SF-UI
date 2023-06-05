@@ -45,6 +45,7 @@ func getDefaultConfig() SfUI {
 		StartVNCCommand:          "[[ $(ss -lnt) == *5900* ]] || /sf/bin/startxvnc \n",
 		StartFileBrowserCommand:  "[[ $(ss -lnt) == *2900* ]] || /sf/bin/startfb \n",
 		ClientInactivityTimeout:  3,
+		WSPingInterval:           20,
 	}
 }
 
@@ -53,10 +54,11 @@ func getcompiledClientConfig(sfui SfUI) []byte {
 	// Store it byte format, to prevent json marshalling on every request
 	// See handleUIConfig()
 	compConfig := []byte(fmt.Sprintf(
-		`{"max_terminals":"%d","sf_endpoint":"%s","desktop_disabled":%s}`,
+		`{"max_terminals":"%d","sf_endpoint":"%s","desktop_disabled":%s,"ws_ping_interval":"%d"}`,
 		sfui.MaxWsTerminals,
 		sfui.SfEndpoint,
 		strconv.FormatBool(sfui.DisableDesktop), // Hide the GUI Option in UI
+		sfui.WSPingInterval,
 	))
 	return compConfig
 }

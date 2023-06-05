@@ -3,7 +3,7 @@ import { ITheme, ITerminalOptions, Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import { AttachAddonComponent } from '../components/attach-addon/attach-addon.component';
 import { WebglAddon } from 'xterm-addon-webgl';
-import { Config } from 'src/app/config/config';
+import { Config } from 'src/environments/environment';
 
 
 class SfTerminal {
@@ -102,7 +102,7 @@ class SfTerminal {
             // Send Pings at regular interval to prevent socket disconnection
             let keepAliveInterval = setInterval(() => {
                 this.socket.send(String(this.SF_PING))
-            }, 25 * 1000) // 40 secs
+            }, Config.WSPingInterval * 1000) // 40 secs
 
             this.socket.onclose = () => {
                 clearInterval(keepAliveInterval)

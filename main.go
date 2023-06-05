@@ -15,6 +15,7 @@ import (
 
 type SfUI struct {
 	MaxWsTerminals    int    `yaml:"max_ws_terminals"`    // Max terminals that can be allocated per client
+	WSPingInterval    int    `yaml:"ws_ping_interval"`    // Intervals at which the client pings the terminals WS connection
 	ServerBindAddress string `yaml:"server_bind_address"` // Address to which the current app binds
 	Debug             bool   `yaml:"debug"`               // Print debug information
 

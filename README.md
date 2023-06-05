@@ -44,7 +44,7 @@ A UI frontend for the services provided by [segfault]("https://thc.org/segfault"
 Run `./bin/sfui -install` to install sfui, visit `http://127.0.0.1:7171` in browser to access SFUI. From here on use systemctl to control sfui.
 
 ## Development environment
-- Start Angular dev server by runnning `cd ui` and `ng serve`
+- Start Angular dev server by runnning `cd ui` and `ng serve -c development`
 - Start SFUI local server by running `make dev` and `./bin/sfui`, make sure you have debug set to true in config.yaml
 
 ## How it works

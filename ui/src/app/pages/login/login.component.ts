@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { HelpDialogComponent } from 'src/app/components/help-dialog/help-dialog.component';
 import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { Config } from '../../config/config';
+import { Config } from 'src/environments/environment';
 import { SaveSecretDialogComponent } from 'src/app/components/save-secret-dialog/save-secret-dialog.component';
 
 @Component({

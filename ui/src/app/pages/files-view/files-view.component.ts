@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { Config } from 'src/app/config/config';
+import { Config } from 'src/environments/environment';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TerminalService } from 'src/app/services/terminal.service';
 

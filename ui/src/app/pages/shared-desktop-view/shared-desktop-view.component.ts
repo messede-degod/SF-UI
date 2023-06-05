@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { ActivatedRoute, ParamMap } from '@angular/router';
-import { Config } from 'src/app/config/config';
+import { ActivatedRoute } from '@angular/router';
+import { Config } from 'src/environments/environment';
 
 @Component({
   selector: 'app-shared-desktop-view',
@@ -9,8 +9,8 @@ import { Config } from 'src/app/config/config';
   styleUrls: ['./shared-desktop-view.component.css']
 })
 export class SharedDesktopViewComponent {
-  shareSecret!: string
-  clientId!: string
+  shareSecret: string = ""
+  clientId: string = ""
   shareExpired: boolean = false
   shareAvailable: boolean = false
   serverError: boolean = false
@@ -19,6 +19,7 @@ export class SharedDesktopViewComponent {
   IframeURL!: SafeUrl
   shouldEncrypt: string
   desktopType: string = "novnc"
+  secretRegex: RegExp = /^[a-zA-Z0-9]+$/
 
   constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer,) {
     this.shouldEncrypt = document.location.protocol == 'https:' ? 'true' : 'false'
@@ -27,8 +28,14 @@ export class SharedDesktopViewComponent {
   ngOnInit() {
     let secret = String(this.route.snapshot.params['secret']);
     let secretsParts = secret.split(":")
-    this.shareSecret = secretsParts[0]
-    this.clientId = secretsParts[1]
+
+    if (this.secretRegex.test(secretsParts[0])) {
+      this.shareSecret = secretsParts[0]
+    }
+
+    if (this.secretRegex.test(secretsParts[1])) {
+      this.clientId = secretsParts[1]
+    }
   }
 
   async loadSharedDesktop() {

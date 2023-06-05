@@ -1,4 +1,5 @@
 max_ws_terminals: 10
+ws_ping_interval: 20
 server_bind_address: 0.0.0.0:7171
 debug: false
 sf_endpoint: "teso.segfault.net"

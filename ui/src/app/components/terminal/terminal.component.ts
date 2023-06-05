@@ -3,7 +3,7 @@ import { ITheme, ITerminalOptions, Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import { AttachAddonComponent } from '../attach-addon/attach-addon.component';
 import { WebglAddon } from 'xterm-addon-webgl';
-import { Config } from 'src/app/config/config';
+import { Config } from 'src/environments/environment';
 import { TerminalService } from 'src/app/services/terminal.service';
 
 

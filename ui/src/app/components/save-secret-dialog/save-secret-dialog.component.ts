@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Config } from '../../config/config';
+import { Config } from 'src/environments/environment';
 
 export interface DialogData {
   secret: string

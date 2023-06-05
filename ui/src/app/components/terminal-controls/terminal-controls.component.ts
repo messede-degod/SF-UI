@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Config } from 'src/app/config/config';
+import { Config } from 'src/environments/environment';
 import { TerminalService } from 'src/app/services/terminal.service';
 
 @Component({

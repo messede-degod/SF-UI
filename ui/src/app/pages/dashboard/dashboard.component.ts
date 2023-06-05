@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { Config } from 'src/app/config/config';
+import { Config } from 'src/environments/environment';
 
 @Component({
   selector: 'app-dashboard',

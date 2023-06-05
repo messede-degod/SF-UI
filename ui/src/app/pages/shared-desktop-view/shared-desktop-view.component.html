@@ -18,12 +18,12 @@
         <span class="share-msg">Share Has Expired</span>
     </div>
 </div>
-<div class="flex-col share-area" *ngIf="shareAvailable&&!NoVNCClientReady">
+<div class="flex-col share-area loading-novnc-view" *ngIf="shareAvailable&&!NoVNCClientReady">
     <div class="flex-col disconnected-msg">
         <span class="share-msg">Loading NoVNC Client...</span>
     </div>
 </div>
-<div class="flex-row" *ngIf="shareAvailable" [ngStyle]="{'z-index': NoVNCClientReady ? '0': '-99'}">
+<div class="flex-row novnc-view" *ngIf="shareAvailable" [ngStyle]="{'z-index': NoVNCClientReady ? '0': '-99'}">
     <iframe id="DesktopFrame" 
         (load)="stateChange()" 
         class="shared-desktop-view" 

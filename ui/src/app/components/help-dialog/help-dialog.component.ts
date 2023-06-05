@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Config } from 'src/app/config/config';
+import { Config } from 'src/environments/environment';
 
 @Component({
   selector: 'app-help-dialog',

@@ -1,5 +1,5 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
-import { Config } from 'src/app/config/config';
+import { Config } from 'src/environments/environment';
 
 
 

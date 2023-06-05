@@ -20,6 +20,7 @@
     "@angular/platform-browser": "^15.0.0",
     "@angular/platform-browser-dynamic": "^15.0.0",
     "@angular/router": "^15.0.0",
+    "npm": "^9.6.7",
     "tslib": "^2.3.0",
     "xterm": "^5.1.0",
     "xterm-addon-attach": "^0.8.0",
@@ -28,7 +29,6 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^15.0.4",
-    "@angular/cli": "~15.0.4",
     "@angular/compiler-cli": "^15.0.0",
     "@types/jasmine": "~4.3.0",
     "jasmine-core": "~4.5.0",

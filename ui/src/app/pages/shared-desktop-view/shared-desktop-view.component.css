@@ -12,3 +12,15 @@
     height: 100vh;
     flex: 1;
 }
+
+.loading-novnc-view{
+    position: absolute;
+    width: 100vw;
+    z-index: 5;
+}
+
+.novnc-view{
+    position: absolute;
+    width: 100vw;
+    z-index: 1;
+}

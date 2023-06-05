@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Config } from 'src/app/config/config';
+import { Config } from 'src/environments/environment';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';

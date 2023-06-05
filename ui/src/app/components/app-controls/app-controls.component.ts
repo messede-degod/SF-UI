@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { Config } from 'src/app/config/config';
+import { Config } from 'src/environments/environment';
 import { DashboardComponent } from 'src/app/pages/dashboard/dashboard.component';
 import { TerminalViewComponent } from 'src/app/pages/terminal-view/terminal-view.component'
 import { TerminalService } from 'src/app/services/terminal.service';

@@ -53,9 +53,6 @@ class SfTerminal {
     };
 
     constructor(termId: number) {
-        if (window.innerWidth < 800) {
-            this.terminalOptions.fontSize = 14
-        }
         this.termId = termId
         this.terminal = new Terminal(this.terminalOptions);
         this.fitAddon = new FitAddon();
@@ -169,6 +166,10 @@ export class TerminalService {
 
     constructor() {
         let localFontSize = localStorage.getItem("font-size")
+        if (window.innerWidth < 800) {
+            this.fontSize = 14
+            return
+        }
         this.fontSize = localFontSize === null ? 16 : Number(localFontSize)
     }
 

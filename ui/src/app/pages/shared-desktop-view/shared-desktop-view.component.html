@@ -1,5 +1,5 @@
 <div class="flex-col share-area" *ngIf="!shareAvailable">
-    <div class="flex-col disconnected-msg" *ngIf="!loading && !serverError && !shareExpired">
+    <div class="flex-col disconnected-msg" *ngIf="!loading && !serverError && !shareExpired && !maxSharesReached">
         <span class="share-msg">SFUI shared desktop</span>
         <div class="reconnect-button" (click)="loadSharedDesktop()">
             <span>View</span>
@@ -10,6 +10,12 @@
     </div>
     <div class="flex-col disconnected-msg" *ngIf="serverError">
         <span class="share-msg">Server Error</span>
+        <div class="reconnect-button" (click)="loadSharedDesktop()">
+            <span>Retry</span>
+        </div>
+    </div>
+    <div class="flex-col disconnected-msg" *ngIf="maxSharesReached">
+        <span class="share-msg">Max Shares Reached</span>
         <div class="reconnect-button" (click)="loadSharedDesktop()">
             <span>Retry</span>
         </div>

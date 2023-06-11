@@ -181,7 +181,10 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 		return cerr
 	}
 
-	client.IncTermCount()       // Add to terminal  Quota (SFUI.MaxWsTerminals)
+	terr := client.IncTermCount() // Add to terminal  Quota (SFUI.MaxWsTerminals)
+	if terr != nil {
+		return cerr
+	}
 	defer client.DecTermCount() // Remove from terminal Quota
 
 	var err error

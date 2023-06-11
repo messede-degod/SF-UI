@@ -20,12 +20,14 @@ type Client struct {
 	MasterSSHConnectionPty    *os.File
 	DesktopActive             bool // Whether a active desktop ws connection exists
 	MaxTerms                  int
+	MaxSharedDesktopConn      int
 	FileBrowserProxy          *httputil.ReverseProxy
 	FileBrowserServiceActive  bool
 	ShareDesktop              bool // Whether desktop sharing is active
 	SharedDesktopIsViewOnly   bool
 	SharedDesktopSecret       string
 	SharedDesktopConn         chan interface{} // Channel when closed kills all shared desktop connections
+	SharedDesktopConnCount    int              // No of active connections to shared desktop
 	// Channel when closed prevents master SSH connection from being killed by RemoveClientIfInactive,
 	// that is unless a ClientInactivityTimeout is first reached, open channel indicated a inactive client
 	// closed channel indicates a active client
@@ -47,6 +49,7 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 		TerminalsCount:            0,
 		MasterSSHConnectionActive: false,
 		MaxTerms:                  sfui.MaxWsTerminals,
+		MaxSharedDesktopConn:      sfui.MaxSharedDesktopConn,
 		ClientConn:                make(chan interface{}), // Initially no active connections exist
 		ClientActive:              true,
 	}
@@ -225,6 +228,45 @@ func (client *Client) DecTermCount() {
 
 	if fclient.TerminalsCount > 0 {
 		fclient.TerminalsCount -= 1
+	}
+
+	clients[client.ClientId] = fclient
+}
+
+func (client *Client) IncSharedDesktopConnCount() error {
+	defer client.MarkClientIfActive()
+
+	// mu is a pointer, it locks the original Client entry in "clients"
+	// first lock then read the fresh copy to prevent a dirty read
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
+	// get a fresh copy of client
+	fclient := clients[client.ClientId]
+
+	if fclient.SharedDesktopConnCount >= fclient.MaxSharedDesktopConn {
+		return errors.New("max shares reached")
+	}
+	fclient.SharedDesktopConnCount += 1
+
+	// update client details
+	clients[client.ClientId] = fclient
+	return nil
+}
+
+func (client *Client) DecSharedDesktopConnCount() {
+	defer client.MarkClientIfInactive()
+
+	// mu is a pointer, it locks the original Client entry in "clients"
+	// first lock then read the fresh copy to prevent a dirty read
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
+	// get a fresh copy of client
+	fclient := clients[client.ClientId]
+
+	if fclient.SharedDesktopConnCount > 0 {
+		fclient.SharedDesktopConnCount -= 1
 	}
 
 	clients[client.ClientId] = fclient

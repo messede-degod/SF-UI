@@ -90,6 +90,14 @@ func (sfui *SfUI) handleSharedDesktopWS(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	serr := client.IncSharedDesktopConnCount()
+	if serr != nil {
+		w.WriteHeader(http.StatusTooManyRequests)
+		w.Write([]byte(`{"status":"maximum shares active"}`))
+		return
+	}
+	defer client.DecSharedDesktopConnCount()
+
 	vncWebSockify(
 		sfui.getGUISocketPath(client.ClientId),
 		client.SharedDesktopIsViewOnly,
@@ -129,6 +137,12 @@ func (sfui *SfUI) handleSetupDesktopSharing(w http.ResponseWriter, r *http.Reque
 			if !client.DesktopActive {
 				w.WriteHeader(http.StatusGone)
 				w.Write([]byte(`{"status":"desktop is not active"}`))
+				return
+			}
+
+			if client.SharedDesktopConnCount >= client.MaxSharedDesktopConn {
+				w.WriteHeader(http.StatusTooManyRequests)
+				w.Write([]byte(`{"status":"maximum shares active"}`))
 				return
 			}
 

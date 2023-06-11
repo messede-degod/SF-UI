@@ -14,10 +14,11 @@ import (
 )
 
 type SfUI struct {
-	MaxWsTerminals    int    `yaml:"max_ws_terminals"`    // Max terminals that can be allocated per client
-	WSPingInterval    int    `yaml:"ws_ping_interval"`    // Intervals at which the client pings the terminals WS connection
-	ServerBindAddress string `yaml:"server_bind_address"` // Address to which the current app binds
-	Debug             bool   `yaml:"debug"`               // Print debug information
+	MaxWsTerminals       int    `yaml:"max_ws_terminals"`        // Max terminals that can be allocated per client
+	MaxSharedDesktopConn int    `yaml:"max_shared_desktop_conn"` // Max no of clients that can connect to a shared desktop
+	WSPingInterval       int    `yaml:"ws_ping_interval"`        // Intervals at which the client pings the terminals WS connection
+	ServerBindAddress    string `yaml:"server_bind_address"`     // Address to which the current app binds
+	Debug                bool   `yaml:"debug"`                   // Print debug information
 
 	MasterSSHCommand         string `yaml:"master_ssh_command"`          // Command used to setup the SSH Master Socket
 	TearDownMasterSSHCommand string `yaml:"teardown_master_ssh_command"` // Command used to teardown the SSH Master Socket.

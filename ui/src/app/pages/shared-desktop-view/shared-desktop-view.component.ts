@@ -14,6 +14,7 @@ export class SharedDesktopViewComponent {
   shareExpired: boolean = false
   shareAvailable: boolean = false
   serverError: boolean = false
+  maxSharesReached: boolean = false
   loading: boolean = false
   NoVNCClientReady: boolean = false
   IframeURL!: SafeUrl
@@ -44,6 +45,7 @@ export class SharedDesktopViewComponent {
     this.shareExpired = false
     this.shareAvailable = false
     this.serverError = false
+    this.maxSharesReached = false
 
     let data = {
       action: "verify",
@@ -68,6 +70,9 @@ export class SharedDesktopViewComponent {
       case 410:
       case 403:
         this.shareExpired = true
+        break
+      case 429:
+        this.maxSharesReached = true
         break
       default:
         this.serverError = true

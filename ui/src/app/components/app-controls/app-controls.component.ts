@@ -60,14 +60,17 @@ export class AppControlsComponent {
       "secret": localStorage.getItem("secret"),
     }
 
+    localStorage.removeItem("secret")
+    this.router.navigate(['/login'])
+
+    this.terminalService.disconnectAllTerminals()
+
     let response = fetch(Config.ApiEndpoint + "/logout", {
       "method": "POST",
       "body": JSON.stringify(logoutData)
     })
     let rdata = await response
 
-    localStorage.removeItem("secret")
-    this.router.navigate(['/login'])
   }
 
   sidebarVisible: boolean = true

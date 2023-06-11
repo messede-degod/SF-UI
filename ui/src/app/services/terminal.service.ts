@@ -198,6 +198,12 @@ export class TerminalService {
         }
     }
 
+    disconnectAllTerminals(){
+        this.terminals.forEach((sfTerminal,termId) => {
+            this.removeTerminal(termId)
+        })
+    }
+
     changeTerminalFontSize(fontSize: number) {
         this.terminals.forEach(sfTerminal => {
             sfTerminal.terminal.options.fontSize = fontSize

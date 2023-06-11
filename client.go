@@ -269,7 +269,7 @@ func (client *Client) DesktopIsActivate() bool {
 	return fclient.DesktopActive
 }
 
-func (client *Client) ActivateDesktopSharing(viewOnly bool, SharedSecret string) {
+func (client *Client) ActivateDesktopSharing(viewOnly bool, SharedSecret string) (AlreadyShared bool) {
 	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
 	// first lock then read the fresh copy to prevent a dirty read
 	client.mu.Lock()
@@ -283,7 +283,9 @@ func (client *Client) ActivateDesktopSharing(viewOnly bool, SharedSecret string)
 		fclient.SharedDesktopSecret = SharedSecret
 		fclient.SharedDesktopConn = make(chan interface{})
 		clients[client.ClientId] = fclient
+		return false
 	}
+	return true // Already shared
 }
 
 func (client *Client) DeactivateDesktopSharing() {

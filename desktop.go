@@ -135,7 +135,10 @@ func (sfui *SfUI) handleSetupDesktopSharing(w http.ResponseWriter, r *http.Reque
 			switch desktopShareReq.Action {
 			case "activate":
 				sharedSecret := RandomStr(24)
-				client.ActivateDesktopSharing(desktopShareReq.ViewOnly, sharedSecret)
+				alreadyShared := client.ActivateDesktopSharing(desktopShareReq.ViewOnly, sharedSecret)
+				if alreadyShared {
+					sharedSecret = client.SharedDesktopSecret
+				}
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(fmt.Sprintf(`{"status":"OK","client_id":"%s","share_secret":"%s"}`,
 					client.ClientId, sharedSecret)))

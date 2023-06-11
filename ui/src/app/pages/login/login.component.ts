@@ -15,6 +15,9 @@ export class LoginComponent {
   router!: Router
   rippleColor: string = "primary"
   loadingDashBoard: boolean = false
+  buildHash: string = ""
+  buildTime: string = ""
+  server: string = ""
 
   constructor(public dialog: MatDialog, private snackBar: MatSnackBar, router: Router) {
     this.router = router
@@ -31,6 +34,9 @@ export class LoginComponent {
       this.secret = storedSecret
       this.login()
     }
+    this.buildHash = Config.BuildHash
+    this.buildTime = Config.BuildTime
+    this.server = Config.SfEndpoint
   }
 
   curTheme: string | null = null
@@ -45,6 +51,18 @@ export class LoginComponent {
     dialogRef.afterClosed().subscribe(result => {
       localStorage.setItem('intro-shown', 'true')
     });
+  }
+
+  openSource() {
+    window.open("https://github.com/messede-degod/SF-UI","_blank")
+  }
+
+  openDonations(){
+    window.open("https://www.thc.org/segfault/upgrade/","_blank")
+  }
+
+  openBuildInfo(){
+    window.open("https://github.com/messede-degod/SF-UI/commit/"+this.buildHash,"_blank")
   }
 
   showSaveSecretDialog(secret: string) {

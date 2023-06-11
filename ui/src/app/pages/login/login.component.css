@@ -46,9 +46,13 @@
     border-radius: 999px;
 }
 
+.help-menu>img{
+    margin-left: 0.8rem;
+}
+
 .input-secret>img:hover,
 .help-menu>img:hover {
-    filter: var(--active-bg);
+    filter: var(--help-btn-bg);
 }
 
 .login-info {
@@ -93,11 +97,23 @@
     font-size: 9rem !important;
 }
 
-.help-menu {
+.bottom-bar{
+    justify-content: space-between;
+}
+
+.help-menu{
     background-color: var(--background);
     display: flex;
     margin: 0.5rem;
     flex-direction: row-reverse;
+}
+
+.build-info{
+    margin: 0.5rem;
+}
+
+.build-hash{
+    cursor: pointer;
 }
 
 .loading-dashboard{

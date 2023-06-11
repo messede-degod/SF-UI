@@ -2,7 +2,7 @@
     <div class="main-section">
         <div class="flex-col login-container">
             <div class="menu-brand flex-col">
-                <h6>SF</h6>
+                <h6 title="Segfault">SF</h6>
                 <span id="brandInfo">by hackerschoice</span>
             </div>
             <div *ngIf="LoginWithSecret && !loadingDashBoard" class="input-secret">
@@ -41,7 +41,15 @@
             </div>
         </div>
     </div>
-    <div class="help-menu">
-        <img src="../../../assets/icons/question.svg" alt="" (click)="openHelpDialog()">
+    <div class="flex flex-row bottom-bar">
+        <div class="flex flex-col build-info">
+            <span *ngIf="buildHash!=''">Build: <u class="build-hash" (click)="openBuildInfo()">{{buildHash}}</u></span>
+            <span *ngIf="server!=''">Server: {{server}}</span>
+        </div>
+        <div class="help-menu">
+            <img src="../../../assets/icons/question.svg" alt="" (click)="openHelpDialog()" title="help">
+            <img src="../../../assets/icons/cash.svg" alt="" (click)="openDonations()" title="donate to segfault">
+            <img src="../../../assets/icons/code.svg" alt="" (click)="openSource()" title="source code">
+        </div>
     </div>
 </div>

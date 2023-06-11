@@ -45,6 +45,7 @@ type SfUI struct {
 }
 
 var buildTime string
+var buildHash string
 var SfuiVersion string = "0.1.1"
 
 //go:embed ui/dist/sf-ui

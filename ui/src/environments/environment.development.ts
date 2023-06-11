@@ -9,4 +9,6 @@ export class Config {
     public static DesktopDisabled = false
     public static SfEndpoint = "segfault.net"
     public static WSPingInterval = 25
+    public static BuildHash = ""
+    public static BuildTime = ""
 }

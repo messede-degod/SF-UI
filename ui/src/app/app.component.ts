@@ -15,6 +15,11 @@ export class AppComponent {
   constructor(private snackBar: MatSnackBar, router: Router) {
     this.router = router
     this.fetchConfig()
+    const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
+    if (darkThemeMq.matches) {
+      document.documentElement.setAttribute('data-theme', "dark");
+      localStorage.setItem('theme', "dark")
+    }
   }
 
   async fetchConfig() {
@@ -25,6 +30,8 @@ export class AppComponent {
       Config.MaxOpenTerminals = config.max_terminals
       Config.DesktopDisabled = config.desktop_disabled
       Config.SfEndpoint = config.sf_endpoint
+      Config.BuildHash = config.build_hash
+      Config.BuildTime =config.build_time
       if (config.ws_ping_interval) {
         if (config.ws_ping_interval >= 5) {
           Config.WSPingInterval = config.ws_ping_interval

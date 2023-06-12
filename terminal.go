@@ -37,6 +37,7 @@ const (
 	SFUI_CMD_RESUME        = '3'
 	SFUI_CMD_AUTHENTICATE  = '4'
 	SFUI_CMD_PING          = '5'
+	SFUI_CMD_PONG          = '6'
 	TERM_MAX_AUTH_FAILURES = 3
 )
 
@@ -157,12 +158,25 @@ func (terminal *Terminal) Read(msg []byte) (n int, err error) {
 			}
 			return 0, nil
 		case SFUI_CMD_PING:
+			terminal.sendPong()
 			return 0, nil
 		}
 		copy(msg, terminal.MsgBuf[1:]) // Copy everything except the first byte
 		return n - 1, err
 	}
 	return n, err
+}
+
+var PONG_CMD_BYTES = []byte{SFUI_CMD_PONG} // Mark as Pong
+var REG_CMD_BYTES = []byte{'0'}            // Mark as Regular data chunk
+
+func (terminal *Terminal) Write(msg []byte) (n int, err error) {
+	n, err = terminal.WSConn.Write(append(REG_CMD_BYTES[:], msg[:]...))
+	return n - 1, err // n-1 so that writer does not get confused as to where the extra 1 bytes came from
+}
+
+func (terminal *Terminal) sendPong() (n int, err error) {
+	return terminal.WSConn.Write(PONG_CMD_BYTES)
 }
 
 var validSecret = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
@@ -195,7 +209,7 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 	}
 	defer terminal.Pty.Close()
 
-	go io.Copy(terminal.WSConn, terminal.Pty) // Copy from PTY -> WS
+	go io.Copy(terminal, terminal.Pty) // Copy from PTY -> WS
 
 	// Copy from WS -> PTY, but use the Read() function
 	// we defined for Terminal to read from the websocket

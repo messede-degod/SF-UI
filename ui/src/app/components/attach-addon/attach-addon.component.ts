@@ -35,7 +35,7 @@ export class AttachAddonComponent implements ITerminalAddon {
   public activate(terminal: Terminal): void {
     this._disposables.push(
       addSocketListener(this._socket, 'message', ev => {
-        const data: ArrayBuffer | string = ev.data;
+        const data: ArrayBuffer | string = ev.data.slice(1);
         terminal.write(typeof data === 'string' ? data : new Uint8Array(data));
       })
     );

@@ -6,7 +6,7 @@
                 <span id="brandInfo">by hackerschoice</span>
             </div>
             <div *ngIf="LoginWithSecret && !loadingDashBoard" class="input-secret">
-                <input type="password" autofocus [(ngModel)]="secret" placeholder="Secret..." required (keyup.enter)="login()">
+                <input type="password" [disabled]="loginDisabled" autofocus [(ngModel)]="secret" placeholder="Secret..." required (keyup.enter)="login()">
                 <img src="../../../assets/icons/arrow-forward.svg" alt="" (click)="login()">
             </div>
 

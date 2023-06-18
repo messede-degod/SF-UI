@@ -19,19 +19,20 @@ type TermRequest struct {
 	Secret      string `json:"secret"`
 	NewInstance bool   `json:"new_instance"`
 	ClientIp    string
-	// SfEndpoint string `json:"sf_endpoint"`
+	WindowId    string `json:"window_id"`
 }
 
 type TermResponse struct {
-	Status string `json:"status"`
-	Secret string `json:"secret,omitempty"`
-	// SfEndpoint string `json:"sf_endpoint"`
+	Status      string `json:"status"`
+	Secret      string `json:"secret,omitempty"`
+	IsDuplicate bool   `json:"is_duplicate_session,omitempty"`
 }
 
 // First byte read from Terminal.Pty is matched with
 // the following constants, to determine the type of data
 // a client is sending
 const (
+	SFUI_NORMAL_MSG        = '0'
 	SFUI_CMD_RESIZE        = '1'
 	SFUI_CMD_PAUSE         = '2'
 	SFUI_CMD_RESUME        = '3'
@@ -75,7 +76,7 @@ func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
 		terminal.ClientSecret = clientSecret
 
 		if !sfui.originAcceptable(ws.Request()) {
-			ws.Write([]byte(`unacceptable origin`))
+			ws.Write([]byte(string(SFUI_NORMAL_MSG) + `unacceptable origin`))
 			return
 		}
 
@@ -83,13 +84,13 @@ func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
 			Secret:   clientSecret,
 			ClientIp: clientIp,
 		}); err != nil { // Invalid Secret
-			ws.Write([]byte(err.Error()))
+			ws.Write([]byte(string(SFUI_NORMAL_MSG) + err.Error()))
 			return
 		}
 
 		err := sfui.handleWsPty(&terminal)
 		if err != nil {
-			ws.Write([]byte(err.Error()))
+			ws.Write([]byte(string(SFUI_NORMAL_MSG) + err.Error()))
 		}
 
 	}).ServeHTTP(w, r)

@@ -178,11 +178,11 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {
 	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
 	if err == nil {
-		termReq := TermRequest{}
-		if json.Unmarshal(data, &termReq) == nil {
-			termReq.ClientIp = sfui.getClientAddr(r)
-			if termReq.NewInstance {
-				secret, err := sfui.generateSecret(&termReq)
+		loginReq := TermRequest{}
+		if json.Unmarshal(data, &loginReq) == nil {
+			loginReq.ClientIp = sfui.getClientAddr(r)
+			if loginReq.NewInstance {
+				secret, err := sfui.generateSecret(&loginReq)
 				if err == nil {
 					w.WriteHeader(http.StatusOK)
 					termRes := TermResponse{
@@ -195,11 +195,37 @@ func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			if sfui.secretValid(&termReq) == nil {
+			if sfui.secretValid(&loginReq) == nil {
+				client, cerr := sfui.GetClient(loginReq.Secret)
+				isDuplicate := false
+				if cerr == nil {
+					// 1 active and non matching window ids - Duplicate
+					// 2 active and matching window ids - Non Duplicate
+					winIdMatches := (client.WindowId == loginReq.WindowId)
+
+					if client.ClientActive && !winIdMatches {
+						isDuplicate = true
+					}
+
+					// 3 inactive and matching window ids - Non Duplicate
+					// 4 inactive and non matching window ids - Non Duplicate, set new window id
+					if !client.ClientActive && !winIdMatches {
+						client.SetWindowId(loginReq.WindowId)
+					}
+				} else {
+					// start a new client
+					go func() {
+						client, err := sfui.GetExistingClientOrMakeNew(loginReq.Secret, loginReq.ClientIp)
+						if err != nil {
+							client.SetWindowId(loginReq.WindowId)
+						}
+					}()
+				}
+
 				w.WriteHeader(http.StatusOK)
 				termRes := TermResponse{
-					Status: "OK",
-					// SfEndpoint: sfui.SfEndpoint,
+					Status:      "OK",
+					IsDuplicate: isDuplicate,
 				}
 				response, _ := json.Marshal(termRes)
 				w.Write(response)

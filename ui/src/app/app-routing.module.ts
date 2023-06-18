@@ -1,14 +1,17 @@
 import { NgModule } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivateFn, RouterModule, RouterStateSnapshot, Routes } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivateFn, RouterModule, RouterStateSnapshot, Routes, createUrlTreeFromSnapshot } from '@angular/router';
+import { Config } from 'src/environments/environment';
 
 const canActivateRoute: CanActivateFn =
   (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
     let secret = localStorage.getItem("secret")
-    if (secret == "" || secret == null) {
-      return false
+    if (secret == "" || secret == null || !Config.LoggedIn) {
+      return createUrlTreeFromSnapshot(route, ['/login']);
+
     }
     return true
   };
+
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },

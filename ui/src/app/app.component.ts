@@ -20,6 +20,11 @@ export class AppComponent {
       document.documentElement.setAttribute('data-theme', "dark");
       localStorage.setItem('theme', "dark")
     }
+
+    let windowId = sessionStorage.getItem("windowId")
+    if(windowId==null||windowId==""){
+      sessionStorage.setItem("windowId",Math.random().toString(16).substring(2,18))
+    }
   }
 
   async fetchConfig() {

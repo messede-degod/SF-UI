@@ -11,4 +11,6 @@ export class Config {
     public static WSPingInterval = 25
     public static BuildHash = ""
     public static BuildTime = ""
+    public static LoggedIn = false
+    public static WindowId = ""
 }

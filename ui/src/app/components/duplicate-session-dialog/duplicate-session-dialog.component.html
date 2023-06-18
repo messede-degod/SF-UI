@@ -1,0 +1,15 @@
+<div class="help-dialog">
+    <div mat-dialog-title>
+        <span>Duplicate Session!</span>
+    </div>
+    <div class="help-content">
+        <p>Your already have a session active on another tab/browser/computer.</p>
+        <br>
+        <p>Clicking <em>Logout</em> will kill all sessions and let you continue here.</p>
+    </div>
+    <mat-dialog-actions align="end">
+        <button *ngIf="!LogginOut"  mat-stroked-button (click)="onLogout()" color="warn">Logout</button>
+        <button *ngIf="LogginOut"  mat-stroked-button color="warn">Loggin Out...</button>
+        <button class="help-close-button" mat-stroked-button (click)="onCancel()" color="primary" [disabled]="LogginOut" >Cancel</button>
+    </mat-dialog-actions>
+</div>

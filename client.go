@@ -33,6 +33,8 @@ type Client struct {
 	// closed channel indicates a active client
 	ClientConn   chan interface{}
 	ClientActive bool // Atleast one active connection exists
+	// Random value supplied by client during login , helps to identify duplicate sessions
+	WindowId string
 }
 
 var AcceptClients = true
@@ -148,7 +150,7 @@ func (sfui *SfUI) GetExistingClientOrMakeNew(ClientSecret string, ClientIp strin
 	}
 
 	if !client.MasterSSHConnectionActive {
-		werr := sfui.waitForMasterSSHSocket(client.ClientId, 5, 2)
+		werr := sfui.waitForMasterSSHSocket(client.ClientId, 5*time.Second, 2)
 		if werr != nil {
 			return client, werr
 		}
@@ -374,6 +376,15 @@ func (client *Client) MarkClientIfActive() {
 			clients[client.ClientId] = fclient
 		}
 	}
+}
+
+func (client *Client) SetWindowId(WindowId string) {
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
+	fclient := clients[client.ClientId]
+	fclient.WindowId = WindowId
+	clients[client.ClientId] = fclient
 }
 
 // Stop New Clients from obtaining service

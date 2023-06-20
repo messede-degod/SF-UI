@@ -12,5 +12,5 @@ export class Config {
     public static BuildHash = ""
     public static BuildTime = ""
     public static LoggedIn = false
-    public static WindowId = ""
+    public static TabId = ""
 }

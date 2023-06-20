@@ -88,7 +88,7 @@ export class LoginComponent {
     var loginData = {
       "secret": this.secret,
       "new_instance": false,
-      "window_id": sessionStorage.getItem("windowId")
+      "tab_id": Config.TabId
     }
 
     if (this.LoginWithSecret) {

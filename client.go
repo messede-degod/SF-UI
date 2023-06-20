@@ -34,7 +34,7 @@ type Client struct {
 	ClientConn   chan interface{}
 	ClientActive bool // Atleast one active connection exists
 	// Random value supplied by client during login , helps to identify duplicate sessions
-	WindowId string
+	TabId string
 }
 
 var AcceptClients = true
@@ -170,7 +170,7 @@ func (sfui *SfUI) GetClient(ClientSecret string) (Client, error) {
 	cmu.Lock()
 	defer cmu.Unlock()
 
-	client, ok := clients[getClientId(ClientSecret)]
+	client, ok := clients[getClientId(ClientSecret)] // race possible
 	if ok {
 		return client, nil
 	}
@@ -378,12 +378,12 @@ func (client *Client) MarkClientIfActive() {
 	}
 }
 
-func (client *Client) SetWindowId(WindowId string) {
+func (client *Client) SetTabId(TabId string) {
 	client.mu.Lock()
 	defer client.mu.Unlock()
 
 	fclient := clients[client.ClientId]
-	fclient.WindowId = WindowId
+	fclient.TabId = TabId
 	clients[client.ClientId] = fclient
 }
 

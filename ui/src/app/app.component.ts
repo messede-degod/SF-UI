@@ -21,10 +21,22 @@ export class AppComponent {
       localStorage.setItem('theme', "dark")
     }
 
-    let windowId = sessionStorage.getItem("windowId")
-    if(windowId==null||windowId==""){
-      sessionStorage.setItem("windowId",Math.random().toString(16).substring(2,18))
+    const tabIdKey = "tabId"
+    const initTabId = (): string => {
+      const id = sessionStorage.getItem(tabIdKey)
+      if (id) {
+        sessionStorage.removeItem(tabIdKey)
+        return id
+      }
+      return Math.random().toString(16).substring(2, 18)
     }
+
+    const tabId = initTabId()
+    window.addEventListener("beforeunload", () => {
+      sessionStorage.setItem(tabIdKey, tabId)
+    })
+
+    Config.TabId = tabId
   }
 
   async fetchConfig() {
@@ -36,7 +48,7 @@ export class AppComponent {
       Config.DesktopDisabled = config.desktop_disabled
       Config.SfEndpoint = config.sf_endpoint
       Config.BuildHash = config.build_hash
-      Config.BuildTime =config.build_time
+      Config.BuildTime = config.build_time
       if (config.ws_ping_interval) {
         if (config.ws_ping_interval >= 5) {
           Config.WSPingInterval = config.ws_ping_interval

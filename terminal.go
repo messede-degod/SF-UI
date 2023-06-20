@@ -19,7 +19,7 @@ type TermRequest struct {
 	Secret      string `json:"secret"`
 	NewInstance bool   `json:"new_instance"`
 	ClientIp    string
-	WindowId    string `json:"window_id"`
+	TabId       string `json:"tab_id"`
 }
 
 type TermResponse struct {

@@ -119,19 +119,18 @@ export class LoginComponent {
 
       let response = await rdata.json()
 
-      if (!this.LoginWithSecret) {  // Disable duplcate check for new instances
-        if (response.is_duplicate_session) {
-          // Prompt if session is duplicate
-          let LoggedOutOfAllSessionsPromise = this.handleDuplicateSession()
-          let LoggedOutOfAllSessions = await LoggedOutOfAllSessionsPromise
 
-          if (!LoggedOutOfAllSessions) { // dont go to dashboard
-            this.loginDisabled = false
-            return
-          } else {  // fresh login after killing all previous sessions
-            this.loginDisabled = false
-            this.login()
-          }
+      if (response.is_duplicate_session) {
+        // Prompt if session is duplicate
+        let LoggedOutOfAllSessionsPromise = this.handleDuplicateSession()
+        let LoggedOutOfAllSessions = await LoggedOutOfAllSessionsPromise
+
+        if (!LoggedOutOfAllSessions) { // dont go to dashboard
+          this.loginDisabled = false
+          return
+        } else {  // fresh login after killing all previous sessions
+          this.loginDisabled = false
+          this.login()
         }
       }
 

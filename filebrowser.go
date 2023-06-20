@@ -20,7 +20,7 @@ func (sfui *SfUI) handleFileBrowser(w http.ResponseWriter, r *http.Request) {
 		clientSecret = r.URL.Query().Get("sf-secret")
 	}
 
-	if sfui.ValidSecret(clientSecret) {
+	if !sfui.ValidSecret(clientSecret) {
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte(`{"status":"Invalid Secret"}`))
 		return

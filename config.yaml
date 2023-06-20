@@ -2,7 +2,7 @@ max_ws_terminals: 10
 max_shared_desktop_conn: 4
 ws_ping_interval: 20
 server_bind_address: 0.0.0.0:7171
-debug: false
+debug: true
 sf_endpoint: "teso.segfault.net"
 sf_ui_origin: http://127.0.0.1:7171
 disable_origin_check: true

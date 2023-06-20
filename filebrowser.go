@@ -20,25 +20,27 @@ func (sfui *SfUI) handleFileBrowser(w http.ResponseWriter, r *http.Request) {
 		clientSecret = r.URL.Query().Get("sf-secret")
 	}
 
-	if validSecret(clientSecret) {
-		client, err := sfui.GetClient(clientSecret)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, err.Error())))
-			return
-		}
-		if client.FileBrowserProxy == nil { // Proxy can timeout after certain time
-			w.WriteHeader(http.StatusGatewayTimeout)
-			w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, err.Error())))
-			return
-		}
-
-		r.URL.Path = strings.Replace(r.URL.Path, "/filebrowser", "", 1)
-		client.FileBrowserProxy.ServeHTTP(w, r)
+	if sfui.ValidSecret(clientSecret) {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte(`{"status":"Invalid Secret"}`))
 		return
 	}
-	w.WriteHeader(http.StatusForbidden)
-	w.Write([]byte(`{"status":"Invalid Secret"}`))
+
+	client, err := sfui.GetClient(clientSecret)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, err.Error())))
+		return
+	}
+
+	if client.FileBrowserProxy == nil { // Proxy can timeout after certain time
+		w.WriteHeader(http.StatusGatewayTimeout)
+		w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, err.Error())))
+		return
+	}
+
+	r.URL.Path = strings.Replace(r.URL.Path, "/filebrowser", "", 1)
+	client.FileBrowserProxy.ServeHTTP(w, r)
 }
 
 type setupFileBrowser struct {
@@ -53,7 +55,7 @@ func (sfui *SfUI) handleSetupFileBrowser(w http.ResponseWriter, r *http.Request)
 	if err == nil {
 		setupFileBrowserReq := setupFileBrowser{}
 		if json.Unmarshal(data, &setupFileBrowserReq) == nil {
-			if !validSecret(setupFileBrowserReq.ClientSecret) {
+			if !sfui.ValidSecret(setupFileBrowserReq.ClientSecret) {
 				w.Write([]byte(`unacceptable secret`))
 				return
 			}

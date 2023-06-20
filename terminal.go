@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"regexp"
 	"syscall"
 	"unsafe"
 
@@ -180,10 +179,8 @@ func (terminal *Terminal) sendPong() (n int, err error) {
 	return terminal.WSConn.Write(PONG_CMD_BYTES)
 }
 
-var validSecret = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
-
 func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
-	if !validSecret(terminal.ClientSecret) {
+	if !sfui.ValidSecret(terminal.ClientSecret) {
 		return errors.New("unacceptable secret")
 	}
 

@@ -40,8 +40,9 @@ type SfUI struct {
 	//			|-sfui/		(created by sfui- container for client dirs)
 	//				|-perClientUniqDir/ (a unique string derived from secret)
 	//						- gui.sock (ssh -L ./gui.sock:127.0.0.1:2000 root@segfault.net)
-	WorkDirectory           string `yaml:"work_directory"`
-	ClientInactivityTimeout int    `yaml:"client_inactivity_timeout"` // Minutes after which the clients master SSH connection is killed
+	WorkDirectory           string              `yaml:"work_directory"`
+	ClientInactivityTimeout int                 `yaml:"client_inactivity_timeout"` // Minutes after which the clients master SSH connection is killed
+	ValidSecret             func(s string) bool // Secret Validator
 }
 
 var buildTime string
@@ -195,7 +196,7 @@ func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			if sfui.secretValid(&loginReq) == nil {
+			if sfui.ValidSecret(loginReq.Secret) {
 				client, cerr := sfui.GetClient(loginReq.Secret)
 				isDuplicate := false
 				if cerr == nil {
@@ -242,7 +243,7 @@ func (sfui *SfUI) handleLogout(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		logoutReq := TermRequest{}
 		if json.Unmarshal(data, &logoutReq) == nil {
-			if validSecret(logoutReq.Secret) {
+			if sfui.ValidSecret(logoutReq.Secret) {
 				// Remove the client connection
 				client, err := sfui.GetClient(logoutReq.Secret)
 				if err == nil { // Client exists

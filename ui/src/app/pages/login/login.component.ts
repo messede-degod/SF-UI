@@ -17,7 +17,6 @@ export class LoginComponent {
   rippleColor: string = "primary"
   loadingDashBoard: boolean = false
   buildHash: string = Config.BuildHash
-  buildTime: string = Config.BuildTime
   server: string = Config.SfEndpoint
   loginDisabled: boolean = false
 
@@ -92,7 +91,7 @@ export class LoginComponent {
     }
 
     if (this.LoginWithSecret) {
-      let secretValid = this.secret.match('[a-zA-Z]*$')
+      let secretValid = this.secret.match('^[a-zA-Z0-9]{6,}$')
       if (secretValid == null || secretValid[0] == '') {
         this.logginInMsg = this.snackBar.open("Please Enter A Valid Secret !", "OK", {
           duration: 2 * 1000
@@ -119,17 +118,20 @@ export class LoginComponent {
       this.logginInMsg.dismiss()
 
       let response = await rdata.json()
-      if (response.is_duplicate_session) {
-        // Prompt if session is duplicate
-        let LoggedOutOfAllSessionsPromise = this.handleDuplicateSession()
-        let LoggedOutOfAllSessions = await LoggedOutOfAllSessionsPromise
 
-        if (!LoggedOutOfAllSessions) { // dont go to dashboard
-          this.loginDisabled = false
-          return
-        } else {  // fresh login after killing all previous sessions
-          this.loginDisabled = false
-          this.login()
+      if (!this.LoginWithSecret) {  // Disable duplcate check for new instances
+        if (response.is_duplicate_session) {
+          // Prompt if session is duplicate
+          let LoggedOutOfAllSessionsPromise = this.handleDuplicateSession()
+          let LoggedOutOfAllSessions = await LoggedOutOfAllSessionsPromise
+
+          if (!LoggedOutOfAllSessions) { // dont go to dashboard
+            this.loginDisabled = false
+            return
+          } else {  // fresh login after killing all previous sessions
+            this.loginDisabled = false
+            this.login()
+          }
         }
       }
 
@@ -138,10 +140,9 @@ export class LoginComponent {
       if (this.LoginWithSecret) {
         localStorage.setItem('secret', this.secret)
       } else {
-        let respBody = await rdata.json()
-        localStorage.setItem('secret', respBody.secret)
+        localStorage.setItem('secret', response.secret)
         // We are creating a new instance, prompt the user to save the secret
-        this.showSaveSecretDialog(respBody.secret)
+        this.showSaveSecretDialog(response.secret)
       }
 
       Config.LoggedIn = true

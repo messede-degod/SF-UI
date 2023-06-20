@@ -15,7 +15,7 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 	clientSecret := queryVals.Get("secret")
 	desktopType := queryVals.Get("type")
 
-	if !validSecret(clientSecret) {
+	if !sfui.ValidSecret(clientSecret) {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte(`unacceptable secret`))
 		return
@@ -69,7 +69,7 @@ func (sfui *SfUI) handleSharedDesktopWS(w http.ResponseWriter, r *http.Request) 
 	clientId := queryVals.Get("client_id")
 	shareSecret := queryVals.Get("secret")
 
-	if !validSecret(clientId) {
+	if !sfui.ValidSecret(clientId) {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte(`unacceptable secret`))
 		return

@@ -16,11 +16,13 @@ export class AppComponent {
     this.router = router
     this.fetchConfig()
     const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
-    if (darkThemeMq.matches) {
+    const LightThemeSetExplicity = localStorage.getItem("theme") == "light" ? true : false
+    if (darkThemeMq.matches && !LightThemeSetExplicity) {
       document.documentElement.setAttribute('data-theme', "dark");
       localStorage.setItem('theme', "dark")
     }
 
+    // Duplicate session detection mechanism
     const tabIdKey = "tabId"
     const initTabId = (): string => {
       const id = sessionStorage.getItem(tabIdKey)

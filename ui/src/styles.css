@@ -327,7 +327,7 @@
 }
 
 .help-close-button {
-    background-color: var(--inactive-bg);
+    background-color: var(--close-btn-color) !important;
 }
 
 .help-content {
@@ -335,6 +335,7 @@
     margin: 2rem;
     display: flex;
     flex-direction: column;
+    line-height: 1.5 rem;
 }
 
 @media only screen and (max-width: 800px) {
@@ -362,6 +363,10 @@
 .sub-list {
     margin-top: 0;
     margin-left: 4rem;
+}
+
+.sub-list>li {
+    line-height: 1.6rem;
 }
 
 .help-heading {

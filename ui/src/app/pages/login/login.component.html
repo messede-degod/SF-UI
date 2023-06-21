@@ -12,11 +12,10 @@
 
             <div *ngIf="!LoginWithSecret" class="flex-col login-btn-container">
                 <div>
-                    <button mat-raised-button class="start-new-btn" (click)="login()">New Server</button>
+                    <button mat-raised-button class="start-new-btn" (click)="login()">I'm New Here</button>
                 </div>
                 <div>
-                    <button mat-raised-button class="enter-secret-btn" (click)="toggleLoginWithSecret()">Existing
-                        Server</button>
+                    <button mat-raised-button class="enter-secret-btn" (click)="toggleLoginWithSecret()">I've Been Here</button>
                 </div>
             </div>
             <div *ngIf="!loadingDashBoard" class="login-info">

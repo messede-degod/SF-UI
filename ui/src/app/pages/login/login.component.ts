@@ -25,9 +25,6 @@ export class LoginComponent {
     if (localStorage.getItem('theme') == 'dark') {
       this.setTheme('dark')
     }
-    if (localStorage.getItem('intro-shown') != 'true') {
-      this.openHelpDialog()
-    }
     let storedSecret = localStorage.getItem('secret')
     if (storedSecret != null) {
       this.LoginWithSecret = true
@@ -47,10 +44,7 @@ export class LoginComponent {
   }
 
   openHelpDialog() {
-    const dialogRef = this.dialog.open(HelpDialogComponent);
-    dialogRef.afterClosed().subscribe(result => {
-      localStorage.setItem('intro-shown', 'true')
-    });
+    this.dialog.open(HelpDialogComponent);
   }
 
   openSource() {

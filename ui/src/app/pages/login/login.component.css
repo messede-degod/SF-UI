@@ -61,6 +61,7 @@
     font-style: italic;
     font-size: 1.2rem;
     text-align: center;
+    line-height: 1.5rem;
 }
 
 .input-secret {

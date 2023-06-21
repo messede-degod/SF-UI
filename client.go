@@ -128,9 +128,11 @@ func (sfui *SfUI) RemoveClientIfInactive(clientSecret string) {
 				select {
 				case <-time.After(time.Minute * time.Duration(sfui.ClientInactivityTimeout)):
 					// After timeout
-					client.mu.Lock()
-					sfui.RemoveClient(&client)
-					// Once removed there is nothing left to unlock
+					if client.mu != nil {
+						client.mu.Lock()
+						sfui.RemoveClient(&client)
+						// Once removed there is nothing left to unlock
+					}
 					break
 				case _, ok := <-client.ClientConn:
 					// New connection from client
@@ -199,192 +201,216 @@ func getClientId(ClientSecret string) string {
 func (client *Client) IncTermCount() error {
 	defer client.MarkClientIfActive()
 
-	// mu is a pointer, it locks the original Client entry in "clients"
-	// first lock then read the fresh copy to prevent a dirty read
-	client.mu.Lock()
-	defer client.mu.Unlock()
+	if client.mu != nil {
+		// mu is a pointer, it locks the original Client entry in "clients"
+		// first lock then read the fresh copy to prevent a dirty read
+		client.mu.Lock()
+		defer client.mu.Unlock()
 
-	// get a fresh copy of client
-	fclient := clients[client.ClientId]
+		// get a fresh copy of client
+		fclient := clients[client.ClientId]
 
-	if fclient.TerminalsCount >= fclient.MaxTerms {
-		return errors.New("Max Terminals allocated")
+		if fclient.TerminalsCount >= fclient.MaxTerms {
+			return errors.New("Max Terminals allocated")
+		}
+		fclient.TerminalsCount += 1
+
+		// update client details
+		clients[client.ClientId] = fclient
 	}
-	fclient.TerminalsCount += 1
-
-	// update client details
-	clients[client.ClientId] = fclient
 	return nil
 }
 
 func (client *Client) DecTermCount() {
 	defer client.MarkClientIfInactive()
 
-	// mu is a pointer, it locks the original Client entry in "clients"
-	// first lock then read the fresh copy to prevent a dirty read
-	client.mu.Lock()
-	defer client.mu.Unlock()
+	if client.mu != nil {
+		// mu is a pointer, it locks the original Client entry in "clients"
+		// first lock then read the fresh copy to prevent a dirty read
+		client.mu.Lock()
+		defer client.mu.Unlock()
 
-	// get a fresh copy of client
-	fclient := clients[client.ClientId]
+		// get a fresh copy of client
+		fclient := clients[client.ClientId]
 
-	if fclient.TerminalsCount > 0 {
-		fclient.TerminalsCount -= 1
+		if fclient.TerminalsCount > 0 {
+			fclient.TerminalsCount -= 1
+		}
+
+		clients[client.ClientId] = fclient
 	}
-
-	clients[client.ClientId] = fclient
 }
 
 func (client *Client) IncSharedDesktopConnCount() error {
 	defer client.MarkClientIfActive()
 
-	// mu is a pointer, it locks the original Client entry in "clients"
-	// first lock then read the fresh copy to prevent a dirty read
-	client.mu.Lock()
-	defer client.mu.Unlock()
+	if client.mu != nil {
+		// mu is a pointer, it locks the original Client entry in "clients"
+		// first lock then read the fresh copy to prevent a dirty read
+		client.mu.Lock()
+		defer client.mu.Unlock()
 
-	// get a fresh copy of client
-	fclient := clients[client.ClientId]
+		// get a fresh copy of client
+		fclient := clients[client.ClientId]
 
-	if fclient.SharedDesktopConnCount >= fclient.MaxSharedDesktopConn {
-		return errors.New("max shares reached")
+		if fclient.SharedDesktopConnCount >= fclient.MaxSharedDesktopConn {
+			return errors.New("max shares reached")
+		}
+		fclient.SharedDesktopConnCount += 1
+
+		// update client details
+		clients[client.ClientId] = fclient
 	}
-	fclient.SharedDesktopConnCount += 1
-
-	// update client details
-	clients[client.ClientId] = fclient
 	return nil
 }
 
 func (client *Client) DecSharedDesktopConnCount() {
 	defer client.MarkClientIfInactive()
 
-	// mu is a pointer, it locks the original Client entry in "clients"
-	// first lock then read the fresh copy to prevent a dirty read
-	client.mu.Lock()
-	defer client.mu.Unlock()
+	if client.mu != nil {
+		// mu is a pointer, it locks the original Client entry in "clients"
+		// first lock then read the fresh copy to prevent a dirty read
+		client.mu.Lock()
+		defer client.mu.Unlock()
 
-	// get a fresh copy of client
-	fclient := clients[client.ClientId]
+		// get a fresh copy of client
+		fclient := clients[client.ClientId]
 
-	if fclient.SharedDesktopConnCount > 0 {
-		fclient.SharedDesktopConnCount -= 1
+		if fclient.SharedDesktopConnCount > 0 {
+			fclient.SharedDesktopConnCount -= 1
+		}
+
+		clients[client.ClientId] = fclient
 	}
-
-	clients[client.ClientId] = fclient
 }
 
 func (client *Client) ActivateDesktop() {
 	defer client.MarkClientIfActive()
 
-	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
-	// first lock then read the fresh copy to prevent a dirty read
-	client.mu.Lock()
-	defer client.mu.Unlock()
+	if client.mu != nil {
+		// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+		// first lock then read the fresh copy to prevent a dirty read
+		client.mu.Lock()
+		defer client.mu.Unlock()
 
-	// get a fresh copy of client
-	fclient := clients[client.ClientId]
-	fclient.DesktopActive = true
-	clients[client.ClientId] = fclient
+		// get a fresh copy of client
+		fclient := clients[client.ClientId]
+		fclient.DesktopActive = true
+		clients[client.ClientId] = fclient
+	}
 }
 
 func (client *Client) DeActivateDesktop() {
 	defer client.MarkClientIfInactive()
 
-	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
-	// first lock then read the fresh copy to prevent a dirty read
-	client.mu.Lock()
-	defer client.mu.Unlock()
+	if client.mu != nil {
+		// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+		// first lock then read the fresh copy to prevent a dirty read
+		client.mu.Lock()
+		defer client.mu.Unlock()
 
-	// get a fresh copy of client
-	fclient := clients[client.ClientId]
-	fclient.DesktopActive = false
-	clients[client.ClientId] = fclient
+		// get a fresh copy of client
+		fclient := clients[client.ClientId]
+		fclient.DesktopActive = false
+		clients[client.ClientId] = fclient
+	}
 }
 
 func (client *Client) DesktopIsActivate() bool {
-	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
-	// first lock then read the fresh copy to prevent a dirty read
-	client.mu.Lock()
-	defer client.mu.Unlock()
+	if client.mu != nil {
+		// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+		// first lock then read the fresh copy to prevent a dirty read
+		client.mu.Lock()
+		defer client.mu.Unlock()
 
-	// get a fresh copy of client
-	fclient := clients[client.ClientId]
-	return fclient.DesktopActive
+		// get a fresh copy of client
+		fclient := clients[client.ClientId]
+		return fclient.DesktopActive
+	}
+	return false
 }
 
 func (client *Client) ActivateDesktopSharing(viewOnly bool, SharedSecret string) (AlreadyShared bool) {
-	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
-	// first lock then read the fresh copy to prevent a dirty read
-	client.mu.Lock()
-	defer client.mu.Unlock()
+	if client.mu != nil {
+		// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+		// first lock then read the fresh copy to prevent a dirty read
+		client.mu.Lock()
+		defer client.mu.Unlock()
 
-	// get a fresh copy of client
-	fclient := clients[client.ClientId]
-	if !fclient.ShareDesktop {
-		fclient.ShareDesktop = true
-		fclient.SharedDesktopIsViewOnly = viewOnly
-		fclient.SharedDesktopSecret = SharedSecret
-		fclient.SharedDesktopConn = make(chan interface{})
-		clients[client.ClientId] = fclient
-		return false
+		// get a fresh copy of client
+		fclient := clients[client.ClientId]
+		if !fclient.ShareDesktop {
+			fclient.ShareDesktop = true
+			fclient.SharedDesktopIsViewOnly = viewOnly
+			fclient.SharedDesktopSecret = SharedSecret
+			fclient.SharedDesktopConn = make(chan interface{})
+			clients[client.ClientId] = fclient
+			return false
+		}
 	}
 	return true // Already shared
 }
 
 func (client *Client) DeactivateDesktopSharing() {
-	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
-	// first lock then read the fresh copy to prevent a dirty read
-	client.mu.Lock()
-	defer client.mu.Unlock()
-	// get a fresh copy of client
-	if client.ShareDesktop {
-		fclient := clients[client.ClientId]
-		close(fclient.SharedDesktopConn)
-		fclient.ShareDesktop = false
-		clients[client.ClientId] = fclient
+	if client.mu != nil {
+		// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+		// first lock then read the fresh copy to prevent a dirty read
+		client.mu.Lock()
+		defer client.mu.Unlock()
+		// get a fresh copy of client
+		if client.ShareDesktop {
+			fclient := clients[client.ClientId]
+			close(fclient.SharedDesktopConn)
+			fclient.ShareDesktop = false
+			clients[client.ClientId] = fclient
+		}
 	}
 }
 
 // If no active client connection exist, open the ClientConn channel
 func (client *Client) MarkClientIfInactive() {
-	client.mu.Lock()
-	defer client.mu.Unlock()
+	if client.mu != nil {
+		client.mu.Lock()
+		defer client.mu.Unlock()
 
-	fclient := clients[client.ClientId]
+		fclient := clients[client.ClientId]
 
-	if fclient.TerminalsCount == 0 && !fclient.DesktopActive {
-		if fclient.ClientActive {
-			fclient.ClientActive = false
-			fclient.ClientConn = make(chan interface{})
-			clients[client.ClientId] = fclient
+		if fclient.TerminalsCount == 0 && !fclient.DesktopActive {
+			if fclient.ClientActive {
+				fclient.ClientActive = false
+				fclient.ClientConn = make(chan interface{})
+				clients[client.ClientId] = fclient
+			}
 		}
 	}
 }
 
 // If no active client connection exist, close the ClientConn channel
 func (client *Client) MarkClientIfActive() {
-	client.mu.Lock()
-	defer client.mu.Unlock()
+	if client.mu != nil {
+		client.mu.Lock()
+		defer client.mu.Unlock()
 
-	fclient := clients[client.ClientId]
+		fclient := clients[client.ClientId]
 
-	if fclient.TerminalsCount > 0 || fclient.DesktopActive {
-		if !fclient.ClientActive {
-			fclient.ClientActive = true
-			close(fclient.ClientConn)
-			clients[client.ClientId] = fclient
+		if fclient.TerminalsCount > 0 || fclient.DesktopActive {
+			if !fclient.ClientActive {
+				fclient.ClientActive = true
+				close(fclient.ClientConn)
+				clients[client.ClientId] = fclient
+			}
 		}
 	}
 }
 
 func (client *Client) SetTabId(TabId string) {
-	client.mu.Lock()
-	defer client.mu.Unlock()
-
-	fclient := clients[client.ClientId]
-	fclient.TabId = TabId
-	clients[client.ClientId] = fclient
+	if client.mu != nil {
+		client.mu.Lock()
+		defer client.mu.Unlock()
+		fclient := clients[client.ClientId]
+		fclient.TabId = TabId
+		clients[client.ClientId] = fclient
+	}
 }
 
 // Stop New Clients from obtaining service

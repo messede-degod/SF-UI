@@ -2,11 +2,11 @@
     <div mat-dialog-title>
         <span>Change Font Size</span>
     </div>
-    <div class="help-content change-font-size-msg">
+    <div class="help-content change-font-size-msg flex-col">
         <div class="flex-row size-indication">
             <label>Font Size</label>
             <label>{{fontSize}}</label>
-        </div><br>
+        </div>
           <mat-slider
               [max]="50"
               [min]="15"
@@ -18,6 +18,6 @@
           </mat-slider>
     </div>
     <mat-dialog-actions align="end">
-        <button class="help-close-button" mat-stroked-button mat-dialog-close color="primary">Close</button>
+        <button class="alt-close-button" mat-button mat-dialog-close color="primary">Close</button>
       </mat-dialog-actions>
 </div>

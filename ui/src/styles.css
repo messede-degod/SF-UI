@@ -330,6 +330,11 @@
     background-color: var(--close-btn-color) !important;
 }
 
+.alt-close-button {
+    background-color: var(--alt-close-btn-color) !important;
+    color: var(--input-text-color) !important;
+}
+
 .help-content {
     font-size: large !important;
     margin: 2rem;

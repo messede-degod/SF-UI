@@ -1,10 +1,10 @@
 <div class="help-dialog">
     <div mat-dialog-title>
-        <span>Share Your Desktop</span>
+        <span>Share Your Segfault Desktop</span>
     </div>
     <div class="help-content">
         <div class="flex-col share-area share-enable" *ngIf="!isActive">
-            <div class="flex-row">
+            <div class="flex-row" title="Check to prevent others from interacting with your desktop">
                 <mat-slide-toggle class="view-only-switch" 
                     [disabled]="enablingShare" 
                     [checked]="viewOnly"
@@ -12,7 +12,7 @@
                 <b>View Only</b>
             </div>
             <button mat-raised-button *ngIf="!enablingShare" class="enable-btn"
-                (click)="toggleSharing()">Share</button>
+                (click)="toggleSharing()">Create Link</button>
             <button mat-raised-button *ngIf="enablingShare"  class="enable-btn">Sharing...</button>
         </div>
 
@@ -26,6 +26,6 @@
         </div>
     </div>
     <mat-dialog-actions align="end">
-        <button class="help-close-button" mat-stroked-button mat-dialog-close color="primary">Close</button>
+        <button class="alt-close-button" mat-button mat-dialog-close color="primary">Close</button>
     </mat-dialog-actions>
 </div>

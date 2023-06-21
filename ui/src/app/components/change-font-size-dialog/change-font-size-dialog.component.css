@@ -1,6 +1,7 @@
 .change-font-size-msg{
     width: 12rem;
     height: 6rem;
+    justify-content: space-between;
 }
 
 .size-indication{

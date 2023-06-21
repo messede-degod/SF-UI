@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"regexp"
 	"syscall"
 	"unsafe"
 
@@ -19,24 +18,26 @@ type TermRequest struct {
 	Secret      string `json:"secret"`
 	NewInstance bool   `json:"new_instance"`
 	ClientIp    string
-	// SfEndpoint string `json:"sf_endpoint"`
+	TabId       string `json:"tab_id"`
 }
 
 type TermResponse struct {
-	Status string `json:"status"`
-	Secret string `json:"secret,omitempty"`
-	// SfEndpoint string `json:"sf_endpoint"`
+	Status      string `json:"status"`
+	Secret      string `json:"secret,omitempty"`
+	IsDuplicate bool   `json:"is_duplicate_session,omitempty"`
 }
 
 // First byte read from Terminal.Pty is matched with
 // the following constants, to determine the type of data
 // a client is sending
 const (
+	SFUI_NORMAL_MSG        = '0'
 	SFUI_CMD_RESIZE        = '1'
 	SFUI_CMD_PAUSE         = '2'
 	SFUI_CMD_RESUME        = '3'
 	SFUI_CMD_AUTHENTICATE  = '4'
 	SFUI_CMD_PING          = '5'
+	SFUI_CMD_PONG          = '6'
 	TERM_MAX_AUTH_FAILURES = 3
 )
 
@@ -74,7 +75,7 @@ func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
 		terminal.ClientSecret = clientSecret
 
 		if !sfui.originAcceptable(ws.Request()) {
-			ws.Write([]byte(`unacceptable origin`))
+			ws.Write([]byte(string(SFUI_NORMAL_MSG) + `unacceptable origin`))
 			return
 		}
 
@@ -82,13 +83,13 @@ func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
 			Secret:   clientSecret,
 			ClientIp: clientIp,
 		}); err != nil { // Invalid Secret
-			ws.Write([]byte(err.Error()))
+			ws.Write([]byte(string(SFUI_NORMAL_MSG) + err.Error()))
 			return
 		}
 
 		err := sfui.handleWsPty(&terminal)
 		if err != nil {
-			ws.Write([]byte(err.Error()))
+			ws.Write([]byte(string(SFUI_NORMAL_MSG) + err.Error()))
 		}
 
 	}).ServeHTTP(w, r)
@@ -157,6 +158,7 @@ func (terminal *Terminal) Read(msg []byte) (n int, err error) {
 			}
 			return 0, nil
 		case SFUI_CMD_PING:
+			terminal.sendPong()
 			return 0, nil
 		}
 		copy(msg, terminal.MsgBuf[1:]) // Copy everything except the first byte
@@ -165,10 +167,20 @@ func (terminal *Terminal) Read(msg []byte) (n int, err error) {
 	return n, err
 }
 
-var validSecret = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
+var PONG_CMD_BYTES = []byte{SFUI_CMD_PONG} // Mark as Pong
+var REG_CMD_BYTES = []byte{'0'}            // Mark as Regular data chunk
+
+func (terminal *Terminal) Write(msg []byte) (n int, err error) {
+	n, err = terminal.WSConn.Write(append(REG_CMD_BYTES[:], msg[:]...))
+	return n - 1, err // n-1 so that writer does not get confused as to where the extra 1 bytes came from
+}
+
+func (terminal *Terminal) sendPong() (n int, err error) {
+	return terminal.WSConn.Write(PONG_CMD_BYTES)
+}
 
 func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
-	if !validSecret(terminal.ClientSecret) {
+	if !sfui.ValidSecret(terminal.ClientSecret) {
 		return errors.New("unacceptable secret")
 	}
 
@@ -195,7 +207,7 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 	}
 	defer terminal.Pty.Close()
 
-	go io.Copy(terminal.WSConn, terminal.Pty) // Copy from PTY -> WS
+	go io.Copy(terminal, terminal.Pty) // Copy from PTY -> WS
 
 	// Copy from WS -> PTY, but use the Read() function
 	// we defined for Terminal to read from the websocket

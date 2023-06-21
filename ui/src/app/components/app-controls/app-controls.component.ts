@@ -61,6 +61,7 @@ export class AppControlsComponent {
     }
 
     localStorage.removeItem("secret")
+    Config.LoggedIn = false
     this.router.navigate(['/login'])
 
     this.terminalService.disconnectAllTerminals()

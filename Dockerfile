@@ -23,7 +23,11 @@ RUN go mod download
 COPY *.go config.yaml ./
 COPY other/systemd/sfui.service ./other/systemd/sfui.service
 COPY --from=ui /ui/dist/sf-ui/  ./ui/dist/sf-ui/
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags prod -ldflags '-w' -ldflags '-X "main.buildTime=${build_date}"' -o sfui
+COPY other/docker/build_helper.go ./
+COPY .git/refs/heads/main build_hash
+RUN go run build_helper.go
+RUN rm build_helper.go
+RUN sh build.sh
 RUN strip sfui
 
 

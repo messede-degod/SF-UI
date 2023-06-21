@@ -9,7 +9,7 @@
 
       <div *ngFor="let menu of menuItems" class="menu-button"
         [ngClass]="{'active-bg' : activeMenu === menu.name, 'inactive-bg' : activeMenu !== menu.name}"
-        (click)="setActiveMenu(menu.name)">
+        (click)="setActiveMenu(menu.name)" [title]="menu.name">
         <div class="menu-icon">
           <img [src]="menu.ilink">
         </div>

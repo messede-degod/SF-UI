@@ -5,6 +5,7 @@ import { MatSnackBar, MatSnackBarRef, TextOnlySnackBar } from '@angular/material
 import { Router } from '@angular/router';
 import { Config } from 'src/environments/environment';
 import { SaveSecretDialogComponent } from 'src/app/components/save-secret-dialog/save-secret-dialog.component';
+import { DuplicateSessionDialogComponent } from 'src/app/components/duplicate-session-dialog/duplicate-session-dialog.component';
 
 @Component({
   selector: 'app-login',
@@ -15,25 +16,25 @@ export class LoginComponent {
   router!: Router
   rippleColor: string = "primary"
   loadingDashBoard: boolean = false
-  buildHash: string = ""
-  buildTime: string = ""
-  server: string = ""
+  buildHash: string = Config.BuildHash
+  server: string = Config.SfEndpoint
+  loginDisabled: boolean = false
 
   constructor(public dialog: MatDialog, private snackBar: MatSnackBar, router: Router) {
     this.router = router
 
     if (localStorage.getItem('theme') == 'dark') {
       this.setTheme('dark')
+    } else {
+      this.setTheme('light')
     }
+
     let storedSecret = localStorage.getItem('secret')
     if (storedSecret != null) {
       this.LoginWithSecret = true
       this.secret = storedSecret
       this.login()
     }
-    this.buildHash = Config.BuildHash
-    this.buildTime = Config.BuildTime
-    this.server = Config.SfEndpoint
   }
 
   curTheme: string | null = null
@@ -48,15 +49,15 @@ export class LoginComponent {
   }
 
   openSource() {
-    window.open("https://github.com/messede-degod/SF-UI","_blank")
+    window.open("https://github.com/messede-degod/SF-UI", "_blank")
   }
 
-  openDonations(){
-    window.open("https://www.thc.org/segfault/upgrade/","_blank")
+  openDonations() {
+    window.open("https://www.thc.org/segfault/upgrade/", "_blank")
   }
 
-  openBuildInfo(){
-    window.open("https://github.com/messede-degod/SF-UI/commit/"+this.buildHash,"_blank")
+  openBuildInfo() {
+    window.open("https://github.com/messede-degod/SF-UI/commit/" + this.buildHash, "_blank")
   }
 
   showSaveSecretDialog(secret: string) {
@@ -71,26 +72,34 @@ export class LoginComponent {
   logginInMsg!: MatSnackBarRef<TextOnlySnackBar>
 
   async login() {
+    if (this.loginDisabled) {
+      return
+    }
+
+    this.loginDisabled = true
+
     var loginData = {
       "secret": this.secret,
-      "new_instance": false
+      "new_instance": false,
+      "tab_id": Config.TabId
     }
 
     if (this.LoginWithSecret) {
-      let secretValid = this.secret.match('[a-zA-Z]*$')
+      let secretValid = this.secret.match('^[a-zA-Z0-9]{6,}$')
       if (secretValid == null || secretValid[0] == '') {
         this.logginInMsg = this.snackBar.open("Please Enter A Valid Secret !", "OK", {
           duration: 2 * 1000
         });
+        this.loginDisabled = false
         return
       }
       this.logginInMsg = this.snackBar.open("Loggin You In ....", "OK", {
-        duration: 5 * 1000
+        duration: 8 * 1000
       });
     } else {
       loginData.new_instance = true
       this.logginInMsg = this.snackBar.open("Creating A New Instance ....", "OK", {
-        duration: 5 * 1000
+        duration: 8 * 1000
       });
     }
 
@@ -100,19 +109,38 @@ export class LoginComponent {
     })
     let rdata = await response
     if (rdata.status == 200) {
-      this.loadingDashBoard = true
       this.logginInMsg.dismiss()
+
+      let response = await rdata.json()
+
+
+      if (response.is_duplicate_session) {
+        // Prompt if session is duplicate
+        let LoggedOutOfAllSessionsPromise = this.handleDuplicateSession()
+        let LoggedOutOfAllSessions = await LoggedOutOfAllSessionsPromise
+
+        if (!LoggedOutOfAllSessions) { // dont go to dashboard
+          this.loginDisabled = false
+          return
+        } else {  // fresh login after killing all previous sessions
+          this.loginDisabled = false
+          this.login()
+        }
+      }
+
+      this.loadingDashBoard = true
 
       if (this.LoginWithSecret) {
         localStorage.setItem('secret', this.secret)
       } else {
-        let respBody = await rdata.json()
-        localStorage.setItem('secret', respBody.secret)
+        localStorage.setItem('secret', response.secret)
         // We are creating a new instance, prompt the user to save the secret
-        this.showSaveSecretDialog(respBody.secret)
+        this.showSaveSecretDialog(response.secret)
       }
 
+      Config.LoggedIn = true
       this.router.navigate(['/dashboard'])
+      this.loginDisabled = false
       return
     } else {
       localStorage.removeItem('secret')
@@ -122,6 +150,23 @@ export class LoginComponent {
     this.snackBar.open("Invalid Secret !", "OK", {
       duration: 5 * 1000
     });
+    this.loginDisabled = false
+  }
+
+  async handleDuplicateSession(): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const dialogRef = this.dialog.open(DuplicateSessionDialogComponent, {
+        data: {
+          secret: this.secret
+        }
+      });
+      dialogRef.afterClosed().subscribe(result => {
+        if (result != undefined) {
+          resolve(result.Logout)
+        }
+        resolve(false) // return false if undefined
+      })
+    })
   }
 
   LoginWithSecret: boolean = false

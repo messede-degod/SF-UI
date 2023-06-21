@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strconv"
 
 	"gopkg.in/yaml.v2"
@@ -47,6 +48,7 @@ func getDefaultConfig() SfUI {
 		StartFileBrowserCommand:  "[[ $(ss -lnt) == *2900* ]] || /sf/bin/startfb \n",
 		ClientInactivityTimeout:  3,
 		WSPingInterval:           20,
+		ValidSecret:              regexp.MustCompile(`^[a-zA-Z0-9]{6,}$`).MatchString,
 	}
 }
 

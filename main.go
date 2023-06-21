@@ -40,8 +40,9 @@ type SfUI struct {
 	//			|-sfui/		(created by sfui- container for client dirs)
 	//				|-perClientUniqDir/ (a unique string derived from secret)
 	//						- gui.sock (ssh -L ./gui.sock:127.0.0.1:2000 root@segfault.net)
-	WorkDirectory           string `yaml:"work_directory"`
-	ClientInactivityTimeout int    `yaml:"client_inactivity_timeout"` // Minutes after which the clients master SSH connection is killed
+	WorkDirectory           string              `yaml:"work_directory"`
+	ClientInactivityTimeout int                 `yaml:"client_inactivity_timeout"` // Minutes after which the clients master SSH connection is killed
+	ValidSecret             func(s string) bool // Secret Validator
 }
 
 var buildTime string
@@ -178,11 +179,11 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {
 	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
 	if err == nil {
-		termReq := TermRequest{}
-		if json.Unmarshal(data, &termReq) == nil {
-			termReq.ClientIp = sfui.getClientAddr(r)
-			if termReq.NewInstance {
-				secret, err := sfui.generateSecret(&termReq)
+		loginReq := TermRequest{}
+		if json.Unmarshal(data, &loginReq) == nil {
+			loginReq.ClientIp = sfui.getClientAddr(r)
+			if loginReq.NewInstance {
+				secret, err := sfui.generateSecret(&loginReq)
 				if err == nil {
 					w.WriteHeader(http.StatusOK)
 					termRes := TermResponse{
@@ -195,11 +196,37 @@ func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			if sfui.secretValid(&termReq) == nil {
+			if sfui.ValidSecret(loginReq.Secret) {
+				client, cerr := sfui.GetClient(loginReq.Secret)
+				isDuplicate := false
+				if cerr == nil {
+					// 1 active and non matching tab ids - Duplicate
+					// 2 active and matching tab ids - Non Duplicate
+					winIdMatches := (client.TabId == loginReq.TabId)
+
+					if client.ClientActive && !winIdMatches {
+						isDuplicate = true
+					}
+
+					// 3 inactive and matching tab ids - Non Duplicate
+					// 4 inactive and non matching tab ids - Non Duplicate, set new tab id
+					if !client.ClientActive && !winIdMatches {
+						client.SetTabId(loginReq.TabId)
+					}
+				} else {
+					// start a new client
+					go func() {
+						client, cerr := sfui.GetExistingClientOrMakeNew(loginReq.Secret, loginReq.ClientIp)
+						if cerr == nil {
+							client.SetTabId(loginReq.TabId)
+						}
+					}()
+				}
+
 				w.WriteHeader(http.StatusOK)
 				termRes := TermResponse{
-					Status: "OK",
-					// SfEndpoint: sfui.SfEndpoint,
+					Status:      "OK",
+					IsDuplicate: isDuplicate,
 				}
 				response, _ := json.Marshal(termRes)
 				w.Write(response)
@@ -214,19 +241,27 @@ func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {
 func (sfui *SfUI) handleLogout(w http.ResponseWriter, r *http.Request) {
 	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
 	if err == nil {
-		termReq := TermRequest{}
-		if json.Unmarshal(data, &termReq) == nil {
-			if validSecret(termReq.Secret) {
+		logoutReq := TermRequest{}
+		if json.Unmarshal(data, &logoutReq) == nil {
+			if sfui.ValidSecret(logoutReq.Secret) {
 				// Remove the client connection
-				client, err := sfui.GetClient(termReq.Secret)
+				client, err := sfui.GetClient(logoutReq.Secret)
 				if err == nil { // Client exists
-					client.mu.Lock()
-					fclient := clients[client.ClientId]
-					if !fclient.ClientActive { // Make sure RemoveClientIfInactive doesnt try to remove the client once more
-						close(fclient.ClientConn) // Marking client as active to prevent RemoveClientIfInactive from running
+					if client.mu != nil {
+						client.mu.Lock()
+						defer client.mu.Unlock()
+						fclient, ok := clients[client.ClientId]
+						if !ok {
+							w.WriteHeader(http.StatusUnavailableForLegalReasons)
+							w.Write([]byte(`{"status":"client not present"}`))
+							return
+						}
+						if !fclient.ClientActive { // Make sure RemoveClientIfInactive doesnt try to remove the client once more
+							close(fclient.ClientConn) // Marking client as active to prevent RemoveClientIfInactive from running
+						}
+						sfui.RemoveClient(&client)
+						// No need to unlock client since its now deleted
 					}
-					sfui.RemoveClient(&client)
-					// No need to unlock client since its now deleted
 				}
 
 				w.WriteHeader(http.StatusOK)

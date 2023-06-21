@@ -16,10 +16,29 @@ export class AppComponent {
     this.router = router
     this.fetchConfig()
     const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
-    if (darkThemeMq.matches) {
+    const LightThemeSetExplicity = localStorage.getItem("theme") == "light" ? true : false
+    if (darkThemeMq.matches && !LightThemeSetExplicity) {
       document.documentElement.setAttribute('data-theme', "dark");
       localStorage.setItem('theme', "dark")
     }
+
+    // Duplicate session detection mechanism
+    const tabIdKey = "tabId"
+    const initTabId = (): string => {
+      const id = sessionStorage.getItem(tabIdKey)
+      if (id) {
+        sessionStorage.removeItem(tabIdKey)
+        return id
+      }
+      return Math.random().toString(16).substring(2, 18)
+    }
+
+    const tabId = initTabId()
+    window.addEventListener("beforeunload", () => {
+      sessionStorage.setItem(tabIdKey, tabId)
+    })
+
+    Config.TabId = tabId
   }
 
   async fetchConfig() {
@@ -31,7 +50,7 @@ export class AppComponent {
       Config.DesktopDisabled = config.desktop_disabled
       Config.SfEndpoint = config.sf_endpoint
       Config.BuildHash = config.build_hash
-      Config.BuildTime =config.build_time
+      Config.BuildTime = config.build_time
       if (config.ws_ping_interval) {
         if (config.ws_ping_interval >= 5) {
           Config.WSPingInterval = config.ws_ping_interval

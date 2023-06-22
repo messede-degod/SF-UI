@@ -32,7 +32,7 @@ export class AppControlsComponent {
   curTheme: string | null = null
   toggleTheme() {
     this.curTheme = document.documentElement.getAttribute('data-theme')
-    var theme = 'light'
+    let theme = 'light'
     if (this.curTheme == null || this.curTheme == 'light') {
       theme = 'dark'
     }
@@ -56,7 +56,7 @@ export class AppControlsComponent {
   }
 
   async logout() {
-    var logoutData = {
+    let logoutData = {
       "secret": localStorage.getItem("secret"),
     }
 
@@ -70,8 +70,7 @@ export class AppControlsComponent {
       "method": "POST",
       "body": JSON.stringify(logoutData)
     })
-    let rdata = await response
-
+    await response
   }
 
   sidebarVisible: boolean = true

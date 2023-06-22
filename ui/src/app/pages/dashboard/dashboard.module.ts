@@ -25,9 +25,6 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ChangeFontSizeDialogComponent } from '../../components/change-font-size-dialog/change-font-size-dialog.component';
 import { MatSliderModule } from '@angular/material/slider';
 
-// import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
-
 @NgModule({
   declarations: [
     DashboardComponent,
@@ -48,7 +45,6 @@ import { MatSliderModule } from '@angular/material/slider';
   imports: [
     CommonModule,
     DashboardRoutingModule,
-    // BrowserAnimationsModule,
     MatDialogModule,
     MatButtonModule,
     MatSnackBarModule,

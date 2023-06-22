@@ -18,7 +18,7 @@
 
         <div class="flex-col share-area" *ngIf="isActive">
             <div>
-                <p class="flex-col">Your shared desktop link</p>
+                <p class="flex-col">Share This Link</p>
             </div>
             <code class="share-link">{{sharelink}}</code>
             <button mat-raised-button *ngIf="!disablingShare" class="disable-btn" (click)="toggleSharing()">Stop Sharing</button>
@@ -26,6 +26,6 @@
         </div>
     </div>
     <mat-dialog-actions align="end">
-        <button class="alt-close-button" mat-button mat-dialog-close color="primary">Close</button>
+        <button class="alt-close-button" mat-button mat-dialog-close color="primary">Continue</button>
     </mat-dialog-actions>
 </div>

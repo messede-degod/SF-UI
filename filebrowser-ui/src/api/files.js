@@ -127,9 +127,8 @@ function moveCopy(items, copy = false, overwrite = false, rename = false) {
   for (let item of items) {
     const from = item.from;
     const to = encodeURIComponent(removePrefix(item.to));
-    const url = `${from}?action=${
-      copy ? "copy" : "rename"
-    }&destination=${to}&override=${overwrite}&rename=${rename}`;
+    const url = `${from}?action=${copy ? "copy" : "rename"
+      }&destination=${to}&override=${overwrite}&rename=${rename}`;
     promises.push(resourceAction(url, "PATCH"));
   }
 
@@ -152,7 +151,7 @@ export async function checksum(url, algo) {
 export function getDownloadURL(file, inline) {
   const params = {
     ...(inline && { inline: "true" }),
-    ...{"sf-secret": window.SfUiSecret}
+    ...{ "sf-secret": window.SfUiSecret }
   };
 
   return createURL("api/raw" + file.path, params);
@@ -162,6 +161,7 @@ export function getPreviewURL(file, size) {
   const params = {
     inline: "true",
     key: Date.parse(file.modified),
+    "sf-secret": window.SfUiSecret,
   };
 
   return createURL("api/preview/" + size + file.path, params);

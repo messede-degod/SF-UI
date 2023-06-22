@@ -13,7 +13,7 @@ export class FilesViewComponent {
   FbIframeURL!: SafeUrl
 
   @Input() InView: boolean = false
-  @Input() noOfTerminals: Number = 0
+  @Input() noOfTerminals: number = 0
 
   FileBrowserActive: boolean = false
   FileBrowserDisconnected: boolean = false

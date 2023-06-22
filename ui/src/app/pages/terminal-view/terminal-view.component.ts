@@ -11,14 +11,14 @@ export class TerminalViewComponent {
   terminalWindows: Array<any> = [
     { id: 1, name: "" }, // Default tab that is open on first launch
   ]
-  noOfTerminals: Number = 1;
-  @Output() noOfTerminalsChange = new EventEmitter<Number>();
+  noOfTerminals: number = 1;
+  @Output() noOfTerminalsChange = new EventEmitter<number>();
 
   setActiveTerminal(termId: number){
     this.activeTerminalId = termId
   }
 
-  setNoOfTerminals(termNos: Number){
+  setNoOfTerminals(termNos: number){
     this.noOfTerminalsChange.emit(termNos)
   }
 }

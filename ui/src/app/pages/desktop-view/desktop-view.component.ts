@@ -23,12 +23,12 @@ export class DesktopViewComponent {
     let shouldEncrypt = document.location.protocol == 'https:' ? 'true' : 'false'
     let desktopType = "novnc"
     let wsPath = "desktopws%3Fsecret%3D" + secret + "%26type%3D" + desktopType
+    // switch to remote scaling for larger screens since it provides better resolution
+    let resize = (window.screen.width > 1920 && window.screen.height > 1080) ? "remote" : "scale"
 
-    // this.IframeURL = sanitizer.bypassSecurityTrustResourceUrl("/assets/xpra_client/html5/index.html?server=" + Config.ApiHost
-    //   + "&port=" + Config.ApiPort + "&path=" + wsPath + "&password=abc");
     this.IframeURL = sanitizer.bypassSecurityTrustResourceUrl("/assets/novnc_client/vnc.html?path=" + wsPath
       + "&host=" + Config.ApiHost + "&port=" + Config.ApiPort + "&encrypt=" + shouldEncrypt
-      + "&autoconnect=true&shared=true&reconnect=false&logging=error&resize=scale&reconnect=true");
+      + "&autoconnect=true&shared=true&reconnect=false&logging=error&resize=" + resize + "&reconnect=true");
   }
 
   requestDesktop() {
@@ -40,6 +40,6 @@ export class DesktopViewComponent {
   }
 
   openShareDialog() {
-    const dialogRef = this.dialog.open(ShareDesktopDialogComponent);
+    this.dialog.open(ShareDesktopDialogComponent);
   }
 }

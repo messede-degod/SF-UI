@@ -1,6 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Config } from 'src/environments/environment';
-import { TerminalService } from 'src/app/services/terminal.service';
 
 @Component({
   selector: 'terminal-controls',
@@ -14,7 +13,7 @@ export class TerminalControlsComponent {
   @Output() terminalWindowsChange = new EventEmitter<Array<any>>();
   MaxTerminalsOpen = false
   closedTermTab: number = -1
-  noOfTerminals: Number = 1;
+  noOfTerminals: number = 1;
   @Output() noOfTerminalsChange = new EventEmitter<number>();
   MaxTerms: number = Config.MaxOpenTerminals
 
@@ -43,7 +42,6 @@ export class TerminalControlsComponent {
 
     if (this.terminalWindows.length == this.MaxTerms) {
       this.MaxTerminalsOpen = true
-      return
     }
   }
 
@@ -77,8 +75,6 @@ export class TerminalControlsComponent {
   }
 
   getTerminalName(termId: number): string {
-    // let termTitle = window.frames[termId].document.title
-    // termTitle =  termTitle.slice(0,6) + "..."
     return "Terminal " + termId
   }
 }

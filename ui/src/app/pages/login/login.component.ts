@@ -61,7 +61,7 @@ export class LoginComponent {
   }
 
   showSaveSecretDialog(secret: string) {
-    const dialogRef = this.dialog.open(SaveSecretDialogComponent, {
+    this.dialog.open(SaveSecretDialogComponent, {
       data: {
         secret: secret
       }
@@ -78,7 +78,7 @@ export class LoginComponent {
 
     this.loginDisabled = true
 
-    var loginData = {
+    let loginData = {
       "secret": this.secret,
       "new_instance": false,
       "tab_id": Config.TabId

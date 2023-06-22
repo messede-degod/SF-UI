@@ -9,7 +9,7 @@ import { Config } from 'src/environments/environment';
 })
 export class DashboardComponent {
   title = 'Segfault';
-  activeMenu: String = "terminal"
+  activeMenu: string = "terminal"
   sidebarVisible: boolean = true
   sidebarFirstLoad: boolean = true
 
@@ -18,7 +18,7 @@ export class DashboardComponent {
   router!: Router
   desktopRequested: boolean = false
   filesRequested: boolean = false
-  noOfTerminals: Number = 1
+  noOfTerminals: number = 1
 
   constructor(router: Router) {
     this.router = router
@@ -27,8 +27,6 @@ export class DashboardComponent {
       this.menuItems.push({ ilink: '../assets/icons/desk.svg', name: "desktop" })
     }
     this.menuItems.push({ ilink: '../assets/icons/files.svg', name: "files" })
-    // this.menuItems.push({ ilink: '../assets/icons/ports.svg', name: "ports" })
-    // this.menuItems.push({ ilink: '../assets/icons/web.svg', name: "web" })
   }
 
   setActiveMenu(name: string) {
@@ -38,7 +36,7 @@ export class DashboardComponent {
     }
   }
 
-  setNoOfTerminals(termNos: Number){
+  setNoOfTerminals(termNos: number){
     this.noOfTerminals = termNos
   }
 }

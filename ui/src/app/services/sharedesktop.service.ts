@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, Output } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Config } from 'src/environments/environment';
 
 
@@ -12,7 +12,7 @@ export class ShareDesktopService {
     sharingLink: string = "";
 
     async enableSharing(viewOnly: boolean): Promise<number> {
-        var data = {
+        let data = {
             "secret": localStorage.getItem('secret'),
             "action": "activate",
             "view_only": viewOnly
@@ -41,7 +41,7 @@ export class ShareDesktopService {
     }
 
     async disableSharing(): Promise<number> {
-        var data = {
+        let data = {
             "secret": localStorage.getItem('secret'),
             "action": "deactivate",
         }

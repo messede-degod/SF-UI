@@ -38,7 +38,7 @@ export class DuplicateSessionDialogComponent {
         "secret": this.data.secret,
       })
     })
-    let lrdata = await response
+    await response
   }
 
 }

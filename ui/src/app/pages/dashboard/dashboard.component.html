@@ -11,7 +11,7 @@
         [ngClass]="{'active-bg' : activeMenu === menu.name, 'inactive-bg' : activeMenu !== menu.name}"
         (click)="setActiveMenu(menu.name)" [title]="menu.name">
         <div class="menu-icon">
-          <img [src]="menu.ilink">
+          <img [alt]="menu.name" [src]="menu.ilink">
         </div>
       </div>
 
@@ -28,8 +28,6 @@
     <terminal-view [ngClass]="{'hidden': activeMenu!='terminal'}"
       (noOfTerminalsChange)="setNoOfTerminals($event)"></terminal-view>
     <desktop-view [ngClass]="{'hidden': activeMenu!='desktop'}"></desktop-view>
-    <!-- <ports-view [ngClass]="{'hidden': activeMenu!='ports'}"></ports-view> -->
-    <!-- <web-view [ngClass]="{'hidden': activeMenu!='web'}"></web-view> -->
     <files-view [InView]="activeMenu=='files'"
       [ngClass]="{'hidden': activeMenu!='files'}" [noOfTerminals]="noOfTerminals"></files-view>
   </section>

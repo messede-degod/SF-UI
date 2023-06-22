@@ -10,6 +10,6 @@
     <mat-dialog-actions align="end">
         <button *ngIf="!LogginOut"  mat-stroked-button (click)="onLogout()" color="warn">Logout</button>
         <button *ngIf="LogginOut"  mat-stroked-button color="warn">Loggin Out...</button>
-        <button class="help-close-button" mat-stroked-button (click)="onCancel()" color="primary" [disabled]="LogginOut" >Cancel</button>
+        <button class="alt-close-button" mat-stroked-button (click)="onCancel()" color="primary" [disabled]="LogginOut" >Cancel</button>
     </mat-dialog-actions>
 </div>

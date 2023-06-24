@@ -53,6 +53,7 @@
 .input-secret>img:hover,
 .help-menu>img:hover {
     filter: var(--help-btn-bg);
+    transition: all .2s ease;
 }
 
 .login-info {

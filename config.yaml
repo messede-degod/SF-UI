@@ -1,6 +1,7 @@
 max_ws_terminals: 10
 max_shared_desktop_conn: 4
-ws_ping_interval: 20
+ws_ping_interval: 20 # seconds
+ws_timeout: 1080 # minutes
 server_bind_address: 0.0.0.0:7171
 debug: false
 sf_endpoint: "8lgm.segfault.net"

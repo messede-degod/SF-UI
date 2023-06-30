@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -15,10 +13,10 @@ import (
 
 // websockify returns an http.Handler which proxies websocket requests to a VNC server
 // address.
-func vncWebSockify(to string, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}) http.Handler {
+func vncWebSockify(to string, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}, timeout time.Duration) http.Handler {
 	return websocket.Server{
 		Handshake: wsProxyHandshake,
-		Handler:   wsProxyHandler(to, viewOnly, isSharedConnection, closeConnection),
+		Handler:   wsProxyHandler(to, viewOnly, isSharedConnection, closeConnection, timeout),
 	}
 }
 
@@ -58,9 +56,7 @@ func (viewOnlyConn *ViewOnlyConn) Read(msg []byte) (n int, err error) {
 	return n, err
 }
 
-// wsProxyHandler is a websocket.Handler which proxies to a unix address with a
-// magic byte check.
-func wsProxyHandler(to string, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}) websocket.Handler {
+func wsProxyHandler(to string, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}, timeout time.Duration) websocket.Handler {
 	return func(ws *websocket.Conn) {
 		conn, err := net.Dial("unix", to)
 		if err != nil {
@@ -89,18 +85,25 @@ func wsProxyHandler(to string, viewOnly bool, isSharedConnection bool, closeConn
 			select {
 			case err = <-done:
 				if err != nil {
-					logf(true, "%v\n", err)
+					log.Printf("%v\n", err)
 				}
 				break
 			case _, ok := <-closeConnection:
 				if !ok {
 					break
 				}
+			case <-time.After(timeout):
+				break
 			}
-		} else { // if not a shared connection, exit only when error occurs
-			err = <-done
-			if err != nil {
-				logf(true, "%v\n", err)
+		} else { // if not a shared connection, exit only when error or timeout  occurs
+			select {
+			case err = <-done:
+				if err != nil {
+					log.Printf("%v\n", err)
+				}
+				break
+			case <-time.After(timeout):
+				break
 			}
 		}
 
@@ -108,16 +111,4 @@ func wsProxyHandler(to string, viewOnly bool, isSharedConnection bool, closeConn
 		ws.Close()
 		<-done
 	}
-}
-
-func logf(cond bool, format string, a ...interface{}) {
-	if cond {
-		fmt.Printf("%s: %s", time.Now().Format("Jan 02 15:04:05"), fmt.Sprintf(format, a...))
-	}
-}
-
-// copyCh is like io.Copy, but it writes to a channel when finished.
-func copyCh(dst io.Writer, src io.Reader, done chan error) {
-	_, err := io.Copy(dst, src)
-	done <- err
 }

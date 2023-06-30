@@ -44,7 +44,13 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 
 	sfui.startDesktopService(client.MasterSSHConnectionPty, desktopType, time.Second*3)
 
-	vncWebSockify(sfui.getGUISocketPath(client.ClientId), false, false, client.SharedDesktopConn).ServeHTTP(w, r)
+	vncWebSockify(
+		sfui.getGUISocketPath(client.ClientId),
+		false, // not view only
+		false, // not shared
+		client.SharedDesktopConn,
+		time.Minute*time.Duration(sfui.WSTimeout),
+	).ServeHTTP(w, r)
 }
 
 // Issue appropriate desktop start command(Type) using Pty and Wait for a certain duration
@@ -103,6 +109,7 @@ func (sfui *SfUI) handleSharedDesktopWS(w http.ResponseWriter, r *http.Request) 
 		client.SharedDesktopIsViewOnly,
 		true, // is a shared connection
 		client.SharedDesktopConn,
+		time.Minute*time.Duration(sfui.WSTimeout),
 	).ServeHTTP(w, r)
 }
 

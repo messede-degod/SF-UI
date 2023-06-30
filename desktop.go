@@ -32,7 +32,7 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if client.DesktopIsActivate() {
+	if client.DesktopActive.Load() {
 		w.WriteHeader(http.StatusNotAcceptable)
 		w.Write([]byte(`can only have one desktop connection active at a time`))
 		return
@@ -84,7 +84,7 @@ func (sfui *SfUI) handleSharedDesktopWS(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if !client.ShareDesktop && (client.SharedDesktopSecret == shareSecret) {
+	if !client.ShareDesktop.Load() && (client.SharedDesktopSecret == shareSecret) {
 		w.WriteHeader(http.StatusNotAcceptable)
 		w.Write([]byte(`unacceptable secret`))
 		return
@@ -100,7 +100,7 @@ func (sfui *SfUI) handleSharedDesktopWS(w http.ResponseWriter, r *http.Request) 
 
 	vncWebSockify(
 		sfui.getGUISocketPath(client.ClientId),
-		client.SharedDesktopIsViewOnly,
+		client.SharedDesktopIsViewOnly.Load(),
 		true, // is a shared connection
 		client.SharedDesktopConn,
 	).ServeHTTP(w, r)
@@ -134,13 +134,13 @@ func (sfui *SfUI) handleSetupDesktopSharing(w http.ResponseWriter, r *http.Reque
 				return
 			}
 
-			if !client.DesktopActive {
+			if !client.DesktopActive.Load() {
 				w.WriteHeader(http.StatusGone)
 				w.Write([]byte(`{"status":"desktop is not active"}`))
 				return
 			}
 
-			if client.SharedDesktopConnCount >= client.MaxSharedDesktopConn {
+			if client.SharedDesktopConnCount.Load() >= client.MaxSharedDesktopConn {
 				w.WriteHeader(http.StatusTooManyRequests)
 				w.Write([]byte(`{"status":"maximum shares active"}`))
 				return
@@ -163,7 +163,7 @@ func (sfui *SfUI) handleSetupDesktopSharing(w http.ResponseWriter, r *http.Reque
 				w.Write([]byte(`{"status":"OK"}`))
 				return
 			case "verify":
-				if client.ShareDesktop && (client.SharedDesktopSecret == desktopShareReq.Secret) {
+				if client.ShareDesktop.Load() && (client.SharedDesktopSecret == desktopShareReq.Secret) {
 					w.WriteHeader(http.StatusOK)
 					w.Write([]byte(`{"status":"OK"}`))
 				} else {

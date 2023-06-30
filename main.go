@@ -35,7 +35,7 @@ type SfUI struct {
 	DisableOriginCheck     bool   `yaml:"disable_origin_check"`       // Disable Origin Checking
 	DisableDesktop         bool   `yaml:"disable_desktop"`            // Disable websocket based GUI desktop access
 	// Directory where SSH sockets are stored,
-	// Diretcory Structure:
+	// Directory Structure:
 	// 		WorkDir/
 	//			|-sfui/		(created by sfui- container for client dirs)
 	//				|-perClientUniqDir/ (a unique string derived from secret)
@@ -202,16 +202,18 @@ func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {
 				if cerr == nil {
 					// 1 active and non matching tab ids - Duplicate
 					// 2 active and matching tab ids - Non Duplicate
-					winIdMatches := (client.TabId == loginReq.TabId)
+					if client.TabId != nil && client.ClientActive != nil {
+						winIdMatches := (*client.TabId == loginReq.TabId)
 
-					if client.ClientActive && !winIdMatches {
-						isDuplicate = true
-					}
+						if client.ClientActive.Load() && !winIdMatches {
+							isDuplicate = true
+						}
 
-					// 3 inactive and matching tab ids - Non Duplicate
-					// 4 inactive and non matching tab ids - Non Duplicate, set new tab id
-					if !client.ClientActive && !winIdMatches {
-						client.SetTabId(loginReq.TabId)
+						// 3 inactive and matching tab ids - Non Duplicate
+						// 4 inactive and non matching tab ids - Non Duplicate, set new tab id
+						if !client.ClientActive.Load() && !winIdMatches {
+							client.SetTabId(loginReq.TabId)
+						}
 					}
 				} else {
 					// start a new client
@@ -247,21 +249,7 @@ func (sfui *SfUI) handleLogout(w http.ResponseWriter, r *http.Request) {
 				// Remove the client connection
 				client, err := sfui.GetClient(logoutReq.Secret)
 				if err == nil { // Client exists
-					if client.mu != nil {
-						client.mu.Lock()
-						defer client.mu.Unlock()
-						fclient, ok := clients[client.ClientId]
-						if !ok {
-							w.WriteHeader(http.StatusUnavailableForLegalReasons)
-							w.Write([]byte(`{"status":"client not present"}`))
-							return
-						}
-						if !fclient.ClientActive { // Make sure RemoveClientIfInactive doesnt try to remove the client once more
-							close(fclient.ClientConn) // Marking client as active to prevent RemoveClientIfInactive from running
-						}
-						sfui.RemoveClient(&client)
-						// No need to unlock client since its now deleted
-					}
+					sfui.RemoveClient(&client)
 				}
 
 				w.WriteHeader(http.StatusOK)

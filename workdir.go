@@ -80,7 +80,7 @@ func (sfui *SfUI) waitForMasterSSHSocket(clientId string, sleepDuration time.Dur
 		time.Sleep(sleepDuration)
 	}
 
-	return errors.New("Master socket was not created in time")
+	return errors.New("master socket was not created in time")
 }
 
 func (sfui *SfUI) destroyMasterSSHSocket(client *Client) error {

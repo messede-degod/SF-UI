@@ -29,7 +29,7 @@ const (
 
 func obtainRunLock() error {
 	if SfUIRunning, pid := isRunning(); SfUIRunning { // Lock file exists
-		return errors.New(fmt.Sprintf("Another SFUI process (PID : %d) is running !", pid))
+		return fmt.Errorf("another sfui process (pid : %d) is running", pid)
 	}
 
 	// Write PID
@@ -49,15 +49,15 @@ func InstallService() error {
 	log.Println("Installing SFUI....")
 
 	if !isRoot() {
-		return errors.New("Need root permission to install !")
+		return errors.New("need root permission to install")
 	}
 
 	if installationExists() {
-		return errors.New("SFUI is already Installed !")
+		return errors.New("sfui is already Installed")
 	}
 
 	if SfUIrunning, pid := isRunning(); SfUIrunning {
-		return errors.New(fmt.Sprintf("SFUI is running (PID: %d), please stop it first !", pid))
+		return fmt.Errorf("sfui is running (pid: %d), please stop it first", pid)
 	}
 
 	// set ExecStart and WorkingDirectory values in sfui.service
@@ -104,7 +104,7 @@ func UnInstallService() error {
 	log.Println("UnInstalling SFUI....")
 
 	if !isRoot() {
-		return errors.New("Need root permission to uninstall !")
+		return errors.New("need root permission to uninstall")
 	}
 
 	SfUIRunning, pid := isRunning()

@@ -23,8 +23,6 @@ Deploying  UI files (html,css,js etc) with nginx is recommended for production d
 - Add the following location directives within the `server` block, (in the same order !).
 ```
 	location ~* .(png|ico|gif|jpg|jpeg|css|js|svg|html)$ {
-                # First attempt to serve request as file, then
-                # as directory, then fall back to displaying a 404.
                 try_files $uri $uri/ =404;
         }
 
@@ -34,6 +32,9 @@ Deploying  UI files (html,css,js etc) with nginx is recommended for production d
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection $connection_upgrade;
             proxy_set_header Host $host;
+            proxy_connect_timeout 1d;
+            proxy_send_timeout 1d;
+            proxy_read_timeout 1d;
         }
 
         location / {

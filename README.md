@@ -2,7 +2,7 @@
 
   
 
-A UI frontend for the services provided by [segfault]("https://thc.org/segfault").
+A UI frontend for the services provided by [segfault](https://thc.org/segfault).
 
 ![segfault](https://user-images.githubusercontent.com/59089310/235642385-f9a6896a-f7ae-4306-ae70-675fe8ea48f0.gif)
 
@@ -45,7 +45,7 @@ Run `./bin/sfui -install` to install sfui, visit `http://127.0.0.1:7171` in brow
 
 ## Development environment
 - Start Angular dev server by runnning `cd ui` and `ng serve -c development`
-- Start SFUI local server by running `make dev` and `./bin/sfui`, make sure you have debug set to true in config.yaml
+- Start SFUI local server by running `make dev` and `./bin/sfui`, make sure you have debug set to true in config.yaml.
 
 ## How it works
 
@@ -97,6 +97,8 @@ This project uses :
 
 - [xtermjs/xterm.js](https://xtermjs.org) 
 
-- [Xpra-org/xpra-html5](https://github.com/Xpra-org/xpra-html5)
+- <strike>[Xpra-org/xpra-html5](https://github.com/Xpra-org/xpra-html5)</strike>
 
 - [filebrowser/filebrowser](https://github.com/filebrowser/filebrowser)
+
+- [novnc/noVNC](https://github.com/novnc/noVNC)

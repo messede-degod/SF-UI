@@ -9,7 +9,7 @@ HASH=$(shell git rev-parse --short HEAD)
 all: | filebrowser UI prod
 
 dev: main.go
-	@go build -o $(BIN_DIR)/$(BIN_NAME) -ldflags '-X "main.buildTime=$(DATE)" -X "main.buildHash=$(HASH)"'
+	@go build -o $(BIN_DIR)/$(BIN_NAME) -race -ldflags '-X "main.buildTime=$(DATE)" -X "main.buildHash=$(HASH)"'
 
 .PHONY: prod
 prod: main.go

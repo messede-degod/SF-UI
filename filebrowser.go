@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-var proxy, perr = NewHttpToUnixProxy("/tmp/test.sock")
-
 func (sfui *SfUI) handleFileBrowser(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
 		return
@@ -69,7 +67,7 @@ func (sfui *SfUI) handleSetupFileBrowser(w http.ResponseWriter, r *http.Request)
 				return
 			}
 
-			if !client.MasterSSHConnectionActive {
+			if !client.MasterSSHConnectionActive.Load() {
 				werr := sfui.waitForMasterSSHSocket(client.ClientId, 5, 2)
 				if werr != nil {
 					w.WriteHeader(http.StatusInternalServerError)
@@ -82,7 +80,7 @@ func (sfui *SfUI) handleSetupFileBrowser(w http.ResponseWriter, r *http.Request)
 				defer client.mu.Unlock()
 
 				// master SSH socket is now active, grab a fresh copy of the client
-				client, cerr = sfui.GetClient(setupFileBrowserReq.ClientSecret)
+				client, _ = sfui.GetClient(setupFileBrowserReq.ClientSecret)
 			}
 
 			// TODO : Check for short writes

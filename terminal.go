@@ -143,7 +143,7 @@ func readSecretFromWs(wsConn *websocket.Conn, msgBuf *[]byte, maxAuthFailures in
 		}
 		authFailures += 1
 	}
-	return "", errors.New(fmt.Sprintf("Client did not supply valid secret (after %d attempts)", TERM_MAX_AUTH_FAILURES))
+	return "", fmt.Errorf("Client did not supply valid secret (after %d attempts)", TERM_MAX_AUTH_FAILURES)
 }
 
 // First byte in the chunk sent by the client is a indicator

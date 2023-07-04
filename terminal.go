@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"syscall"
+	"time"
 	"unsafe"
 
 	"github.com/creack/pty"
@@ -211,9 +213,17 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 
 	// Copy from WS -> PTY, but use the Read() function
 	// we defined for Terminal to read from the websocket
-	_, werr := io.Copy(terminal.Pty, terminal)
-	if werr != nil {
-		terminal.WSConn.Close()
+	done := make(chan error)
+	go copyCh(terminal.Pty, terminal, done)
+
+	select {
+	case err = <-done:
+		if err != nil {
+			log.Println(err.Error())
+		}
+		break
+	case <-time.After(time.Minute * time.Duration(sfui.WSTimeout)):
+		break
 	}
 
 	command.Process.Kill()

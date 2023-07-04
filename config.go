@@ -48,6 +48,7 @@ func getDefaultConfig() SfUI {
 		StartFileBrowserCommand:  "[[ $(ss -lnt) == *2900* ]] || /sf/bin/startfb \n",
 		ClientInactivityTimeout:  3,
 		WSPingInterval:           20,
+		WSTimeout:                1080, // 18 Hours
 		ValidSecret:              regexp.MustCompile(`^[a-zA-Z0-9]{6,}$`).MatchString,
 	}
 }

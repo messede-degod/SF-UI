@@ -17,6 +17,7 @@ type SfUI struct {
 	MaxWsTerminals       int    `yaml:"max_ws_terminals"`        // Max terminals that can be allocated per client
 	MaxSharedDesktopConn int    `yaml:"max_shared_desktop_conn"` // Max no of clients that can connect to a shared desktop
 	WSPingInterval       int    `yaml:"ws_ping_interval"`        // Intervals at which the client pings the terminals WS connection
+	WSTimeout            int    `yaml:"ws_timeout"`              // Timeout (in minutes) applied to terminal and desktop ws connections
 	ServerBindAddress    string `yaml:"server_bind_address"`     // Address to which the current app binds
 	Debug                bool   `yaml:"debug"`                   // Print debug information
 

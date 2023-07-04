@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/rand"
+	"io"
 	"math/big"
 	"net"
 	"net/http"
@@ -59,4 +60,10 @@ func NewHttpToUnixProxy(sockAddr string) (*httputil.ReverseProxy, error) {
 	}
 
 	return proxy, nil
+}
+
+// copyCh is like io.Copy, but it writes to a channel when finished.
+func copyCh(dst io.Writer, src io.Reader, done chan error) {
+	_, err := io.Copy(dst, src)
+	done <- err
 }

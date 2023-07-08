@@ -69,6 +69,8 @@ func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
 			MsgBuf:   make([]byte, 256),
 		}
 
+		ws.PayloadType = websocket.BinaryFrame
+
 		clientSecret, cerr := terminal.ReadSecret()
 		if cerr != nil {
 			ws.Write([]byte(cerr.Error()))

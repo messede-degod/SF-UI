@@ -41,6 +41,7 @@ const UI = {
     inhibitReconnect: true,
     reconnectCallback: null,
     reconnectPassword: null,
+    failedReconnectAttempts: 0,
 
     prime() {
         return WebUtil.initSettings().then(() => {
@@ -1086,6 +1087,15 @@ const UI = {
             return;
         }
 
+        if (WebUtil.getConfigVar('max_reconnects') !== null) {
+            if (UI.failedReconnectAttempts >= WebUtil.getConfigVar('max_reconnects')) {
+                UI.cancelReconnect()
+                return;
+            }
+
+            UI.failedReconnectAttempts += 1;
+        }
+
         UI.connect(null, UI.reconnectPassword);
     },
 
@@ -1096,6 +1106,7 @@ const UI = {
         }
 
         UI.updateVisualState('disconnected');
+        UI.failedReconnectAttempts = 0;
 
         UI.openControlbar();
         UI.openConnectPanel();
@@ -1104,6 +1115,7 @@ const UI = {
     connectFinished(e) {
         UI.connected = true;
         UI.inhibitReconnect = false;
+        UI.failedReconnectAttempts = 0;
 
         let msg;
         if (UI.getSetting('encrypt')) {

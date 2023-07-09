@@ -156,6 +156,7 @@
     align-items: center;
     border-radius: 4px;
     transition: background-color .2s cubic-bezier(0.075, 0.82, 0.165, 1);
+    user-select: none;
 }
 
 .menu-button>div>img {
@@ -208,6 +209,7 @@
     border-radius: 4px;
     animation: fadeIn 0.5s;
     transition: background-color .2s ease;
+    user-select: none;
 }
 
 .terminal-tab-closed {

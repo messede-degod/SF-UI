@@ -44,9 +44,10 @@
     width: 2rem;
     filter: var(--term-tab-icon);
     border-radius: 999px;
+    transition: all .2s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 
-.help-menu>img{
+.help-menu>img {
     margin-left: 0.8rem;
 }
 
@@ -99,30 +100,31 @@
     font-size: 9rem !important;
 }
 
-.bottom-bar{
+.bottom-bar {
     justify-content: space-between;
 }
 
-.help-menu{
+.help-menu {
     background-color: var(--background);
     display: flex;
     margin: 0.5rem;
     flex-direction: row-reverse;
 }
 
-.build-info{
+.build-info {
     margin: 0.5rem;
 }
 
-.build-hash{
+.build-hash {
     cursor: pointer;
 }
 
-.loading-dashboard{
+.loading-dashboard {
     font-family: 'PT Sans';
 }
-.loading-dash-spinner{
-        width: 1.2rem !important;
-        height: 1.2rem !important;
-        margin-right: 0.5rem;
+
+.loading-dash-spinner {
+    width: 1.2rem !important;
+    height: 1.2rem !important;
+    margin-right: 0.5rem;
 }

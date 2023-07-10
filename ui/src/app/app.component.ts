@@ -48,7 +48,6 @@ export class AppComponent {
       let config = await rdata.json()
       Config.MaxOpenTerminals = config.max_terminals
       Config.DesktopDisabled = config.desktop_disabled
-      Config.SfEndpoint = config.sf_endpoint
       Config.BuildHash = config.build_hash
       Config.BuildTime = config.build_time
       if (config.ws_ping_interval) {

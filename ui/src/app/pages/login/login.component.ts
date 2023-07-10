@@ -85,7 +85,7 @@ export class LoginComponent {
     }
 
     if (this.LoginWithSecret) {
-      let secretValid = this.secret.match('^[a-zA-Z0-9]{6,}$')
+      let secretValid = this.secret.match('^[a-zA-Z0-9-]{6,}$')
       if (secretValid == null || secretValid[0] == '') {
         this.logginInMsg = this.snackBar.open("Please Enter A Valid Secret !", "OK", {
           duration: 2 * 1000

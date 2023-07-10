@@ -10,6 +10,8 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
+	"strings"
+	"sync/atomic"
 	"syscall"
 )
 
@@ -29,12 +31,12 @@ type SfUI struct {
 	StartVNCCommand          string `yaml:"start_vnc_command"`           // Command used to start VNC
 	StartFileBrowserCommand  string `yaml:"start_filebrowser_command"`   // Command used to start filebrowser
 
-	CompiledClientConfig   []byte // Ui related config that has to be sent to client
-	SfEndpoint             string `yaml:"sf_endpoint"`                // Current Sf Endpoints Name
-	SfUIOrigin             string `yaml:"sf_ui_origin"`               // Where SFUI is deployed, for CSRF prevention, ex: https://web.segfault.net
-	UseXForwardedForHeader bool   `yaml:"use_x_forwarded_for_header"` // Use the X-Forwared-For HTTP header, usefull when behind a reverse proxy
-	DisableOriginCheck     bool   `yaml:"disable_origin_check"`       // Disable Origin Checking
-	DisableDesktop         bool   `yaml:"disable_desktop"`            // Disable websocket based GUI desktop access
+	CompiledClientConfig   []byte   // Ui related config that has to be sent to client
+	SfEndpoints            []string `yaml:"sf_endpoints"`               // Sf Endpoints To Use
+	SfUIOrigin             string   `yaml:"sf_ui_origin"`               // Where SFUI is deployed, for CSRF prevention, ex: https://web.segfault.net
+	UseXForwardedForHeader bool     `yaml:"use_x_forwarded_for_header"` // Use the X-Forwared-For HTTP header, usefull when behind a reverse proxy
+	DisableOriginCheck     bool     `yaml:"disable_origin_check"`       // Disable Origin Checking
+	DisableDesktop         bool     `yaml:"disable_desktop"`            // Disable websocket based GUI desktop access
 	// Directory where SSH sockets are stored,
 	// Directory Structure:
 	// 		WorkDir/
@@ -44,6 +46,8 @@ type SfUI struct {
 	WorkDirectory           string              `yaml:"work_directory"`
 	ClientInactivityTimeout int                 `yaml:"client_inactivity_timeout"` // Minutes after which the clients master SSH connection is killed
 	ValidSecret             func(s string) bool // Secret Validator
+	EndpointSelector        *atomic.Int32       // Helps select a endpoint in RR fashion
+	NoEndpoints             int32               // No of available endpoints
 }
 
 var buildTime string
@@ -145,7 +149,7 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.URL.Path {
 	case "/secret":
-		sfui.handleSecret(w, r)
+		sfui.handleLogin(w, r)
 		w.Header().Add("Content-Type", "application/json")
 	case "/logout":
 		sfui.handleLogout(w, r)
@@ -177,24 +181,24 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (sfui *SfUI) handleSecret(w http.ResponseWriter, r *http.Request) {
+func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
 	if err == nil {
 		loginReq := TermRequest{}
 		if json.Unmarshal(data, &loginReq) == nil {
 			loginReq.ClientIp = sfui.getClientAddr(r)
 			if loginReq.NewInstance {
-				secret, err := sfui.generateSecret(&loginReq)
-				if err == nil {
-					w.WriteHeader(http.StatusOK)
-					termRes := TermResponse{
-						Status: "OK",
-						Secret: secret,
-					}
-					response, _ := json.Marshal(termRes)
-					w.Write(response)
-					return
+				secret := sfui.getEndpointNameRR() + "-"
+				secret += sfui.generateSecret(&loginReq)
+
+				w.WriteHeader(http.StatusOK)
+				termRes := TermResponse{
+					Status: "OK",
+					Secret: secret,
 				}
+				response, _ := json.Marshal(termRes)
+				w.Write(response)
+				return
 			}
 
 			if sfui.ValidSecret(loginReq.Secret) {
@@ -265,4 +269,39 @@ func (sfui *SfUI) handleLogout(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte(`{"status":"Internal Server Error"}`))
+}
+
+// return the endpoint FQDN given a name (ex: 8lgm -> return 8lgm.segfault.net)
+// defaults to first available endpoint FQDN if name is not found.
+func (sfui *SfUI) getEndpointBySecret(secret string) string {
+	secretParts := strings.Split(secret, "-") // secret is in the form  "endpointname-randomsecretXXXXX"
+	if len(secretParts) > 1 {
+		endpointName := secretParts[0]
+
+		for _, address := range sfui.SfEndpoints {
+			if strings.Contains(address, endpointName) {
+				return address
+			}
+		}
+	}
+
+	return sfui.SfEndpoints[0]
+}
+
+func (sfui *SfUI) getEndpointNameRR() string {
+	selected := sfui.EndpointSelector.Load()
+	if selected > sfui.NoEndpoints-1 {
+		sfui.EndpointSelector.Store(0)
+		selected = 0
+	}
+	sfui.EndpointSelector.Add(1)
+
+	log.Println("using ", sfui.SfEndpoints[selected])
+
+	eparts := strings.Split(sfui.SfEndpoints[selected], ".")
+	if len(eparts) > 0 {
+		return eparts[0]
+	}
+
+	return ""
 }

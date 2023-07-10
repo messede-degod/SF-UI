@@ -4,14 +4,16 @@ ws_ping_interval: 20 # seconds
 ws_timeout: 1080 # minutes
 server_bind_address: 0.0.0.0:7171
 debug: false
-sf_endpoint: "8lgm.segfault.net"
+sf_endpoints: 
+  - "8lgm.segfault.net"
+  - "adm.segfault.net"
 sf_ui_origin: http://127.0.0.1:7171
 disable_origin_check: true
 use_x_forwarded_for_header: false
 disable_desktop: false
 work_directory: /dev/shm
 master_ssh_command: 'sshpass -p segfault ssh -M -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:5900 -L %s/fb.sock:127.0.0.1:2900 -o "SetEnv SECRET=%s REMOTE_ADDR=%s" root@%s -t bash'
-teardown_master_ssh_command: "sshpass -p segfault ssh -S %s/ssh.sock -O exit root@%s"
+teardown_master_ssh_command: "sshpass -p segfault ssh -S %s/ssh.sock -O exit root@host.com"
 slave_ssh_command: 'sshpass -p segfault ssh -S %s/ssh.sock -o "SetEnv SECRET=%s REMOTE_ADDR=%s" root@%s'
 start_xpra_command: "[[ $(ss -lnt) == *2000* ]] || /sf/bin/startxweb \n"
 start_vnc_command: "[[ $(ss -lnt) == *5900* ]] || /sf/bin/startxvnc \n"

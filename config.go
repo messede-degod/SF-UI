@@ -6,6 +6,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"sync/atomic"
 
 	"gopkg.in/yaml.v2"
 )
@@ -25,6 +26,7 @@ func ReadConfig() SfUI {
 	}
 
 	sfuiConfig.CompiledClientConfig = getcompiledClientConfig(sfuiConfig)
+	sfuiConfig.NoEndpoints = int32(len(sfuiConfig.SfEndpoints))
 	return sfuiConfig
 }
 
@@ -37,19 +39,22 @@ func getDefaultConfig() SfUI {
 		MasterSSHCommand:         "sshpass -p segfault ssh -M -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:5900 -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s -t sh",
 		TearDownMasterSSHCommand: "sshpass -p segfault ssh -S %s/ssh.sock -O exit root@%s",
 		SlaveSSHCommand:          "sshpass -p segfault ssh -S %s/ssh.sock -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s",
-		SfEndpoint:               "teso.segfault.net",
-		SfUIOrigin:               "http://127.0.0.1:7171",
-		DisableOriginCheck:       true,
-		UseXForwardedForHeader:   false,
-		DisableDesktop:           false,
-		WorkDirectory:            "/dev/shm/",
-		StartXpraCommand:         "[[ $(ss -lnt) == *2000* ]] || /sf/bin/startxweb \n",
-		StartVNCCommand:          "[[ $(ss -lnt) == *5900* ]] || /sf/bin/startxvnc \n",
-		StartFileBrowserCommand:  "[[ $(ss -lnt) == *2900* ]] || /sf/bin/startfb \n",
-		ClientInactivityTimeout:  3,
-		WSPingInterval:           20,
-		WSTimeout:                1080, // 18 Hours
-		ValidSecret:              regexp.MustCompile(`^[a-zA-Z0-9]{6,}$`).MatchString,
+		SfEndpoints: []string{
+			"8lgm.segfault.net",
+			"adm.segfault.net"},
+		SfUIOrigin:              "http://127.0.0.1:7171",
+		DisableOriginCheck:      true,
+		UseXForwardedForHeader:  false,
+		DisableDesktop:          false,
+		WorkDirectory:           "/dev/shm/",
+		StartXpraCommand:        "[[ $(ss -lnt) == *2000* ]] || /sf/bin/startxweb \n",
+		StartVNCCommand:         "[[ $(ss -lnt) == *5900* ]] || /sf/bin/startxvnc \n",
+		StartFileBrowserCommand: "[[ $(ss -lnt) == *2900* ]] || /sf/bin/startfb \n",
+		ClientInactivityTimeout: 3,
+		WSPingInterval:          20,
+		WSTimeout:               1080, // 18 Hours
+		ValidSecret:             regexp.MustCompile(`^[a-zA-Z0-9-]{6,}$`).MatchString,
+		EndpointSelector:        &atomic.Int32{},
 	}
 }
 
@@ -59,14 +64,12 @@ func getcompiledClientConfig(sfui SfUI) []byte {
 	// See handleUIConfig()
 	compConfig := []byte(fmt.Sprintf(
 		`{	"max_terminals":"%d",
-			"sf_endpoint":"%s",
 			"desktop_disabled":%s,
 			"ws_ping_interval":"%d",
 			"build_hash":"%s",
 			"build_time":"%s"
 		}`,
 		sfui.MaxWsTerminals,
-		sfui.SfEndpoint,
 		strconv.FormatBool(sfui.DisableDesktop), // Hide the GUI Option in UI
 		sfui.WSPingInterval,
 		buildHash,

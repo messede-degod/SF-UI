@@ -49,9 +49,10 @@ func (sfui *SfUI) workDirRemoveClient(clientId string) error {
 }
 
 func (sfui *SfUI) prepareMasterSSHSocket(clientId string, clientSecret string, clientIp string) (*exec.Cmd, *os.File, error) {
+	endpointAddress := sfui.getEndpointBySecret(clientSecret)
 	clientDir := sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId
 	masterSSHCommand := sfui.MasterSSHCommand
-	masterSSHCommand = fmt.Sprintf(masterSSHCommand, clientDir, clientDir, clientDir, clientSecret, clientIp, sfui.SfEndpoint)
+	masterSSHCommand = fmt.Sprintf(masterSSHCommand, clientDir, clientDir, clientDir, clientSecret, clientIp, endpointAddress)
 
 	cmd := exec.Command("bash", "-c", masterSSHCommand)
 
@@ -86,7 +87,7 @@ func (sfui *SfUI) waitForMasterSSHSocket(clientId string, sleepDuration time.Dur
 func (sfui *SfUI) destroyMasterSSHSocket(client *Client) error {
 	clientDir := sfui.WorkDirectory + WORK_SUB_DIR + "/" + client.ClientId
 	destroyMasterSSHCommand := sfui.TearDownMasterSSHCommand
-	destroyMasterSSHCommand = fmt.Sprintf(destroyMasterSSHCommand, clientDir, sfui.SfEndpoint)
+	destroyMasterSSHCommand = fmt.Sprintf(destroyMasterSSHCommand, clientDir)
 
 	cmd := exec.Command("bash", "-c", destroyMasterSSHCommand)
 	err := cmd.Run() // perform -O exit
@@ -110,9 +111,10 @@ func (sfui *SfUI) destroyMasterSSHSocket(client *Client) error {
 
 // Provide a SSH connection command with respect to a clients master SSH socket
 func (sfui *SfUI) getSlaveSSHTerminalCommand(clientId string, clientSecret string, clientIp string) *exec.Cmd {
+	endpointAddress := sfui.getEndpointBySecret(clientSecret)
 	clientDir := sfui.WorkDirectory + WORK_SUB_DIR + "/" + clientId
 	slaveSSHTerminalCommand := sfui.SlaveSSHCommand
-	slaveSSHTerminalCommand = fmt.Sprintf(slaveSSHTerminalCommand, clientDir, clientSecret, clientIp, sfui.SfEndpoint)
+	slaveSSHTerminalCommand = fmt.Sprintf(slaveSSHTerminalCommand, clientDir, clientSecret, clientIp, endpointAddress)
 
 	return exec.Command("bash", "-c", slaveSSHTerminalCommand)
 }

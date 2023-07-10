@@ -239,9 +239,9 @@ func (sfui *SfUI) secretValid(TermRequest *TermRequest) error {
 	return nil
 }
 
-func (sfui *SfUI) generateSecret(TermRequest *TermRequest) (Secret string, Error error) {
+func (sfui *SfUI) generateSecret(TermRequest *TermRequest) string {
 	// Return a new secret
-	return RandomStr(25), nil
+	return RandomStr(25)
 }
 
 func (sfui *SfUI) originAcceptable(r *http.Request) bool {

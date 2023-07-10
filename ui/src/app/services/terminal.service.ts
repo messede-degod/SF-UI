@@ -78,6 +78,7 @@ class SfTerminal {
             this.terminal.loadAddon(attachAddon);
 
             this.terminal.writeln("Connecting to SFUI Socket...")
+            this.terminal.focus()
 
             //Authenticate using Secret
             this.socket.onopen = () => {

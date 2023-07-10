@@ -28,7 +28,7 @@ export class DesktopViewComponent {
 
     this.IframeURL = sanitizer.bypassSecurityTrustResourceUrl("/assets/novnc_client/vnc.html?path=" + wsPath
       + "&host=" + Config.ApiHost + "&port=" + Config.ApiPort + "&encrypt=" + shouldEncrypt
-      + "&autoconnect=true&shared=true&reconnect=false&logging=error&resize=" + resize + "&reconnect=true");
+      + "&autoconnect=true&shared=true&logging=error&resize=" + resize + "&reconnect=true&max_reconnects=3");
   }
 
   requestDesktop() {

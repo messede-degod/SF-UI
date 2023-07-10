@@ -27,16 +27,15 @@ export class AttachAddonComponent implements ITerminalAddon {
 
   constructor(socket: WebSocket, options?: IAttachOptions) {
     this._socket = socket;
-    // always set binary type to arraybuffer, we do not handle blobs
-    this._socket.binaryType = 'arraybuffer';
+    this._socket.binaryType = 'blob';
     this._bidirectional = !(options && options.bidirectional === false);
   }
 
-  public activate(terminal: Terminal): void {
+  public activate(terminal: Terminal): void {    
     this._disposables.push(
-      addSocketListener(this._socket, 'message', ev => {
-        const data: ArrayBuffer | string = ev.data.slice(1);
-        terminal.write(typeof data === 'string' ? data : new Uint8Array(data));
+      addSocketListener(this._socket, 'message', async ev => {
+          const data: Blob = ev.data.slice(1);
+          terminal.write(new Uint8Array(await data.arrayBuffer()))
       })
     );
 
@@ -59,14 +58,14 @@ export class AttachAddonComponent implements ITerminalAddon {
     if (!this._checkOpenSocket()) {
       return;
     }
-    this._socket.send(SFUICommand.SF_DATA+data);
+    this._socket.send(SFUICommand.SF_DATA + data);
   }
 
   private _sendBinary(data: string): void {
     if (!this._checkOpenSocket()) {
       return;
     }
-    const buffer = new Uint8Array(data.length+1);
+    const buffer = new Uint8Array(data.length + 1);
     for (let i = 1; i < data.length; ++i) {
       buffer[i] = data.charCodeAt(i) & 255;
     }

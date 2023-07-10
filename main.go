@@ -271,21 +271,22 @@ func (sfui *SfUI) handleLogout(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status":"Internal Server Error"}`))
 }
 
-// return the endpoint FQDN given a name (ex: 8lgm -> return 8lgm.segfault.net)
+// Split secret into endpoint name and actual-secret
+// return the endpoint FQDN based on the name (ex: 8lgm -> return 8lgm.segfault.net)
 // defaults to first available endpoint FQDN if name is not found.
-func (sfui *SfUI) getEndpointBySecret(secret string) string {
+func (sfui *SfUI) getEndpointAndSecret(secret string) (EndpointAddress string, ActualSecret string) {
 	secretParts := strings.Split(secret, "-") // secret is in the form  "endpointname-randomsecretXXXXX"
 	if len(secretParts) > 1 {
 		endpointName := secretParts[0]
 
 		for _, address := range sfui.SfEndpoints {
 			if strings.Contains(address, endpointName) {
-				return address
+				return address, secretParts[1]
 			}
 		}
 	}
 
-	return sfui.SfEndpoints[0]
+	return sfui.SfEndpoints[0], secret
 }
 
 func (sfui *SfUI) getEndpointNameRR() string {

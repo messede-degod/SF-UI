@@ -1,3 +1,4 @@
 .help-dialog{
-    height: 30rem !important
+    height: 30rem !important;
+    overflow: auto;
 }

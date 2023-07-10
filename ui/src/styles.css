@@ -347,7 +347,6 @@
     display: flex;
     flex-direction: column;
     line-height: 1.5 rem;
-    overflow: auto;
 }
 
 @media only screen and (max-width: 800px) {

@@ -90,7 +90,7 @@ func (sfui *SfUI) handleSharedDesktopWS(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if !client.ShareDesktop.Load() && (client.SharedDesktopSecret == shareSecret) {
+	if client.SharedDesktopSecret != shareSecret {
 		w.WriteHeader(http.StatusNotAcceptable)
 		w.Write([]byte(`unacceptable secret`))
 		return

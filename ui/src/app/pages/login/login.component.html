@@ -6,16 +6,18 @@
                 <span id="brandInfo">by hackerschoice</span>
             </div>
             <div *ngIf="LoginWithSecret && !loadingDashBoard" class="input-secret">
-                <input type="password" [disabled]="loginDisabled" autofocus [(ngModel)]="secret" placeholder="Secret..." required (keyup.enter)="login()">
+                <input type="password" [disabled]="loginDisabled" autofocus [(ngModel)]="secret" placeholder="Secret..."
+                    required (keyup.enter)="login()">
                 <img src="../../../assets/icons/arrow-forward.svg" alt="" (click)="login()">
             </div>
 
-            <div *ngIf="!LoginWithSecret" class="flex-col login-btn-container">
+            <div *ngIf="!LoginWithSecret  && !loadingDashBoard" class="flex-col login-btn-container">
                 <div>
                     <button mat-raised-button class="start-new-btn" (click)="login()">I'm New Here</button>
                 </div>
                 <div>
-                    <button mat-raised-button class="enter-secret-btn" (click)="toggleLoginWithSecret()">I've Been Here</button>
+                    <button mat-raised-button class="enter-secret-btn" (click)="toggleLoginWithSecret()">I've Been
+                        Here</button>
                 </div>
             </div>
             <div *ngIf="!loadingDashBoard" class="login-info">
@@ -43,7 +45,7 @@
     <div class="flex flex-row bottom-bar">
         <div class="flex flex-col build-info">
             <span *ngIf="buildHash!=''">Build: <u class="build-hash" (click)="openBuildInfo()">{{buildHash}}</u></span>
-            <span *ngIf="server!=''">Server: {{server}}</span>
+            <span *ngIf="buildTime!=''">Built On: {{buildTime | date:'medium' }}</span>
         </div>
         <div class="help-menu">
             <img src="../../../assets/icons/question.svg" alt="" (click)="openHelpDialog()" title="help">

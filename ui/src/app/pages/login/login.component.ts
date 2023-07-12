@@ -17,7 +17,7 @@ export class LoginComponent {
   rippleColor: string = "primary"
   loadingDashBoard: boolean = false
   buildHash: string = Config.BuildHash
-  server: string = Config.SfEndpoint
+  buildTime: string = Config.BuildTime
   loginDisabled: boolean = false
 
   constructor(public dialog: MatDialog, private snackBar: MatSnackBar, router: Router) {

@@ -349,6 +349,11 @@
     line-height: 1.5 rem;
 }
 
+.code-select{
+    user-select: all;
+}
+
+
 @media only screen and (max-width: 800px) {
     .help-content {
         height: 25rem;

@@ -5,10 +5,20 @@
                 <h6 title="Segfault">SF</h6>
                 <span id="brandInfo">by hackerschoice</span>
             </div>
+
             <div *ngIf="LoginWithSecret && !loadingDashBoard" class="input-secret">
                 <input type="password" [disabled]="loginDisabled" autofocus [(ngModel)]="secret" placeholder="Secret..."
                     required (keyup.enter)="login()">
-                <img src="../../../assets/icons/arrow-forward.svg" alt="" (click)="login()">
+                <div [ngClass]="{
+                    'lds-ring': loginDisabled
+                }">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <img class="input-secret-img" src="../../../assets/icons/arrow-forward.svg" alt=""
+                        (click)="login()">
+                </div>
             </div>
 
             <div *ngIf="!LoginWithSecret  && !loadingDashBoard" class="flex-col login-btn-container">
@@ -20,6 +30,8 @@
                         Here</button>
                 </div>
             </div>
+
+
             <div *ngIf="!loadingDashBoard" class="login-info">
                 <span *ngIf="LoginWithSecret">
                     Enter your Segfault secret<br>to start using...
@@ -32,13 +44,13 @@
                 </span>
             </div>
             <div *ngIf="loadingDashBoard" class="login-info">
-                <span class="loading-dashboard flex-row">
+                <div class="loading-dashboard flex-row">
                     <div>
                         <mat-progress-spinner class="loading-dash-spinner" color="danger" mode="indeterminate">
                         </mat-progress-spinner>
                     </div>
-                    Loading DashBoard...
-                </span>
+                    <span>Loading DashBoard...</span>
+                </div>
             </div>
         </div>
     </div>

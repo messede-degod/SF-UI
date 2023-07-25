@@ -4,6 +4,7 @@ import { FitAddon } from 'xterm-addon-fit';
 import { AttachAddonComponent } from '../components/attach-addon/attach-addon.component';
 import { WebglAddon } from 'xterm-addon-webgl';
 import { Config } from 'src/environments/environment';
+import { WebLinksAddon } from 'xterm-addon-web-links';
 
 
 class SfTerminal {
@@ -76,6 +77,7 @@ class SfTerminal {
             // Attach The Sockets I/O to the terminal
             const attachAddon = new AttachAddonComponent(this.socket, { bidirectional: true });
             this.terminal.loadAddon(attachAddon);
+            this.terminal.loadAddon(new WebLinksAddon());
 
             this.terminal.writeln("Connecting to SFUI Socket...")
             this.terminal.focus()

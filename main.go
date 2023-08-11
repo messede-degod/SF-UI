@@ -40,22 +40,21 @@ type SfUI struct {
 	UseXForwardedForHeader bool     `yaml:"use_x_forwarded_for_header"` // Use the X-Forwared-For HTTP header, usefull when behind a reverse proxy
 	DisableOriginCheck     bool     `yaml:"disable_origin_check"`       // Disable Origin Checking
 	DisableDesktop         bool     `yaml:"disable_desktop"`            // Disable websocket based GUI desktop access
-	// Directory where SSH sockets are stored,
-	// Directory Structure:
-	// 		WorkDir/
-	//			|-sfui/		(created by sfui- container for client dirs)
-	//				|-perClientUniqDir/ (a unique string derived from secret)
-	//						- gui.sock (ssh -L ./gui.sock:127.0.0.1:2000 root@segfault.net)
-	WorkDirectory           string              `yaml:"work_directory"`
+
 	ClientInactivityTimeout int                 `yaml:"client_inactivity_timeout"` // Minutes after which the clients master SSH connection is killed
 	ValidSecret             func(s string) bool // Secret Validator
 	EndpointSelector        *atomic.Int32       // Helps select a endpoint in RR fashion
 	NoEndpoints             int32               // No of available endpoints
+
+	SegfaultSSHUsername string `yaml:"segfault_ssh_username"`
+	SegfaultSSHPassword string `yaml:"segfault_ssh_password"`
+	SegfaultUseSSHKey   bool   `yaml:"segfault_use_ssh_key"`  // whether to use a ssh key
+	SegfaultSSHKeyPath  string `yaml:"segfault_ssh_key_path"` // absolute path to the ssh key
 }
 
 var buildTime string
 var buildHash string
-var SfuiVersion string = "0.1.1"
+var SfuiVersion string = "0.2.0"
 
 //go:embed ui/dist/sf-ui
 var staticfiles embed.FS

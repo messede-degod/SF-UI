@@ -26,6 +26,9 @@ type SSHConnection struct {
 	Port                  string
 	Username              string
 	Password              string
+	UseSSHKey             bool
+	SSHKeyPath            string
+	ClientIpAddress       string
 	Secret                string
 	ForwardedConnections  map[uint16]*net.Conn
 	Timeout               time.Duration
@@ -55,6 +58,15 @@ func (sshConnection *SSHConnection) StartSSHConnection() error {
 		Timeout: sshConnection.Timeout,
 	}
 
+	if sshConnection.UseSSHKey {
+		authMethod, merr := GetSSHPrivateKeyAuthMethod(sshConnection.SSHKeyPath)
+		if merr == nil {
+			config.Auth = append(config.Auth, authMethod)
+		} else {
+			log.Println("couldn't enable SSH key auth ", merr.Error())
+		}
+	}
+
 	// connect
 	client, err := ssh.Dial("tcp", sshConnection.Host+":"+sshConnection.Port, config)
 	if err != nil {
@@ -70,6 +82,7 @@ func (sshConnection *SSHConnection) StartSSHConnection() error {
 	}
 
 	controlTerminal.Setenv("SECRET", sshConnection.Secret)
+	controlTerminal.Setenv("REMOTE_ADDR", sshConnection.ClientIpAddress)
 	sshConnection.ControlTerminal = controlTerminal
 	sshConnection.Connected.Store(true)
 	go sshConnection.SetupControlTerminal()
@@ -92,9 +105,13 @@ func (sshConnection *SSHConnection) StartTerminal() (Session *ssh.Session,
 			ssh.ECHOCTL:       0,
 		})
 
-		sterr := sess.Setenv("SECRET", sshConnection.Secret)
-		if sterr != nil {
-			log.Println(sterr, "SECRET")
+		st1err := sess.Setenv("SECRET", sshConnection.Secret)
+		if st1err != nil {
+			log.Println(st1err, "SECRET")
+		}
+		st2err := sess.Setenv("REMOTE_ADDR", sshConnection.ClientIpAddress)
+		if st2err != nil {
+			log.Println(st2err, "REMOTE_ADDR")
 		}
 
 		stdin, sierr := sess.StdinPipe()
@@ -235,4 +252,18 @@ func (sshConnection *SSHConnection) ForwardRemotePort(port uint16, cache bool) (
 		),
 	))
 	return &conn, err
+}
+
+func GetSSHPrivateKeyAuthMethod(keyFilePath string) (ssh.AuthMethod, error) {
+	filebytes, ferr := os.ReadFile(keyFilePath)
+	if ferr != nil {
+		return nil, ferr
+	}
+
+	signer, serr := ssh.ParsePrivateKey(filebytes)
+	if serr != nil {
+		return nil, serr
+	}
+
+	return ssh.PublicKeys(signer), nil
 }

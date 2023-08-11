@@ -46,7 +46,6 @@ func getDefaultConfig() SfUI {
 		DisableOriginCheck:      true,
 		UseXForwardedForHeader:  false,
 		DisableDesktop:          false,
-		WorkDirectory:           "/dev/shm/",
 		StartXpraCommand:        "[[ $(ss -lnt) == *2000* ]] || /sf/bin/startxweb \n",
 		StartVNCCommand:         "[[ $(ss -lnt) == *5900* ]] || /sf/bin/startxvnc \n",
 		StartFileBrowserCommand: "[[ $(ss -lnt) == *2900* ]] || /sf/bin/startfb \n",
@@ -57,6 +56,10 @@ func getDefaultConfig() SfUI {
 		EndpointSelector:        &atomic.Int32{},
 		VNCPort:                 5900,
 		FileBrowserPort:         2900,
+		SegfaultSSHUsername:     "root",
+		SegfaultSSHPassword:     "segfault",
+		SegfaultUseSSHKey:       false,
+		SegfaultSSHKeyPath:      "",
 	}
 }
 

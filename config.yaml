@@ -3,7 +3,7 @@ max_shared_desktop_conn: 4
 ws_ping_interval: 20 # seconds
 ws_timeout: 1080 # minutes
 server_bind_address: 0.0.0.0:7171
-debug: true
+debug: false
 sf_endpoints: 
   - "8lgm.segfault.net"
   - "adm.segfault.net"
@@ -18,3 +18,7 @@ start_filebrowser_command: "[[ $(ss -lnt) == *2900* ]] || /sf/bin/startfb"
 client_inactivity_timeout: 1
 vnc_port: 5900
 filebrowser_port: 2900
+segfault_ssh_username: root
+segfault_ssh_password: segfault
+segfault_use_ssh_key: false
+segfault_ssh_key_path: /tmp/id_rsa

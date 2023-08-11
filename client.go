@@ -102,6 +102,8 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 		return client, cerr
 	}
 
+	client.ClientActive.Store(true)
+
 	cmu.Lock()
 	clients[client.ClientId] = client
 	cmu.Unlock()
@@ -380,7 +382,13 @@ func (client *Client) SetTabId(TabId string) {
 	if client.mu != nil {
 		client.mu.Lock()
 		defer client.mu.Unlock()
-		client.TabId = &TabId
+
+		cmu.Lock()
+		defer cmu.Unlock()
+
+		fclient := clients[client.ClientId]
+		fclient.TabId = &TabId
+		clients[client.ClientId] = fclient
 	}
 }
 

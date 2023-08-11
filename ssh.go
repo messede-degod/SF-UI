@@ -141,7 +141,6 @@ func (sshConnection *SSHConnection) StartTerminal() (Session *ssh.Session,
 
 func (sshConnection *SSHConnection) StopSSHConnection() error {
 	if sshConnection.Connected.Load() {
-		log.Println("Stopping SSH Connection")
 		for _, forwardedConn := range sshConnection.ForwardedConnections {
 			(*forwardedConn).Close()
 		}

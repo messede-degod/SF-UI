@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func (sfui *SfUI) handleFileBrowser(w http.ResponseWriter, r *http.Request) {
@@ -31,14 +32,23 @@ func (sfui *SfUI) handleFileBrowser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if client.FileBrowserProxy == nil { // Proxy can timeout after certain time
-		w.WriteHeader(http.StatusGatewayTimeout)
+	conn, err := client.SSHConnection.ForwardRemotePort(sfui.FileBrowserPort, false)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, err.Error())))
+		return
+	}
+	defer (*conn).Close()
+
+	FileBrowserProxy, perr := NewHttpToNetConnProxy(conn)
+	if perr != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, perr.Error())))
 		return
 	}
 
 	r.URL.Path = strings.Replace(r.URL.Path, "/filebrowser", "", 1)
-	client.FileBrowserProxy.ServeHTTP(w, r)
+	FileBrowserProxy.ServeHTTP(w, r)
 }
 
 type setupFileBrowser struct {
@@ -58,7 +68,7 @@ func (sfui *SfUI) handleSetupFileBrowser(w http.ResponseWriter, r *http.Request)
 				return
 			}
 
-			// Get the  associated client or create a new one
+			// Get the  associated client
 			// client variable below will get stale
 			client, cerr := sfui.GetClient(setupFileBrowserReq.ClientSecret)
 			if cerr != nil {
@@ -67,8 +77,8 @@ func (sfui *SfUI) handleSetupFileBrowser(w http.ResponseWriter, r *http.Request)
 				return
 			}
 
-			if !client.MasterSSHConnectionActive.Load() {
-				werr := sfui.waitForMasterSSHSocket(client.ClientId, 5, 2)
+			if !client.SSHConnection.Connected.Load() {
+				werr := client.SSHConnection.WaitForConnection(5, 2*time.Second)
 				if werr != nil {
 					w.WriteHeader(http.StatusInternalServerError)
 					w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, werr.Error())))
@@ -83,9 +93,14 @@ func (sfui *SfUI) handleSetupFileBrowser(w http.ResponseWriter, r *http.Request)
 				client, _ = sfui.GetClient(setupFileBrowserReq.ClientSecret)
 			}
 
-			// TODO : Check for short writes
-			client.MasterSSHConnectionPty.WriteString(sfui.StartFileBrowserCommand)
-			client.MasterSSHConnectionPty.Sync()
+			rerr := client.SSHConnection.RunControlCommand(sfui.StartFileBrowserCommand)
+			if rerr != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(rerr.Error()))
+				return
+			}
+
+			time.Sleep(time.Second * 3) // :-) elite strategy to make sure that filebrowser is active
 
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(`{"status":"OK"}`))

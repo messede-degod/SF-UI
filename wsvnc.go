@@ -13,10 +13,10 @@ import (
 
 // websockify returns an http.Handler which proxies websocket requests to a VNC server
 // address.
-func vncWebSockify(to string, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}, timeout time.Duration) http.Handler {
+func vncWebSockify(conn *net.Conn, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}, timeout time.Duration) http.Handler {
 	return websocket.Server{
 		Handshake: wsProxyHandshake,
-		Handler:   wsProxyHandler(to, viewOnly, isSharedConnection, closeConnection, timeout),
+		Handler:   wsProxyHandler(conn, viewOnly, isSharedConnection, closeConnection, timeout),
 	}
 }
 
@@ -56,17 +56,10 @@ func (viewOnlyConn *ViewOnlyConn) Read(msg []byte) (n int, err error) {
 	return n, err
 }
 
-func wsProxyHandler(to string, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}, timeout time.Duration) websocket.Handler {
+func wsProxyHandler(conn *net.Conn, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}, timeout time.Duration) websocket.Handler {
 	return func(ws *websocket.Conn) {
-		conn, err := net.Dial("unix", to)
-		if err != nil {
-			log.Println(err)
-			ws.Close()
-			return
-		}
-
+		var err error
 		ws.PayloadType = websocket.BinaryFrame
-
 		done := make(chan error)
 
 		if viewOnly {
@@ -74,11 +67,11 @@ func wsProxyHandler(to string, viewOnly bool, isSharedConnection bool, closeConn
 				Ws:     ws,
 				MsgBuf: make([]byte, 256),
 			}
-			go copyCh(conn, &viewOnlyConn, done) // Use custom Read() function to filter out input
-			go copyCh(ws, conn, done)
+			go copyCh(*conn, &viewOnlyConn, done) // Use custom Read() function to filter out input
+			go copyCh(ws, *conn, done)
 		} else {
-			go copyCh(conn, ws, done)
-			go copyCh(ws, conn, done)
+			go copyCh(*conn, ws, done)
+			go copyCh(ws, *conn, done)
 		}
 
 		if isSharedConnection { // if shared, close connection when user disabled sharing(i.e closeConnection channel is closed)
@@ -107,7 +100,6 @@ func wsProxyHandler(to string, viewOnly bool, isSharedConnection bool, closeConn
 			}
 		}
 
-		conn.Close()
 		ws.Close()
 		<-done
 	}

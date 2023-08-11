@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -42,10 +42,18 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 	defer client.DeActivateDesktop()
 	defer client.DeactivateDesktopSharing() // Remove all shares when master VNC connection exits
 
-	sfui.startDesktopService(client.MasterSSHConnectionPty, desktopType, time.Second*3)
+	sfui.startDesktopService(&client, desktopType, time.Second*3)
+
+	conn, err := client.SSHConnection.ForwardRemotePort(sfui.VNCPort, false)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	defer (*conn).Close()
 
 	vncWebSockify(
-		sfui.getGUISocketPath(client.ClientId),
+		conn,
 		false, // not view only
 		false, // not shared
 		client.SharedDesktopConn,
@@ -54,18 +62,21 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 }
 
 // Issue appropriate desktop start command(Type) using Pty and Wait for a certain duration
-// so that the said command can come alive
-func (sfui *SfUI) startDesktopService(Pty *os.File, Type string, Wait time.Duration) {
+func (sfui *SfUI) startDesktopService(client *Client, desktoptype string, wait time.Duration) {
 	startCmd := ""
-	switch Type {
+	switch desktoptype {
 	case "xpra":
 		startCmd = sfui.StartXpraCommand
 	default:
 		startCmd = sfui.StartVNCCommand
 	}
-	Pty.WriteString(startCmd)
-	Pty.Sync()
-	time.Sleep(Wait)
+
+	rerr := client.SSHConnection.RunControlCommand(startCmd)
+	if rerr != nil {
+		log.Println(rerr)
+	}
+
+	time.Sleep(wait)
 }
 
 func (sfui *SfUI) handleSharedDesktopWS(w http.ResponseWriter, r *http.Request) {
@@ -104,8 +115,16 @@ func (sfui *SfUI) handleSharedDesktopWS(w http.ResponseWriter, r *http.Request) 
 	}
 	defer client.DecSharedDesktopConnCount()
 
+	conn, err := client.SSHConnection.ForwardRemotePort(sfui.VNCPort, false)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	defer (*conn).Close()
+
 	vncWebSockify(
-		sfui.getGUISocketPath(client.ClientId),
+		conn,
 		client.SharedDesktopIsViewOnly.Load(),
 		true, // is a shared connection
 		client.SharedDesktopConn,

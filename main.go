@@ -7,6 +7,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/http/pprof"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"regexp"
@@ -26,10 +28,11 @@ type SfUI struct {
 	MasterSSHCommand         string `yaml:"master_ssh_command"`          // Command used to setup the SSH Master Socket
 	TearDownMasterSSHCommand string `yaml:"teardown_master_ssh_command"` // Command used to teardown the SSH Master Socket.
 	SlaveSSHCommand          string `yaml:"slave_ssh_command"`           // Command used to start a SSH shell using the master socket
-	GUIBridgeCommand         string `yaml:"gui_bridge_command"`          // Command used to setup a GUI port forward using the master socket
 	StartXpraCommand         string `yaml:"start_xpra_command"`          // Command used to start xpra
 	StartVNCCommand          string `yaml:"start_vnc_command"`           // Command used to start VNC
 	StartFileBrowserCommand  string `yaml:"start_filebrowser_command"`   // Command used to start filebrowser
+	VNCPort                  uint16 `yaml:"vnc_port"`
+	FileBrowserPort          uint16 `yaml:"filebrowser_port"`
 
 	CompiledClientConfig   []byte   // Ui related config that has to be sent to client
 	SfEndpoints            []string `yaml:"sf_endpoints"`               // Sf Endpoints To Use
@@ -71,11 +74,6 @@ func main() {
 		return
 	}
 	// release runLock in cleanUp()
-
-	gerr := sfui.cleanWorkDir()
-	if gerr != nil {
-		log.Fatal(gerr)
-	}
 
 	sfui.handleSignals()
 
@@ -139,6 +137,7 @@ func (sfui *SfUI) cleanUp() {
 }
 
 var isFbPath = regexp.MustCompile(`(?m)^/filebrowser.*`).MatchString
+var isPPROFPath = regexp.MustCompile(`(?m)^/debug.*`).MatchString
 
 func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 	if sfui.Debug {
@@ -148,6 +147,8 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Headers", "*")
 	}
 	switch r.URL.Path {
+	case "/debug/pprof/heap":
+		pprof.Index(w, r)
 	case "/secret":
 		sfui.handleLogin(w, r)
 		w.Header().Add("Content-Type", "application/json")
@@ -177,6 +178,12 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 			sfui.handleFileBrowser(w, r)
 			return
 		}
+
+		if isPPROFPath(r.URL.Path) {
+			pprof.Index(w, r)
+			return
+		}
+
 		handleUIRequest(w, r)
 	}
 }
@@ -296,8 +303,6 @@ func (sfui *SfUI) getEndpointNameRR() string {
 		selected = 0
 	}
 	sfui.EndpointSelector.Add(1)
-
-	log.Println("using ", sfui.SfEndpoints[selected])
 
 	eparts := strings.Split(sfui.SfEndpoints[selected], ".")
 	if len(eparts) > 0 {

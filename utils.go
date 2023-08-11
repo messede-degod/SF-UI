@@ -37,9 +37,9 @@ func (sfui *SfUI) getClientAddr(r *http.Request) string {
 	return strings.Split(r.RemoteAddr, ":")[0] // Remote addr is ip:port, we need only ip
 }
 
-// NewHttpToUnixProxy : Proxy between http/websocket and unix socket
-func NewHttpToUnixProxy(sockAddr string) (*httputil.ReverseProxy, error) {
-	// Traget Url value is never used since we use the unix transport, but it has to speicifed anyhow
+// NewHttpToNetConnProxy : Proxy between http/websocket and net.Conn
+func NewHttpToNetConnProxy(hconn *net.Conn) (*httputil.ReverseProxy, error) {
+	// Traget Url value is never used since we use the unix transport, but it has to specified anyhow
 	targetUrl := "http://127.0.0.1:8080"
 	target, err := url.Parse(targetUrl)
 	if err != nil {
@@ -50,9 +50,9 @@ func NewHttpToUnixProxy(sockAddr string) (*httputil.ReverseProxy, error) {
 
 	proxy.Transport = &http.Transport{
 		Dial: func(proto, addr string) (conn net.Conn, err error) {
-			return net.Dial("unix", sockAddr)
+			return *hconn, nil
 		},
-		ForceAttemptHTTP2:     true,
+		ForceAttemptHTTP2:     false,
 		MaxIdleConns:          100,
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
@@ -64,6 +64,7 @@ func NewHttpToUnixProxy(sockAddr string) (*httputil.ReverseProxy, error) {
 
 // copyCh is like io.Copy, but it writes to a channel when finished.
 func copyCh(dst io.Writer, src io.Reader, done chan error) {
-	_, err := io.Copy(dst, src)
+	buf := make([]byte, 32*1024)
+	_, err := io.CopyBuffer(dst, src, buf)
 	done <- err
 }

@@ -4,31 +4,28 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"net"
 	"net/http/httputil"
-	"os"
-	"os/exec"
 	"sync"
 	"sync/atomic"
 	"time"
 )
 
 type Client struct {
-	ClientId                  string
-	mu                        *sync.Mutex
-	TerminalsCount            *atomic.Int32
-	MasterSSHConnectionActive *atomic.Bool
-	MasterSSHConnectionCmd    *exec.Cmd
-	MasterSSHConnectionPty    *os.File
-	DesktopActive             *atomic.Bool // Whether a active desktop ws connection exists
-	MaxTerms                  int32
-	MaxSharedDesktopConn      int32
-	FileBrowserProxy          *httputil.ReverseProxy
-	FileBrowserServiceActive  *atomic.Bool
-	ShareDesktop              *atomic.Bool // Whether desktop sharing is active
-	SharedDesktopIsViewOnly   *atomic.Bool
-	SharedDesktopSecret       string
-	SharedDesktopConn         chan interface{} // Channel when closed kills all shared desktop connections
-	SharedDesktopConnCount    *atomic.Int32    // No of active connections to shared desktop
+	ClientId                 string
+	mu                       *sync.Mutex
+	TerminalsCount           *atomic.Int32
+	DesktopActive            *atomic.Bool // Whether a active desktop ws connection exists
+	MaxTerms                 int32
+	MaxSharedDesktopConn     int32
+	SSHConnection            *SSHConnection
+	FileBrowserProxy         *httputil.ReverseProxy
+	FileBrowserServiceActive *atomic.Bool
+	ShareDesktop             *atomic.Bool // Whether desktop sharing is active
+	SharedDesktopIsViewOnly  *atomic.Bool
+	SharedDesktopSecret      string
+	SharedDesktopConn        chan interface{} // Channel when closed kills all shared desktop connections
+	SharedDesktopConnCount   *atomic.Int32    // No of active connections to shared desktop
 	// Channel when closed prevents master SSH connection from being killed by RemoveClientIfInactive,
 	// that is unless a ClientInactivityTimeout is first reached, open channel indicated a inactive client
 	// closed channel indicates a active client
@@ -49,22 +46,21 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 	// Make and return a new client
 	tabId := ""
 	client := Client{
-		ClientId:                  getClientId(ClientSecret),
-		mu:                        &sync.Mutex{},
-		TerminalsCount:            &atomic.Int32{},
-		MasterSSHConnectionActive: &atomic.Bool{},
-		MaxTerms:                  int32(sfui.MaxWsTerminals),
-		MaxSharedDesktopConn:      int32(sfui.MaxSharedDesktopConn),
-		ClientConn:                make(chan interface{}), // Initially no active connections exist
-		ClientActive:              &atomic.Bool{},
-		DesktopActive:             &atomic.Bool{},
-		FileBrowserServiceActive:  &atomic.Bool{},
-		ShareDesktop:              &atomic.Bool{},
-		SharedDesktopConn:         make(chan interface{}),
-		SharedDesktopIsViewOnly:   &atomic.Bool{},
-		SharedDesktopConnCount:    &atomic.Int32{},
-		Deleted:                   &atomic.Bool{},
-		TabId:                     &tabId,
+		ClientId:                 getClientId(ClientSecret),
+		mu:                       &sync.Mutex{},
+		TerminalsCount:           &atomic.Int32{},
+		MaxTerms:                 int32(sfui.MaxWsTerminals),
+		MaxSharedDesktopConn:     int32(sfui.MaxSharedDesktopConn),
+		ClientConn:               make(chan interface{}), // Initially no active connections exist
+		ClientActive:             &atomic.Bool{},
+		DesktopActive:            &atomic.Bool{},
+		FileBrowserServiceActive: &atomic.Bool{},
+		ShareDesktop:             &atomic.Bool{},
+		SharedDesktopConn:        make(chan interface{}),
+		SharedDesktopIsViewOnly:  &atomic.Bool{},
+		SharedDesktopConnCount:   &atomic.Int32{},
+		Deleted:                  &atomic.Bool{},
+		TabId:                    &tabId,
 	}
 
 	if !AcceptClients {
@@ -79,37 +75,29 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 	// where multiple SSH connection would be created when a master SSH connection
 	// is still being established.
 	cmu.Lock()
+
+	endpointAddress, actualSecret := sfui.getEndpointAndSecret(ClientSecret)
+	sshConnection := SSHConnection{
+		Connected:             &atomic.Bool{},
+		Host:                  endpointAddress,
+		ControlTerminalActive: &atomic.Bool{},
+		Port:                  "22",
+		Username:              "root",
+		Password:              "segfault",
+		Secret:                actualSecret,
+		Timeout:               1 * time.Minute,
+		ForwardedConnections:  make(map[uint16]*net.Conn),
+	}
+	client.SSHConnection = &sshConnection
+
 	clients[client.ClientId] = client
+
 	cmu.Unlock()
 
-	if werr := sfui.workDirAddClient(client.ClientId); werr != nil {
+	if cerr := sshConnection.StartSSHConnection(); cerr != nil {
 		sfui.RemoveClient(&client)
-		return client, werr
+		return client, cerr
 	}
-
-	mCmd, mPty, mPtyErr := sfui.prepareMasterSSHSocket(client.ClientId, ClientSecret, ClientIp)
-	if mPtyErr != nil {
-		sfui.RemoveClient(&client)
-		return client, mPtyErr
-	}
-	client.MasterSSHConnectionPty = mPty
-	client.MasterSSHConnectionCmd = mCmd
-
-	// Wait untill the master SSH socket becomes available
-	mwerr := sfui.waitForMasterSSHSocket(client.ClientId, time.Second*10, 2)
-	if mwerr != nil {
-		sfui.RemoveClient(&client)
-		return client, mwerr
-	}
-
-	FileBrowserProxy, perr := NewHttpToUnixProxy(sfui.getFileBrowserSocketPath(client.ClientId))
-	if perr != nil {
-		sfui.RemoveClient(&client)
-		return client, perr
-	}
-
-	client.FileBrowserProxy = FileBrowserProxy
-	client.MasterSSHConnectionActive.Store(true)
 
 	cmu.Lock()
 	clients[client.ClientId] = client
@@ -133,8 +121,9 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 		close(client.ClientConn) // Stop RemoveClientIfInactive if running
 	}
 
-	sfui.destroyMasterSSHSocket(client)
-	sfui.workDirRemoveClient(client.ClientId)
+	if client.SSHConnection != nil {
+		client.SSHConnection.StopSSHConnection()
+	}
 
 	cmu.Lock()
 	delete(clients, client.ClientId)
@@ -176,12 +165,12 @@ func (sfui *SfUI) GetExistingClientOrMakeNew(ClientSecret string, ClientIp strin
 		return sfui.NewClient(ClientSecret, ClientIp)
 	}
 
-	if client.MasterSSHConnectionActive == nil {
+	if client.SSHConnection == nil {
 		return client, errors.New("client does not exist")
 	}
 
-	if !client.MasterSSHConnectionActive.Load() {
-		werr := sfui.waitForMasterSSHSocket(client.ClientId, 5*time.Second, 2)
+	if !client.SSHConnection.Connected.Load() {
+		werr := client.SSHConnection.WaitForConnection(2, 5*time.Second)
 		if werr != nil {
 			return client, werr
 		}
@@ -201,7 +190,7 @@ func (sfui *SfUI) GetClient(ClientSecret string) (Client, error) {
 	cmu.Lock()
 	defer cmu.Unlock()
 
-	client, ok := clients[getClientId(ClientSecret)] // race possible
+	client, ok := clients[getClientId(ClientSecret)]
 	if ok {
 		return client, nil
 	}

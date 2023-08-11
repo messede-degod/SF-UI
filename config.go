@@ -55,6 +55,8 @@ func getDefaultConfig() SfUI {
 		WSTimeout:               1080, // 18 Hours
 		ValidSecret:             regexp.MustCompile(`^[a-zA-Z0-9-]{6,}$`).MatchString,
 		EndpointSelector:        &atomic.Int32{},
+		VNCPort:                 5900,
+		FileBrowserPort:         2900,
 	}
 }
 

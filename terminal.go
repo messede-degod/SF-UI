@@ -7,12 +7,9 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
-	"syscall"
 	"time"
-	"unsafe"
 
-	"github.com/creack/pty"
+	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/websocket"
 )
 
@@ -47,14 +44,14 @@ type Terminal struct {
 	ClientSecret string
 	ClientIp     string
 	WSConn       *websocket.Conn
-	Pty          *os.File
+	SSHSession   *ssh.Session
 	MsgBuf       []byte
 }
 
 type TermConfig struct {
 	Secret string `json:"secret"`
-	Rows   uint16 `json:"rows"`
-	Cols   uint16 `json:"cols"`
+	Rows   int    `json:"rows"`
+	Cols   int    `json:"cols"`
 }
 
 func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
@@ -99,28 +96,8 @@ func (sfui *SfUI) handleTerminalWs(w http.ResponseWriter, r *http.Request) {
 	}).ServeHTTP(w, r)
 }
 
-func (terminal *Terminal) setTermDimensions(rows uint16, cols uint16) {
-	if terminal.Pty.Fd() <= 2 {
-		return
-	}
-
-	window := struct {
-		row uint16
-		col uint16
-		x   uint16
-		y   uint16
-	}{
-		uint16(rows),
-		uint16(cols),
-		0,
-		0,
-	}
-	syscall.Syscall(
-		syscall.SYS_IOCTL,
-		terminal.Pty.Fd(),
-		syscall.TIOCSWINSZ,
-		uintptr(unsafe.Pointer(&window)),
-	)
+func (terminal *Terminal) setTermDimensions(rows int, cols int) {
+	terminal.SSHSession.WindowChange(rows, cols)
 }
 
 // Read Secret Sent by Client
@@ -175,8 +152,10 @@ var PONG_CMD_BYTES = []byte{SFUI_CMD_PONG} // Mark as Pong
 var REG_CMD_BYTES = []byte{'0'}            // Mark as Regular data chunk
 
 func (terminal *Terminal) Write(msg []byte) (n int, err error) {
-	n, err = terminal.WSConn.Write(append(REG_CMD_BYTES[:], msg[:]...))
-	return n - 1, err // n-1 so that writer does not get confused as to where the extra 1 bytes came from
+	bw := append(REG_CMD_BYTES, msg[:]...)
+	n, err = terminal.WSConn.Write(bw)
+	bw = nil
+	return n - 1, err // n-1 so that writer does not get confused as to where the extra 1 byte came from
 }
 
 func (terminal *Terminal) sendPong() (n int, err error) {
@@ -204,33 +183,37 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 	defer client.DecTermCount() // Remove from terminal Quota
 
 	var err error
-	command := sfui.getSlaveSSHTerminalCommand(client.ClientId, terminal.ClientSecret, terminal.ClientIp)
-	terminal.Pty, err = pty.Start(command)
-	if err != nil {
-		return err
+	sess, stdin, stdout, stderr, serr := client.SSHConnection.StartTerminal()
+	if serr != nil {
+		return serr
 	}
-	defer terminal.Pty.Close()
+	terminal.SSHSession = sess
+	defer sess.Close()
 
-	go io.Copy(terminal, terminal.Pty) // Copy from PTY -> WS
+	stdOutbuf := make([]byte, 32*1024)
+	stdErrbuf := make([]byte, 32*1024)
 
-	// Copy from WS -> PTY, but use the Read() function
+	go io.CopyBuffer(terminal, *stdout, stdOutbuf) // Copy from stdout -> WS
+	go io.CopyBuffer(terminal, *stderr, stdErrbuf) // Copy from stderr -> WS
+
+	// Copy from WS -> stdin, but use the Read() function
 	// we defined for Terminal to read from the websocket
 	done := make(chan error)
-	go copyCh(terminal.Pty, terminal, done)
+	go copyCh(*stdin, terminal, done)
+
+	timeout := time.NewTimer(time.Minute * time.Duration(sfui.WSTimeout))
 
 	select {
+	case <-timeout.C:
+		break
 	case err = <-done:
 		if err != nil {
 			log.Println(err.Error())
 		}
-		break
-	case <-time.After(time.Minute * time.Duration(sfui.WSTimeout)):
+		timeout.Stop()
 		break
 	}
 
-	command.Process.Kill()
-	command.Wait()
-	terminal.Pty.Close()
 	return nil
 }
 

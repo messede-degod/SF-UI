@@ -7,8 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/http/pprof"
-	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"regexp"
@@ -136,7 +134,6 @@ func (sfui *SfUI) cleanUp() {
 }
 
 var isFbPath = regexp.MustCompile(`(?m)^/filebrowser.*`).MatchString
-var isPPROFPath = regexp.MustCompile(`(?m)^/debug.*`).MatchString
 
 func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 	if sfui.Debug {
@@ -146,8 +143,6 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Headers", "*")
 	}
 	switch r.URL.Path {
-	case "/debug/pprof/heap":
-		pprof.Index(w, r)
 	case "/secret":
 		sfui.handleLogin(w, r)
 		w.Header().Add("Content-Type", "application/json")
@@ -175,11 +170,6 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 		// /filebrowser/*
 		if isFbPath(r.URL.Path) {
 			sfui.handleFileBrowser(w, r)
-			return
-		}
-
-		if isPPROFPath(r.URL.Path) {
-			pprof.Index(w, r)
 			return
 		}
 

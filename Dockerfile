@@ -1,5 +1,5 @@
 # Build Filebrowser
-FROM node:16.20 AS filebrowser
+FROM node:latest AS filebrowser
 WORKDIR /filebrowser/
 COPY filebrowser-ui/package.json ./
 RUN npm install

@@ -1,7 +1,7 @@
 import store from "@/store";
 import router from "@/router";
 import { Base64 } from "js-base64";
-import { baseURL } from "@/utils/constants";
+import { fetchURL } from "@/api/utils";
 
 export function parseToken(token) {
   const parts = token.split(".");
@@ -25,21 +25,25 @@ export async function validateLogin() {
       await renew(localStorage.getItem("jwt"));
     }
   } catch (_) {
-    console.warn('Invalid JWT token in storage') // eslint-disable-line
+    console.warn("Invalid JWT token in storage"); // eslint-disable-line
   }
 }
 
 export async function login(username, password, recaptcha) {
   const data = { username, password, recaptcha };
 
-  const res = await fetch(`${baseURL}/api/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-SfUi-Token" : window.SfUiSecret,
+  const res = await fetchURL(
+    `/api/login`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-SfUi-Token" : window.SfUiSecret,
+      },
+      body: JSON.stringify(data),
     },
-    body: JSON.stringify(data),
-  });
+    false
+  );
 
   const body = await res.text();
 
@@ -51,7 +55,7 @@ export async function login(username, password, recaptcha) {
 }
 
 export async function renew(jwt) {
-  const res = await fetch(`${baseURL}/api/renew`, {
+  const res = await fetchURL(`/api/renew`, {
     method: "POST",
     headers: {
       "X-Auth": jwt,
@@ -71,14 +75,18 @@ export async function renew(jwt) {
 export async function signup(username, password) {
   const data = { username, password };
 
-  const res = await fetch(`${baseURL}/api/signup`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-SfUi-Token" : window.SfUiSecret,
+  const res = await fetchURL(
+    `/api/signup`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-SfUi-Token" : window.SfUiSecret,
+      },
+      body: JSON.stringify(data),
     },
-    body: JSON.stringify(data),
-  });
+    false
+  );
 
   if (res.status !== 200) {
     throw new Error(res.status);

@@ -87,10 +87,10 @@ export default {
       event.preventDefault();
       event.stopPropagation();
 
-      // let redirect = this.$route.query.redirect;
-      // if (redirect === "" || redirect === undefined || redirect === null) {
-      let redirect = "/files/";
-      // }
+      let redirect = this.$route.query.redirect;
+      if (redirect === "" || redirect === undefined || redirect === null) {
+        redirect = "/files/";
+      }
 
       let captcha = "";
       if (recaptcha) {

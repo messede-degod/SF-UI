@@ -33,7 +33,7 @@ RUN strip sfui
 
 # Run SfUI
 FROM alpine:latest
-RUN apk add bash openssh sshpass
+RUN apk add bash
 WORKDIR /app/
 COPY --from=backend /backend/sfui ./
 COPY config.yaml ./

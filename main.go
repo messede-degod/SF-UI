@@ -48,6 +48,8 @@ type SfUI struct {
 	SegfaultSSHPassword string `yaml:"segfault_ssh_password"`
 	SegfaultUseSSHKey   bool   `yaml:"segfault_use_ssh_key"`  // whether to use a ssh key
 	SegfaultSSHKeyPath  string `yaml:"segfault_ssh_key_path"` // absolute path to the ssh key
+
+	MaintenanceSecret string `yaml:"maintenance_secret"` // secret used to restrict access to certain maintenance apis
 }
 
 var buildTime string
@@ -165,6 +167,9 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 		sfui.handleSetupFileBrowser(w, r)
 	case "/desktop/share":
 		sfui.handleSetupDesktopSharing(w, r)
+		w.Header().Add("Content-Type", "application/json")
+	case "/stats":
+		sfui.handleClientStats(w, r)
 		w.Header().Add("Content-Type", "application/json")
 	default:
 		// /filebrowser/*

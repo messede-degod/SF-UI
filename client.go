@@ -3,8 +3,10 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"net"
+	"net/http"
 	"net/http/httputil"
 	"sync"
 	"sync/atomic"
@@ -405,4 +407,49 @@ func (sfui *SfUI) RemoveAllClients() {
 		client := clients[cid]
 		sfui.RemoveClient(&client)
 	}
+}
+
+type ClientStats struct {
+	ClientCount int          `json:"client_count"`
+	Clients     []ClientStat `json:"clients"`
+}
+
+type ClientStat struct {
+	TermCount     int  `json:"term_count"`
+	DesktopActive bool `json:"desktop_active"`
+}
+
+func (sfui *SfUI) handleClientStats(w http.ResponseWriter, r *http.Request) {
+	MtSecret := r.Header.Get("X-Mt-Secret")
+
+	if MtSecret != sfui.MaintenanceSecret {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(`{"status":"denied"}`))
+		return
+	}
+
+	stats := ClientStats{
+		ClientCount: 0,
+	}
+
+	cmu.Lock()
+	for _, client := range clients {
+		nClient := ClientStat{
+			TermCount:     int(client.TerminalsCount.Load()),
+			DesktopActive: client.DesktopActive.Load(),
+		}
+		stats.Clients = append(stats.Clients, nClient)
+		stats.ClientCount++
+	}
+	cmu.Unlock()
+
+	jb, err := json.Marshal(stats)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(jb)
 }

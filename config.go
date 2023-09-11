@@ -60,6 +60,7 @@ func getDefaultConfig() SfUI {
 		SegfaultSSHPassword:     "segfault",
 		SegfaultUseSSHKey:       false,
 		SegfaultSSHKeyPath:      "",
+		MaintenanceSecret:       RandomStr(42),
 	}
 }
 

@@ -22,3 +22,8 @@ segfault_ssh_username: root
 segfault_ssh_password: segfault
 segfault_use_ssh_key: false
 segfault_ssh_key_path: /tmp/id_rsa
+enable_metric_logging: false
+elastic_server_host: "sf-stats.segfault.net"
+elastic_index_name: "sf-stats"
+elastic_username: "elastic"
+elastic_password: "elastic"

@@ -7,6 +7,7 @@ ui/out-tsc
 ui/bazel-out
 ui/src/app/config/config.ts
 bin/*
+config.yaml
 
 # Node
 ui/node_modules

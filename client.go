@@ -135,6 +135,13 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 	cmu.Lock()
 	delete(clients, client.ClientId)
 	cmu.Unlock()
+
+	if sfui.EnableMetricLogging {
+		go MLogger.AddLogEntry(&Metric{
+			Type: "Logout",
+			Time: time.Now().UTC().String(),
+		})
+	}
 }
 
 // If a client has no active terminals or a GUI connection

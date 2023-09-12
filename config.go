@@ -61,6 +61,8 @@ func getDefaultConfig() SfUI {
 		SegfaultUseSSHKey:       false,
 		SegfaultSSHKeyPath:      "",
 		MaintenanceSecret:       RandomStr(42),
+		EnableMetricLogging:     false,
+		MetricLoggerQueueSize:   500,
 	}
 }
 

@@ -13,6 +13,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"syscall"
+	"time"
 )
 
 type SfUI struct {
@@ -49,7 +50,14 @@ type SfUI struct {
 	SegfaultUseSSHKey   bool   `yaml:"segfault_use_ssh_key"`  // whether to use a ssh key
 	SegfaultSSHKeyPath  string `yaml:"segfault_ssh_key_path"` // absolute path to the ssh key
 
-	MaintenanceSecret string `yaml:"maintenance_secret"` // secret used to restrict access to certain maintenance apis
+	MaintenanceSecret     string `yaml:"maintenance_secret"`    // secret used to restrict access to certain maintenance apis
+	EnableMetricLogging   bool   `yaml:"enable_metric_logging"` // collect metrics from sfui
+	MetricLoggerQueueSize int    `yaml:"metric_logger_queue_size"`
+
+	ElasticServerHost string `yaml:"elastic_server_host"`
+	ElasticIndexName  string `yaml:"elastic_index_name"`
+	ElasticUsername   string `yaml:"elastic_username"`
+	ElasticPassword   string `yaml:"elastic_password"`
 }
 
 var buildTime string
@@ -75,6 +83,12 @@ func main() {
 	// release runLock in cleanUp()
 
 	sfui.handleSignals()
+
+	if sfui.EnableMetricLogging {
+		MLogger.StartLogger(sfui.MetricLoggerQueueSize, 1,
+			sfui.ElasticServerHost, sfui.ElasticIndexName,
+			sfui.ElasticUsername, sfui.ElasticPassword)
+	}
 
 	log.Printf("Listening on http://%s ....\n", sfui.ServerBindAddress)
 	http.ListenAndServe(sfui.ServerBindAddress, http.HandlerFunc(sfui.requestHandler))
@@ -199,6 +213,14 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 				}
 				response, _ := json.Marshal(termRes)
 				w.Write(response)
+
+				if sfui.EnableMetricLogging {
+					go MLogger.AddLogEntry(&Metric{
+						Type: "NewAccount",
+						Time: time.Now().UTC().String(),
+					})
+				}
+
 				return
 			}
 
@@ -238,6 +260,14 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 				}
 				response, _ := json.Marshal(termRes)
 				w.Write(response)
+
+				if sfui.EnableMetricLogging {
+					go MLogger.AddLogEntry(&Metric{
+						Type: "Login",
+						Time: time.Now().UTC().String(),
+					})
+				}
+
 				return
 			}
 		}

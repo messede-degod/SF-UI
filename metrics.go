@@ -39,6 +39,7 @@ func (metricLogger *MetricLogger) StartLogger(queueSize int, flushInterval int,
 
 func (metricLogger *MetricLogger) AddLogEntry(log *Metric) {
 	if metricLogger.LoggingActive.Load() {
+		log.Time = time.Now().Format(time.RFC3339)
 		select {
 		case metricLogger.LogQueue <- *log:
 		default: // Channel full

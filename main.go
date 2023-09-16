@@ -13,7 +13,6 @@ import (
 	"strings"
 	"sync/atomic"
 	"syscall"
-	"time"
 )
 
 type SfUI struct {
@@ -217,7 +216,6 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 				if sfui.EnableMetricLogging {
 					go MLogger.AddLogEntry(&Metric{
 						Type: "NewAccount",
-						Time: time.Now().UTC().String(),
 					})
 				}
 
@@ -264,7 +262,6 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 				if sfui.EnableMetricLogging {
 					go MLogger.AddLogEntry(&Metric{
 						Type: "Login",
-						Time: time.Now().UTC().String(),
 					})
 				}
 

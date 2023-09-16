@@ -139,7 +139,6 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 	if sfui.EnableMetricLogging {
 		go MLogger.AddLogEntry(&Metric{
 			Type: "Logout",
-			Time: time.Now().UTC().String(),
 		})
 	}
 }

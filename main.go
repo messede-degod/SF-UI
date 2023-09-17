@@ -145,6 +145,10 @@ func (sfui *SfUI) cleanUp() {
 	sfui.DisableClientAccess()
 	log.Println("Disconnecting all clients...")
 	sfui.RemoveAllClients()
+	log.Println("Flushing Log Queue...")
+	if sfui.EnableMetricLogging {
+		MLogger.FlushQueue()
+	}
 	releaseRunLock()
 }
 

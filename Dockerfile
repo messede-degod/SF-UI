@@ -37,6 +37,7 @@ RUN apk add bash
 WORKDIR /app/
 COPY --from=backend /backend/sfui ./
 COPY config.yaml ./
+COPY other/geoip/geo.mmdb  /app/geo.mmdb
 COPY other/ssh/known_hosts /root/.ssh/
 EXPOSE 7171
 ENTRYPOINT ["/app/sfui"]

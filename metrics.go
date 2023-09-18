@@ -19,8 +19,9 @@ type MetricLogger struct {
 }
 
 type Metric struct {
-	Type string
-	Time string
+	Type    string
+	Time    string
+	Country string
 }
 
 var MLogger = MetricLogger{}

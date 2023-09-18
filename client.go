@@ -15,6 +15,7 @@ import (
 
 type Client struct {
 	ClientId                 string
+	ClientCountry            string
 	mu                       *sync.Mutex
 	TerminalsCount           *atomic.Int32
 	DesktopActive            *atomic.Bool // Whether a active desktop ws connection exists
@@ -63,6 +64,7 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 		SharedDesktopConnCount:   &atomic.Int32{},
 		Deleted:                  &atomic.Bool{},
 		TabId:                    &tabId,
+		ClientCountry:            GetCountryByIp(ClientIp),
 	}
 
 	if !AcceptClients {
@@ -132,15 +134,16 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 		client.SSHConnection.StopSSHConnection()
 	}
 
+	if sfui.EnableMetricLogging {
+		go MLogger.AddLogEntry(&Metric{
+			Type:    "Logout",
+			Country: client.ClientCountry,
+		})
+	}
+
 	cmu.Lock()
 	delete(clients, client.ClientId)
 	cmu.Unlock()
-
-	if sfui.EnableMetricLogging {
-		go MLogger.AddLogEntry(&Metric{
-			Type: "Logout",
-		})
-	}
 }
 
 // If a client has no active terminals or a GUI connection

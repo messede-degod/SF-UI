@@ -68,3 +68,14 @@ func copyCh(dst io.Writer, src io.Reader, done chan error) {
 	_, err := io.CopyBuffer(dst, src, buf)
 	done <- err
 }
+
+func GetCountryByIp(ip string) string {
+	countryCode, err := GeoIpLookup(ip)
+	if err != nil {
+		return "WORLD"
+	}
+	if countryCode == "" {
+		return "LOCAL"
+	}
+	return countryCode
+}

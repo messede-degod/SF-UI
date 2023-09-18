@@ -57,6 +57,7 @@ type SfUI struct {
 	ElasticIndexName  string `yaml:"elastic_index_name"`
 	ElasticUsername   string `yaml:"elastic_username"`
 	ElasticPassword   string `yaml:"elastic_password"`
+	GeoIpDBPath       string `yaml:"geo_ip_db_path"`
 }
 
 var buildTime string
@@ -84,6 +85,10 @@ func main() {
 	sfui.handleSignals()
 
 	if sfui.EnableMetricLogging {
+		gerr := GeoIpInit(sfui.GeoIpDBPath)
+		if gerr != nil {
+			log.Println(gerr)
+		}
 		MLogger.StartLogger(sfui.MetricLoggerQueueSize, 1,
 			sfui.ElasticServerHost, sfui.ElasticIndexName,
 			sfui.ElasticUsername, sfui.ElasticPassword)
@@ -148,6 +153,7 @@ func (sfui *SfUI) cleanUp() {
 	log.Println("Flushing Log Queue...")
 	if sfui.EnableMetricLogging {
 		MLogger.FlushQueue()
+		GeoIpClose()
 	}
 	releaseRunLock()
 }
@@ -219,7 +225,8 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 				if sfui.EnableMetricLogging {
 					go MLogger.AddLogEntry(&Metric{
-						Type: "NewAccount",
+						Type:    "NewAccount",
+						Country: GetCountryByIp(loginReq.ClientIp),
 					})
 				}
 
@@ -255,7 +262,8 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 					}()
 					if sfui.EnableMetricLogging {
 						go MLogger.AddLogEntry(&Metric{
-							Type: "Login",
+							Type:    "Login",
+							Country: GetCountryByIp(loginReq.ClientIp),
 						})
 					}
 				}

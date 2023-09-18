@@ -63,6 +63,7 @@ func getDefaultConfig() SfUI {
 		MaintenanceSecret:       RandomStr(42),
 		EnableMetricLogging:     false,
 		MetricLoggerQueueSize:   500,
+		GeoIpDBPath:             "geo.mmdb",
 	}
 }
 

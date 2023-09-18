@@ -253,6 +253,11 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 							client.SetTabId(loginReq.TabId)
 						}
 					}()
+					if sfui.EnableMetricLogging {
+						go MLogger.AddLogEntry(&Metric{
+							Type: "Login",
+						})
+					}
 				}
 
 				w.WriteHeader(http.StatusOK)
@@ -262,13 +267,6 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 				}
 				response, _ := json.Marshal(termRes)
 				w.Write(response)
-
-				if sfui.EnableMetricLogging {
-					go MLogger.AddLogEntry(&Metric{
-						Type: "Login",
-					})
-				}
-
 				return
 			}
 		}

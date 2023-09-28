@@ -431,8 +431,9 @@ type ClientStats struct {
 }
 
 type ClientStat struct {
-	TermCount     int  `json:"term_count"`
-	DesktopActive bool `json:"desktop_active"`
+	TermCount     int    `json:"term_count"`
+	Country       string `json:"country"`
+	DesktopActive bool   `json:"desktop_active"`
 }
 
 func (sfui *SfUI) handleClientStats(w http.ResponseWriter, r *http.Request) {
@@ -452,6 +453,7 @@ func (sfui *SfUI) handleClientStats(w http.ResponseWriter, r *http.Request) {
 	for _, client := range clients {
 		nClient := ClientStat{
 			TermCount:     int(client.TerminalsCount.Load()),
+			Country:       client.ClientCountry,
 			DesktopActive: client.DesktopActive.Load(),
 		}
 		stats.Clients = append(stats.Clients, nClient)

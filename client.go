@@ -112,6 +112,13 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 	clients[client.ClientId] = client
 	cmu.Unlock()
 
+	if sfui.EnableMetricLogging {
+		go MLogger.AddLogEntry(&Metric{
+			Type:    "Login",
+			Country: client.ClientCountry,
+		})
+	}
+
 	return client, nil
 }
 

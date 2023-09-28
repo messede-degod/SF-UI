@@ -260,12 +260,6 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 							client.SetTabId(loginReq.TabId)
 						}
 					}()
-					if sfui.EnableMetricLogging {
-						go MLogger.AddLogEntry(&Metric{
-							Type:    "Login",
-							Country: GetCountryByIp(loginReq.ClientIp),
-						})
-					}
 				}
 
 				w.WriteHeader(http.StatusOK)

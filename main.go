@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -94,6 +95,8 @@ func main() {
 			sfui.ElasticUsername, sfui.ElasticPassword)
 	}
 
+	BanDB.Init()
+
 	log.Printf("Listening on http://%s ....\n", sfui.ServerBindAddress)
 	http.ListenAndServe(sfui.ServerBindAddress, http.HandlerFunc(sfui.requestHandler))
 }
@@ -155,6 +158,7 @@ func (sfui *SfUI) cleanUp() {
 		MLogger.FlushQueue()
 		GeoIpClose()
 	}
+	BanDB.Save()
 	releaseRunLock()
 }
 
@@ -208,9 +212,17 @@ func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
 func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
 	if err == nil {
+		clientIp := sfui.getClientAddr(r)
+		isBanned, reason := BanDB.IsBanned(clientIp)
+		if isBanned {
+			w.WriteHeader(http.StatusUnavailableForLegalReasons)
+			w.Write([]byte(fmt.Sprintf(`{"status":"Banned", "reason" : "%s"}`, reason)))
+			return
+		}
+
 		loginReq := TermRequest{}
 		if json.Unmarshal(data, &loginReq) == nil {
-			loginReq.ClientIp = sfui.getClientAddr(r)
+			loginReq.ClientIp = clientIp
 			if loginReq.NewInstance {
 				secret := sfui.getEndpointNameRR() + "-"
 				secret += sfui.generateSecret(&loginReq)

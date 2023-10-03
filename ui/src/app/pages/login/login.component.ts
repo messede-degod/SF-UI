@@ -142,15 +142,23 @@ export class LoginComponent {
       this.router.navigate(['/dashboard'])
       this.loginDisabled = false
       return
-    } else {
-      localStorage.removeItem('secret')
+    }
+
+    localStorage.removeItem('secret')
+    this.loginDisabled = false
+
+    if (rdata.status==451){
+      this.logginInMsg.dismiss()
+      this.snackBar.open("IP Banned, Contact SysCop on Telegram !", "OK", {
+        duration: 15 * 1000
+      });
+      return 
     }
 
     this.logginInMsg.dismiss()
     this.snackBar.open("Invalid Secret !", "OK", {
       duration: 5 * 1000
     });
-    this.loginDisabled = false
   }
 
   async handleDuplicateSession(): Promise<boolean> {

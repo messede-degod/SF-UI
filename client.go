@@ -46,6 +46,11 @@ var randVal = RandomStr(10)           // Random str for deriving clientId, doesn
 
 // Return a new client, prepare necessary sockets
 func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error) {
+	isBanned, reason := BanDB.IsBanned(ClientIp)
+	if isBanned {
+		return Client{}, errors.New(reason)
+	}
+
 	// Make and return a new client
 	tabId := ""
 	client := Client{

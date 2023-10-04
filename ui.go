@@ -9,6 +9,7 @@ import (
 
 // Provide UI related config to client
 func (sfui *SfUI) handleUIConfig(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(sfui.CompiledClientConfig)
 }

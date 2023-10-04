@@ -41,7 +41,8 @@ type BanDBOp struct {
 	Reason string `json:"reason"`
 }
 
-func (sfui *SfUI) Add(w http.ResponseWriter, r *http.Request) {
+func (sfui *SfUI) AddBan(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	MtSecret := r.Header.Get("X-Mt-Secret")
 
 	if MtSecret != sfui.MaintenanceSecret {
@@ -67,7 +68,8 @@ func (sfui *SfUI) Add(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status":"error"}`))
 }
 
-func (sfui *SfUI) Remove(w http.ResponseWriter, r *http.Request) {
+func (sfui *SfUI) RemoveBan(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	MtSecret := r.Header.Get("X-Mt-Secret")
 
 	if MtSecret != sfui.MaintenanceSecret {
@@ -93,7 +95,8 @@ func (sfui *SfUI) Remove(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status":"error"}`))
 }
 
-func (sfui *SfUI) List(w http.ResponseWriter, r *http.Request) {
+func (sfui *SfUI) ListBans(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	MtSecret := r.Header.Get("X-Mt-Secret")
 
 	if MtSecret != sfui.MaintenanceSecret {

@@ -434,6 +434,7 @@ type ClientStat struct {
 }
 
 func (sfui *SfUI) handleClientStats(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	MtSecret := r.Header.Get("X-Mt-Secret")
 
 	if MtSecret != sfui.MaintenanceSecret {

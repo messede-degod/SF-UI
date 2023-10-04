@@ -140,6 +140,7 @@ type DesktopShareRequest struct {
 }
 
 func (sfui *SfUI) handleSetupDesktopSharing(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
 	if err == nil {
 		desktopShareReq := DesktopShareRequest{}

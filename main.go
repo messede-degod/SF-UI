@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"regexp"
 	"strings"
 	"sync/atomic"
 	"syscall"
@@ -84,6 +83,7 @@ func main() {
 	// release runLock in cleanUp()
 
 	sfui.handleSignals()
+	sfui.InitRouter()
 
 	if sfui.EnableMetricLogging {
 		gerr := GeoIpInit(sfui.GeoIpDBPath)
@@ -162,54 +162,8 @@ func (sfui *SfUI) cleanUp() {
 	releaseRunLock()
 }
 
-var isFbPath = regexp.MustCompile(`(?m)^/filebrowser.*`).MatchString
-
-func (sfui *SfUI) requestHandler(w http.ResponseWriter, r *http.Request) {
-	if sfui.Debug {
-		// log.Println(r.RemoteAddr, " ", r.URL, " ", r.UserAgent())
-		w.Header().Add("Access-Control-Allow-Origin", "*")
-		w.Header().Add("Access-Control-Allow-Methods", "*")
-		w.Header().Add("Access-Control-Allow-Headers", "*")
-	}
-	switch r.URL.Path {
-	case "/secret":
-		sfui.handleLogin(w, r)
-		w.Header().Add("Content-Type", "application/json")
-	case "/logout":
-		sfui.handleLogout(w, r)
-	case "/config":
-		sfui.handleUIConfig(w, r)
-		w.Header().Add("Content-Type", "application/json")
-	case "/ws":
-		sfui.handleTerminalWs(w, r)
-	case "/desktopws":
-		if !sfui.DisableDesktop {
-			sfui.handleDesktopWS(w, r)
-		}
-	case "/sharedDesktopWs":
-		if !sfui.DisableDesktop {
-			sfui.handleSharedDesktopWS(w, r)
-		}
-	case "/filebrowser":
-		sfui.handleSetupFileBrowser(w, r)
-	case "/desktop/share":
-		sfui.handleSetupDesktopSharing(w, r)
-		w.Header().Add("Content-Type", "application/json")
-	case "/stats":
-		sfui.handleClientStats(w, r)
-		w.Header().Add("Content-Type", "application/json")
-	default:
-		// /filebrowser/*
-		if isFbPath(r.URL.Path) {
-			sfui.handleFileBrowser(w, r)
-			return
-		}
-
-		handleUIRequest(w, r)
-	}
-}
-
 func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
 	if err == nil {
 		clientIp := sfui.getClientAddr(r)
@@ -296,6 +250,7 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (sfui *SfUI) handleLogout(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
 	if err == nil {
 		logoutReq := TermRequest{}

@@ -55,6 +55,11 @@ export class AppComponent {
           Config.WSPingInterval = config.ws_ping_interval
         }
       }
+      if (config.available_endpoints) {
+        if (Array.isArray(config.available_endpoints) && config.available_endpoints.length > 0) {
+          Config.AllowedEndpoints = config.available_endpoints
+        }
+      }
     } else {
       this.snackBar.open("Failed to fetch config from server !", "OK", {
         duration: 2 * 1000

@@ -93,6 +93,15 @@ export class LoginComponent {
         this.loginDisabled = false
         return
       }
+
+      if(!this.isValidSfEndpoint(this.secret)){
+        this.snackBar.open("Invalid Segfault Endpoint, Contact SysCop on Telegram !", "OK", {
+          duration: 15 * 1000
+        });
+        this.loginDisabled = false
+        return
+      }
+
       this.logginInMsg = this.snackBar.open("Loggin You In ....", "OK", {
         duration: 8 * 1000
       });
@@ -181,6 +190,16 @@ export class LoginComponent {
 
   async toggleLoginWithSecret() {
     this.LoginWithSecret = !this.LoginWithSecret
+  }
+
+  isValidSfEndpoint(secret: string): boolean{
+    let parts = secret.split("-")
+    if(parts.length>1){
+      if(!Config.AllowedEndpoints.includes(`${parts[0]}.segfault.net`,0)){
+        return false
+      }
+    }
+    return true
   }
 
 }

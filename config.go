@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strconv"
 	"sync/atomic"
 
 	"gopkg.in/yaml.v2"
@@ -69,7 +68,7 @@ func getDefaultConfig() SfUI {
 
 type UIConfig struct {
 	MaxTerms           int      `json:"max_terminals"`
-	DesktopDisabled    string   `json:"desktop_disabled"`
+	DesktopDisabled    bool     `json:"desktop_disabled"`
 	WSPingInterval     int      `json:"ws_ping_interval"`
 	BuildHash          string   `json:"build_hash"`
 	BuildTime          string   `json:"build_time"`
@@ -83,7 +82,7 @@ func getcompiledClientConfig(sfui SfUI) []byte {
 
 	config := UIConfig{
 		MaxTerms:           sfui.MaxWsTerminals,
-		DesktopDisabled:    strconv.FormatBool(sfui.DisableDesktop),
+		DesktopDisabled:    sfui.DisableDesktop,
 		WSPingInterval:     sfui.WSPingInterval,
 		BuildHash:          buildHash,
 		BuildTime:          buildTime,

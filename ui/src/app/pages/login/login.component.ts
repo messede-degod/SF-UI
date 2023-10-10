@@ -94,8 +94,9 @@ export class LoginComponent {
         return
       }
 
-      if(!this.isValidSfEndpoint(this.secret)){
-        this.snackBar.open("Invalid Segfault Endpoint, Contact SysCop on Telegram !", "OK", {
+      let [secEndpoint,isEndpointValid] = this.isValidSfEndpoint(this.secret)
+      if(!isEndpointValid){
+        this.snackBar.open(`Server "${secEndpoint}" is not known. Please contact a SysCop for help`, "OK", {
           duration: 15 * 1000
         });
         this.loginDisabled = false
@@ -192,14 +193,15 @@ export class LoginComponent {
     this.LoginWithSecret = !this.LoginWithSecret
   }
 
-  isValidSfEndpoint(secret: string): boolean{
+  // return extracted endpoint from secret and its validity
+  isValidSfEndpoint(secret: string): [string,boolean]{
     let parts = secret.split("-")
     if(parts.length>1){
       if(!Config.AllowedEndpoints.includes(`${parts[0]}.segfault.net`,0)){
-        return false
+        return [parts[0],false]
       }
     }
-    return true
+    return ["",true]
   }
 
 }

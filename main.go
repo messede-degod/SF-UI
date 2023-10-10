@@ -193,6 +193,7 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 					go MLogger.AddLogEntry(&Metric{
 						Type:    "NewAccount",
 						Country: GetCountryByIp(loginReq.ClientIp),
+						UserUid: getClientId(loginReq.ClientIp),
 					})
 				}
 
@@ -230,6 +231,7 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 						go MLogger.AddLogEntry(&Metric{
 							Type:    "Login",
 							Country: GetCountryByIp(loginReq.ClientIp),
+							UserUid: getClientId(loginReq.ClientIp),
 						})
 					}
 				}

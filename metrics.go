@@ -22,6 +22,7 @@ type Metric struct {
 	Type    string
 	Time    string
 	Country string
+	UserUid string
 }
 
 var MLogger = MetricLogger{}

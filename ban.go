@@ -55,7 +55,7 @@ func (sfui *SfUI) AddBan(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		banRequest := BanDBOp{}
 		if json.Unmarshal(data, &banRequest) == nil {
-			if banRequest.Ip != "" && banRequest.Reason == "" && BanDB.Addresses != nil {
+			if banRequest.Ip != "" && banRequest.Reason != "" && BanDB.Addresses != nil {
 				BanDB.Addresses[banRequest.Ip] = banRequest.Reason
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{"status":"ok"}`))
@@ -109,6 +109,7 @@ func (sfui *SfUI) ListBans(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		w.WriteHeader(http.StatusOK)
 		w.Write(banData)
+		return
 	}
 
 	w.WriteHeader(http.StatusInternalServerError)

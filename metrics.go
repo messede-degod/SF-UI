@@ -57,6 +57,8 @@ func (metricLogger *MetricLogger) periodicFlush() {
 }
 
 func (metricLogger *MetricLogger) FlushQueue() {
+	logData := strings.Builder{}
+
 outer:
 	for { // Flush everything in the queue
 		select {
@@ -64,25 +66,25 @@ outer:
 			if !ok {
 				break
 			}
-			metricLogger.InsertLog(&LogEntry)
+			LogBytes, err := json.Marshal(LogEntry)
+			if err == nil {
+				logData.WriteString(`{ "index":{} }`)
+				logData.WriteByte(10)
+				logData.Write(LogBytes)
+				logData.WriteByte(10)
+			}
+
 		default:
 			break outer
 		}
 	}
-}
-
-func (metricLogger *MetricLogger) InsertLog(LogEntry *Metric) error {
-	LogBytes, err := json.Marshal(LogEntry)
-	if err != nil {
-		return err
-	}
-	return metricLogger.Insert(string(LogBytes))
+	metricLogger.Insert(logData.String())
 }
 
 func (metricLogger *MetricLogger) Insert(Data string) error {
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", metricLogger.ElasticServerUrl+"/"+
-		metricLogger.ElasticIndexName+"/_doc", strings.NewReader(Data))
+		metricLogger.ElasticIndexName+"/_bulk", strings.NewReader(Data))
 	if err != nil {
 		return err
 	}

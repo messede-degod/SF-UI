@@ -432,8 +432,10 @@ type ClientStats struct {
 }
 
 type ClientStat struct {
-	TermCount     int  `json:"term_count"`
-	DesktopActive bool `json:"desktop_active"`
+	Uid           string `json:"uid"`
+	Ip            string `json:"ip"`
+	TermCount     int    `json:"term_count"`
+	DesktopActive bool   `json:"desktop_active"`
 }
 
 func (sfui *SfUI) handleClientStats(w http.ResponseWriter, r *http.Request) {
@@ -453,6 +455,8 @@ func (sfui *SfUI) handleClientStats(w http.ResponseWriter, r *http.Request) {
 	cmu.Lock()
 	for _, client := range clients {
 		nClient := ClientStat{
+			Uid:           getClientId(client.ClientIp),
+			Ip:            client.ClientIp,
 			TermCount:     int(client.TerminalsCount.Load()),
 			DesktopActive: client.DesktopActive.Load(),
 		}

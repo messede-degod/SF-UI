@@ -191,9 +191,10 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 				if sfui.EnableMetricLogging {
 					go MLogger.AddLogEntry(&Metric{
-						Type:    "NewAccount",
-						Country: GetCountryByIp(loginReq.ClientIp),
-						UserUid: getClientId(loginReq.ClientIp),
+						Type:     "NewAccount",
+						Referrer: r.Header.Get("Referer"),
+						Country:  GetCountryByIp(loginReq.ClientIp),
+						UserUid:  getClientId(loginReq.ClientIp),
 					})
 				}
 
@@ -229,9 +230,10 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 					}()
 					if sfui.EnableMetricLogging {
 						go MLogger.AddLogEntry(&Metric{
-							Type:    "Login",
-							Country: GetCountryByIp(loginReq.ClientIp),
-							UserUid: getClientId(loginReq.ClientIp),
+							Type:     "Login",
+							Referrer: r.Header.Get("Referer"),
+							Country:  GetCountryByIp(loginReq.ClientIp),
+							UserUid:  getClientId(loginReq.ClientIp),
 						})
 					}
 				}

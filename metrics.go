@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"sync/atomic"
@@ -19,10 +19,11 @@ type MetricLogger struct {
 }
 
 type Metric struct {
-	Type    string
-	Time    string
-	Country string
-	UserUid string
+	Type     string
+	Time     string
+	Country  string
+	Referrer string
+	UserUid  string
 }
 
 var MLogger = MetricLogger{}
@@ -78,7 +79,10 @@ outer:
 			break outer
 		}
 	}
-	metricLogger.Insert(logData.String())
+	lerr := metricLogger.Insert(logData.String())
+	if lerr != nil {
+		log.Println(lerr)
+	}
 }
 
 func (metricLogger *MetricLogger) Insert(Data string) error {
@@ -97,5 +101,6 @@ func (metricLogger *MetricLogger) Insert(Data string) error {
 	if resp.StatusCode == 201 {
 		return nil
 	}
-	return errors.New("Insert Failed")
+
+	return fmt.Errorf("code:%d Insert Failed", resp.StatusCode)
 }

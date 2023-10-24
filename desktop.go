@@ -44,7 +44,7 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 
 	sfui.startDesktopService(&client, desktopType, time.Second*3)
 
-	conn, err := client.SSHConnection.ForwardRemotePort(sfui.VNCPort, false)
+	conn, err := client.SSHConnection.ForwardRemotePort(sfui.VNCPort)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -115,7 +115,7 @@ func (sfui *SfUI) handleSharedDesktopWS(w http.ResponseWriter, r *http.Request) 
 	}
 	defer client.DecSharedDesktopConnCount()
 
-	conn, err := client.SSHConnection.ForwardRemotePort(sfui.VNCPort, false)
+	conn, err := client.SSHConnection.ForwardRemotePort(sfui.VNCPort)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))

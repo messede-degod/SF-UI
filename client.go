@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -36,8 +37,9 @@ type Client struct {
 	ClientConn   chan interface{}
 	ClientActive *atomic.Bool // Atleast one active connection exists
 	// Random value supplied by client during login , helps to identify duplicate sessions
-	TabId   *string
-	Deleted *atomic.Bool
+	TabId       *string
+	Deleted     *atomic.Bool
+	ConnectedOn time.Time
 }
 
 var AcceptClients = true
@@ -72,6 +74,7 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 		TabId:                    &tabId,
 		ClientCountry:            GetCountryByIp(ClientIp),
 		ClientIp:                 ClientIp,
+		ConnectedOn:              time.Now(),
 	}
 
 	if !AcceptClients {
@@ -434,6 +437,9 @@ type ClientStats struct {
 type ClientStat struct {
 	Uid           string `json:"uid"`
 	Ip            string `json:"ip"`
+	Country       string `json:"country"`
+	ConnectedOn   string `json:"connected_on"`
+	Age           string `json:"age"`
 	TermCount     int    `json:"term_count"`
 	DesktopActive bool   `json:"desktop_active"`
 }
@@ -454,10 +460,17 @@ func (sfui *SfUI) handleClientStats(w http.ResponseWriter, r *http.Request) {
 
 	cmu.Lock()
 	for _, client := range clients {
+		connectedSince := time.Since(client.ConnectedOn)
 		nClient := ClientStat{
-			Uid:           getClientId(client.ClientIp),
-			Ip:            client.ClientIp,
-			TermCount:     int(client.TerminalsCount.Load()),
+			Uid:         getClientId(client.ClientIp),
+			Ip:          client.ClientIp,
+			TermCount:   int(client.TerminalsCount.Load()),
+			Country:     client.ClientCountry,
+			ConnectedOn: client.ConnectedOn.UTC().String(),
+			Age: fmt.Sprintf("%f Hours %f Minutes %f Seconds",
+				connectedSince.Hours(),
+				connectedSince.Minutes(),
+				connectedSince.Seconds()),
 			DesktopActive: client.DesktopActive.Load(),
 		}
 		stats.Clients = append(stats.Clients, nClient)

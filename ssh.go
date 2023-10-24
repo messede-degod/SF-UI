@@ -241,7 +241,7 @@ func (sshConnection *SSHConnection) RunControlCommand(command string) error {
 	return errors.New("control terminal not active")
 }
 
-func (sshConnection *SSHConnection) ForwardRemotePort(port uint16, cache bool) (*net.Conn, error) {
+func (sshConnection *SSHConnection) ForwardRemotePort(port uint16) (*net.Conn, error) {
 	conn, err := sshConnection.Client.DialTCP("tcp4", nil, net.TCPAddrFromAddrPort(
 		netip.AddrPortFrom(
 			netip.AddrFrom4(

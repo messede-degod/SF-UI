@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -460,17 +459,13 @@ func (sfui *SfUI) handleClientStats(w http.ResponseWriter, r *http.Request) {
 
 	cmu.Lock()
 	for _, client := range clients {
-		connectedSince := time.Since(client.ConnectedOn)
 		nClient := ClientStat{
-			Uid:         getClientId(client.ClientIp),
-			Ip:          client.ClientIp,
-			TermCount:   int(client.TerminalsCount.Load()),
-			Country:     client.ClientCountry,
-			ConnectedOn: client.ConnectedOn.UTC().String(),
-			Age: fmt.Sprintf("%f Hours %f Minutes %f Seconds",
-				connectedSince.Hours(),
-				connectedSince.Minutes(),
-				connectedSince.Seconds()),
+			Uid:           getClientId(client.ClientIp),
+			Ip:            client.ClientIp,
+			TermCount:     int(client.TerminalsCount.Load()),
+			Country:       client.ClientCountry,
+			ConnectedOn:   client.ConnectedOn.UTC().String(),
+			Age:           time.Since(client.ConnectedOn).String(),
 			DesktopActive: client.DesktopActive.Load(),
 		}
 		stats.Clients = append(stats.Clients, nClient)

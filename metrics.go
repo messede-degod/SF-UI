@@ -59,7 +59,7 @@ func (metricLogger *MetricLogger) periodicFlush() {
 
 func (metricLogger *MetricLogger) FlushQueue() {
 	logData := strings.Builder{}
-
+	logAvailable := false
 outer:
 	for { // Flush everything in the queue
 		select {
@@ -74,14 +74,16 @@ outer:
 				logData.Write(LogBytes)
 				logData.WriteByte(10)
 			}
-
+			logAvailable = true
 		default:
 			break outer
 		}
 	}
-	lerr := metricLogger.Insert(logData.String())
-	if lerr != nil {
-		log.Println(lerr)
+	if logAvailable {
+		lerr := metricLogger.Insert(logData.String())
+		if lerr != nil {
+			log.Println(lerr)
+		}
 	}
 }
 

@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"os"
 	"regexp"
-	"strconv"
 	"sync/atomic"
 
 	"gopkg.in/yaml.v2"
@@ -67,22 +66,32 @@ func getDefaultConfig() SfUI {
 	}
 }
 
+type UIConfig struct {
+	MaxTerms           int      `json:"max_terminals"`
+	DesktopDisabled    bool     `json:"desktop_disabled"`
+	WSPingInterval     int      `json:"ws_ping_interval"`
+	BuildHash          string   `json:"build_hash"`
+	BuildTime          string   `json:"build_time"`
+	AvailableEndpoints []string `json:"available_endpoints"`
+}
+
 func getcompiledClientConfig(sfui SfUI) []byte {
 	// Add any UI related configuration that has to be sent to client
 	// Store it byte format, to prevent json marshalling on every request
 	// See handleUIConfig()
-	compConfig := []byte(fmt.Sprintf(
-		`{	"max_terminals":"%d",
-			"desktop_disabled":%s,
-			"ws_ping_interval":"%d",
-			"build_hash":"%s",
-			"build_time":"%s"
-		}`,
-		sfui.MaxWsTerminals,
-		strconv.FormatBool(sfui.DisableDesktop), // Hide the GUI Option in UI
-		sfui.WSPingInterval,
-		buildHash,
-		buildTime,
-	))
-	return compConfig
+
+	config := UIConfig{
+		MaxTerms:           sfui.MaxWsTerminals,
+		DesktopDisabled:    sfui.DisableDesktop,
+		WSPingInterval:     sfui.WSPingInterval,
+		BuildHash:          buildHash,
+		BuildTime:          buildTime,
+		AvailableEndpoints: sfui.SfEndpoints,
+	}
+
+	configBytes, err := json.Marshal(config)
+	if err == nil {
+		return configBytes
+	}
+	return nil
 }

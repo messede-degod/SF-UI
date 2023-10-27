@@ -44,7 +44,7 @@ func (sfui *SfUI) handleDesktopWS(w http.ResponseWriter, r *http.Request) {
 
 	sfui.startDesktopService(&client, desktopType, time.Second*3)
 
-	conn, err := client.SSHConnection.ForwardRemotePort(sfui.VNCPort, false)
+	conn, err := client.SSHConnection.ForwardRemotePort(sfui.VNCPort)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -115,7 +115,7 @@ func (sfui *SfUI) handleSharedDesktopWS(w http.ResponseWriter, r *http.Request) 
 	}
 	defer client.DecSharedDesktopConnCount()
 
-	conn, err := client.SSHConnection.ForwardRemotePort(sfui.VNCPort, false)
+	conn, err := client.SSHConnection.ForwardRemotePort(sfui.VNCPort)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -140,6 +140,7 @@ type DesktopShareRequest struct {
 }
 
 func (sfui *SfUI) handleSetupDesktopSharing(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
 	if err == nil {
 		desktopShareReq := DesktopShareRequest{}

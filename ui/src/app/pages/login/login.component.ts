@@ -93,6 +93,16 @@ export class LoginComponent {
         this.loginDisabled = false
         return
       }
+
+      let [secEndpoint,isEndpointValid] = this.isValidSfEndpoint(this.secret)
+      if(!isEndpointValid){
+        this.snackBar.open(`Server "${secEndpoint}" is not known. Please contact a SysCop for help`, "OK", {
+          duration: 15 * 1000
+        });
+        this.loginDisabled = false
+        return
+      }
+
       this.logginInMsg = this.snackBar.open("Loggin You In ....", "OK", {
         duration: 8 * 1000
       });
@@ -142,15 +152,23 @@ export class LoginComponent {
       this.router.navigate(['/dashboard'])
       this.loginDisabled = false
       return
-    } else {
-      localStorage.removeItem('secret')
+    }
+
+    localStorage.removeItem('secret')
+    this.loginDisabled = false
+
+    if (rdata.status==451){
+      this.logginInMsg.dismiss()
+      this.snackBar.open("IP Banned, Contact SysCop on Telegram !", "OK", {
+        duration: 15 * 1000
+      });
+      return 
     }
 
     this.logginInMsg.dismiss()
     this.snackBar.open("Invalid Secret !", "OK", {
       duration: 5 * 1000
     });
-    this.loginDisabled = false
   }
 
   async handleDuplicateSession(): Promise<boolean> {
@@ -173,6 +191,17 @@ export class LoginComponent {
 
   async toggleLoginWithSecret() {
     this.LoginWithSecret = !this.LoginWithSecret
+  }
+
+  // return extracted endpoint from secret and its validity
+  isValidSfEndpoint(secret: string): [string,boolean]{
+    let parts = secret.split("-")
+    if(parts.length>1){
+      if(!Config.AllowedEndpoints.includes(`${parts[0]}.segfault.net`,0)){
+        return [parts[0],false]
+      }
+    }
+    return ["",true]
   }
 
 }

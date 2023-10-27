@@ -13,4 +13,5 @@ export class Config {
     public static BuildTime = ""
     public static LoggedIn = false
     public static TabId = ""
+    public static AllowedEndpoints = Array<string>()
 }

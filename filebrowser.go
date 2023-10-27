@@ -32,7 +32,7 @@ func (sfui *SfUI) handleFileBrowser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err := client.SSHConnection.ForwardRemotePort(sfui.FileBrowserPort, false)
+	conn, err := client.SSHConnection.ForwardRemotePort(sfui.FileBrowserPort)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf(`{"status":"%s"}`, err.Error())))

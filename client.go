@@ -16,6 +16,7 @@ import (
 type Client struct {
 	ClientId                 string
 	ClientCountry            string
+	ClientIp                 string
 	mu                       *sync.Mutex
 	TerminalsCount           *atomic.Int32
 	DesktopActive            *atomic.Bool // Whether a active desktop ws connection exists
@@ -35,8 +36,9 @@ type Client struct {
 	ClientConn   chan interface{}
 	ClientActive *atomic.Bool // Atleast one active connection exists
 	// Random value supplied by client during login , helps to identify duplicate sessions
-	TabId   *string
-	Deleted *atomic.Bool
+	TabId       *string
+	Deleted     *atomic.Bool
+	ConnectedOn time.Time
 }
 
 var AcceptClients = true
@@ -46,6 +48,11 @@ var randVal = RandomStr(10)           // Random str for deriving clientId, doesn
 
 // Return a new client, prepare necessary sockets
 func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error) {
+	isBanned, reason := BanDB.IsBanned(ClientIp)
+	if isBanned {
+		return Client{}, errors.New(reason)
+	}
+
 	// Make and return a new client
 	tabId := ""
 	client := Client{
@@ -65,6 +72,8 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 		Deleted:                  &atomic.Bool{},
 		TabId:                    &tabId,
 		ClientCountry:            GetCountryByIp(ClientIp),
+		ClientIp:                 ClientIp,
+		ConnectedOn:              time.Now(),
 	}
 
 	if !AcceptClients {
@@ -144,6 +153,7 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 	if sfui.EnableMetricLogging {
 		go MLogger.AddLogEntry(&Metric{
 			Type:    "Logout",
+			UserUid: getClientId(client.ClientIp),
 			Country: client.ClientCountry,
 		})
 	}
@@ -431,12 +441,17 @@ type ClientStats struct {
 }
 
 type ClientStat struct {
-	TermCount     int    `json:"term_count"`
+	Uid           string `json:"uid"`
+	Ip            string `json:"ip"`
 	Country       string `json:"country"`
+	ConnectedOn   string `json:"connected_on"`
+	Age           string `json:"age"`
+	TermCount     int    `json:"term_count"`
 	DesktopActive bool   `json:"desktop_active"`
 }
 
 func (sfui *SfUI) handleClientStats(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	MtSecret := r.Header.Get("X-Mt-Secret")
 
 	if MtSecret != sfui.MaintenanceSecret {
@@ -452,8 +467,12 @@ func (sfui *SfUI) handleClientStats(w http.ResponseWriter, r *http.Request) {
 	cmu.Lock()
 	for _, client := range clients {
 		nClient := ClientStat{
+			Uid:           getClientId(client.ClientIp),
+			Ip:            client.ClientIp,
 			TermCount:     int(client.TerminalsCount.Load()),
 			Country:       client.ClientCountry,
+			ConnectedOn:   client.ConnectedOn.UTC().String(),
+			Age:           time.Since(client.ConnectedOn).String(),
 			DesktopActive: client.DesktopActive.Load(),
 		}
 		stats.Clients = append(stats.Clients, nClient)

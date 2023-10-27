@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"sync/atomic"
@@ -19,9 +19,11 @@ type MetricLogger struct {
 }
 
 type Metric struct {
-	Type    string
-	Time    string
-	Country string
+	Type     string
+	Time     string
+	Country  string
+	Referrer string
+	UserUid  string
 }
 
 var MLogger = MetricLogger{}
@@ -56,6 +58,8 @@ func (metricLogger *MetricLogger) periodicFlush() {
 }
 
 func (metricLogger *MetricLogger) FlushQueue() {
+	logData := strings.Builder{}
+	logAvailable := false
 outer:
 	for { // Flush everything in the queue
 		select {
@@ -63,25 +67,30 @@ outer:
 			if !ok {
 				break
 			}
-			metricLogger.InsertLog(&LogEntry)
+			LogBytes, err := json.Marshal(LogEntry)
+			if err == nil {
+				logData.WriteString(`{ "index":{} }`)
+				logData.WriteByte(10)
+				logData.Write(LogBytes)
+				logData.WriteByte(10)
+			}
+			logAvailable = true
 		default:
 			break outer
 		}
 	}
-}
-
-func (metricLogger *MetricLogger) InsertLog(LogEntry *Metric) error {
-	LogBytes, err := json.Marshal(LogEntry)
-	if err != nil {
-		return err
+	if logAvailable {
+		lerr := metricLogger.Insert(logData.String())
+		if lerr != nil {
+			log.Println(lerr)
+		}
 	}
-	return metricLogger.Insert(string(LogBytes))
 }
 
 func (metricLogger *MetricLogger) Insert(Data string) error {
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", metricLogger.ElasticServerUrl+"/"+
-		metricLogger.ElasticIndexName+"/_doc", strings.NewReader(Data))
+		metricLogger.ElasticIndexName+"/_bulk", strings.NewReader(Data))
 	if err != nil {
 		return err
 	}
@@ -91,8 +100,9 @@ func (metricLogger *MetricLogger) Insert(Data string) error {
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode == 201 {
+	if resp.StatusCode == 200 {
 		return nil
 	}
-	return errors.New("Insert Failed")
+
+	return fmt.Errorf("code:%d Insert Failed", resp.StatusCode)
 }

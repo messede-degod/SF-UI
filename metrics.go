@@ -100,7 +100,7 @@ func (metricLogger *MetricLogger) Insert(Data string) error {
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode == 201 {
+	if resp.StatusCode == 200 {
 		return nil
 	}
 

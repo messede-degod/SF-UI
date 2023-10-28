@@ -18,10 +18,14 @@ func (sfui *SfUI) InitRouter() {
 		"/sharedDesktopWs": sfui.handleSharedDesktopWS,
 		"/filebrowser":     sfui.handleSetupFileBrowser,
 		"/desktop/share":   sfui.handleSetupDesktopSharing,
-		"/stats":           sfui.handleClientStats,
-		"/ban/add":         sfui.AddBan,
-		"/ban/remove":      sfui.RemoveBan,
-		"/ban/list":        sfui.ListBans,
+		//
+		// Administrative
+		//
+		"/ban/add":      sfui.AddBan,
+		"/ban/remove":   sfui.RemoveBan,
+		"/ban/list":     sfui.ListBans,
+		"/client/stats": sfui.handleClientStats,
+		"/client/kill":  sfui.handleKillClient,
 	}
 }
 

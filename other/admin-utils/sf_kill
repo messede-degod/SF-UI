@@ -1,0 +1,10 @@
+#!/bin/bash
+
+curl  http://127.0.0.1:7171/client/kill -X POST  -H "X-Mt-Secret: $SF_MT_SECRET" -d " 
+{
+ \"client_id\":\"$1\"
+}
+"
+
+#ss --kill -tn "dst == $1"
+

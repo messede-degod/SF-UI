@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -31,7 +32,7 @@ type Client struct {
 	SharedDesktopConn        chan interface{} // Channel when closed kills all shared desktop connections
 	SharedDesktopConnCount   *atomic.Int32    // No of active connections to shared desktop
 	// Channel when closed prevents master SSH connection from being killed by RemoveClientIfInactive,
-	// that is unless a ClientInactivityTimeout is first reached, open channel indicated a inactive client
+	// that is unless a ClientInactivityTimeout is first reached, open channel indicates a inactive client
 	// closed channel indicates a active client
 	ClientConn   chan interface{}
 	ClientActive *atomic.Bool // Atleast one active connection exists
@@ -173,8 +174,9 @@ func (sfui *SfUI) RemoveClientIfInactive(clientSecret string) {
 		if err == nil {
 			if client.TerminalsCount != nil && client.DesktopActive != nil {
 				if client.TerminalsCount.Load() == 0 && !client.DesktopActive.Load() {
+					timeout := time.NewTimer(time.Minute * time.Duration(sfui.ClientInactivityTimeout))
 					select {
-					case <-time.After(time.Minute * time.Duration(sfui.ClientInactivityTimeout)):
+					case <-timeout.C:
 						// After timeout
 						if client.mu != nil {
 							sfui.RemoveClient(&client)
@@ -185,6 +187,7 @@ func (sfui *SfUI) RemoveClientIfInactive(clientSecret string) {
 						if !ok {
 							break
 						}
+						timeout.Stop()
 					}
 				}
 			}
@@ -230,10 +233,26 @@ func (sfui *SfUI) GetClient(ClientSecret string) (Client, error) {
 	return client, errors.New("no such client")
 }
 
+func (sfui *SfUI) GetClientUnsafe(ClientSecret string) (Client, error) {
+	client, ok := clients[getClientId(ClientSecret)]
+	if ok {
+		return client, nil
+	}
+	return client, errors.New("no such client")
+}
+
 func (sfui *SfUI) GetClientById(ClientId string) (Client, error) {
 	cmu.Lock()
 	defer cmu.Unlock()
 
+	client, ok := clients[ClientId]
+	if ok {
+		return client, nil
+	}
+	return client, errors.New("no such client")
+}
+
+func (sfui *SfUI) GetClientByIdUnsafe(ClientId string) (Client, error) {
 	client, ok := clients[ClientId]
 	if ok {
 		return client, nil
@@ -441,7 +460,8 @@ type ClientStats struct {
 }
 
 type ClientStat struct {
-	Uid           string `json:"uid"`
+	ClientId      string `json:"client_id"`
+	IpId          string `json:"ip_id"`
 	Ip            string `json:"ip"`
 	Country       string `json:"country"`
 	ConnectedOn   string `json:"connected_on"`
@@ -467,7 +487,8 @@ func (sfui *SfUI) handleClientStats(w http.ResponseWriter, r *http.Request) {
 	cmu.Lock()
 	for _, client := range clients {
 		nClient := ClientStat{
-			Uid:           getClientId(client.ClientIp),
+			ClientId:      client.ClientId,
+			IpId:          getClientId(client.ClientIp),
 			Ip:            client.ClientIp,
 			TermCount:     int(client.TerminalsCount.Load()),
 			Country:       client.ClientCountry,
@@ -489,4 +510,45 @@ func (sfui *SfUI) handleClientStats(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(jb)
+}
+
+type AdminOp struct {
+	ClientId string `json:"client_id"`
+}
+
+func (sfui *SfUI) handleKillClient(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	MtSecret := r.Header.Get("X-Mt-Secret")
+
+	if MtSecret != sfui.MaintenanceSecret {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(`{"status":"denied"}`))
+		return
+	}
+
+	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
+	if err == nil {
+		adminRequest := AdminOp{}
+		if json.Unmarshal(data, &adminRequest) == nil {
+			if adminRequest.ClientId != "" {
+
+				cmu.Lock()
+				client, ok := clients[adminRequest.ClientId]
+				cmu.Unlock()
+				if ok {
+					sfui.RemoveClient(&client)
+					w.WriteHeader(http.StatusOK)
+					w.Write([]byte(`{"status":"ok"}`))
+					return
+				}
+
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"no such client"}`))
+				return
+			}
+		}
+	}
+
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte(`{"status":"error"}`))
 }

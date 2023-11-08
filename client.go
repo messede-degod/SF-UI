@@ -40,6 +40,7 @@ type Client struct {
 	TabId       *string
 	Deleted     *atomic.Bool
 	ConnectedOn time.Time
+	ClientAlive chan interface{}
 }
 
 var AcceptClients = true
@@ -75,6 +76,7 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 		ClientCountry:            GetCountryByIp(ClientIp),
 		ClientIp:                 ClientIp,
 		ConnectedOn:              time.Now(),
+		ClientAlive:              make(chan interface{}),
 	}
 
 	if !AcceptClients {
@@ -129,6 +131,24 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 		})
 	}
 
+	go func() {
+		timeout := time.NewTimer(time.Minute * 1)
+		select {
+		case <-timeout.C:
+			// After hard timeout
+			if client.mu != nil {
+				sfui.RemoveClient(&client)
+			}
+			break
+		case _, ok := <-client.ClientAlive:
+			// Client was stopped
+			if !ok {
+				break
+			}
+			timeout.Stop()
+		}
+	}()
+
 	return client, nil
 }
 
@@ -144,7 +164,8 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 	client.Deleted.Store(true)
 
 	if !client.ClientActive.Load() {
-		close(client.ClientConn) // Stop RemoveClientIfInactive if running
+		close(client.ClientConn)  // Stop RemoveClientIfInactive if running
+		close(client.ClientAlive) // Mark client as dead
 	}
 
 	if client.SSHConnection != nil {

@@ -132,7 +132,7 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 	}
 
 	go func() {
-		timeout := time.NewTimer(time.Minute * 1)
+		timeout := time.NewTimer(time.Minute * time.Duration(sfui.WSTimeout))
 		select {
 		case <-timeout.C:
 			// After hard timeout
@@ -362,9 +362,9 @@ func (client *Client) ActivateDesktopSharing(viewOnly bool, SharedSecret string)
 			fclient.ShareDesktop.Store(true)
 			fclient.SharedDesktopIsViewOnly.Store(viewOnly)
 			fclient.SharedDesktopSecret = SharedSecret
-			fclient.SharedDesktopConn = make(chan interface{})
 			if fclient.Deleted != nil {
 				if !fclient.Deleted.Load() {
+					fclient.SharedDesktopConn = make(chan interface{})
 					clients[client.ClientId] = fclient
 				}
 			}
@@ -383,10 +383,10 @@ func (client *Client) DeactivateDesktopSharing() {
 		// get a fresh copy of client
 		if client.ShareDesktop.Load() {
 			fclient := clients[client.ClientId]
-			close(fclient.SharedDesktopConn)
 			fclient.ShareDesktop.Store(false)
 			if fclient.Deleted != nil {
 				if !fclient.Deleted.Load() {
+					close(fclient.SharedDesktopConn)
 					clients[client.ClientId] = fclient
 				}
 			}

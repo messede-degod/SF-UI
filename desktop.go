@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
 )
@@ -71,10 +70,7 @@ func (sfui *SfUI) startDesktopService(client *Client, desktoptype string, wait t
 		startCmd = sfui.StartVNCCommand
 	}
 
-	rerr := client.SSHConnection.RunControlCommand(startCmd)
-	if rerr != nil {
-		log.Println(rerr)
-	}
+	client.SSHConnection.RunControlCommand(startCmd)
 
 	time.Sleep(wait)
 }

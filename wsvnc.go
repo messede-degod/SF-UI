@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net"
 	"net/http"
 	"time"
@@ -58,7 +57,6 @@ func (viewOnlyConn *ViewOnlyConn) Read(msg []byte) (n int, err error) {
 
 func wsProxyHandler(conn *net.Conn, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}, timeout time.Duration) websocket.Handler {
 	return func(ws *websocket.Conn) {
-		var err error
 		ws.PayloadType = websocket.BinaryFrame
 		done := make(chan error)
 
@@ -76,10 +74,7 @@ func wsProxyHandler(conn *net.Conn, viewOnly bool, isSharedConnection bool, clos
 
 		if isSharedConnection { // if shared, close connection when user disabled sharing(i.e closeConnection channel is closed)
 			select {
-			case err = <-done:
-				if err != nil {
-					log.Printf("%v\n", err)
-				}
+			case <-done:
 				break
 			case _, ok := <-closeConnection:
 				if !ok {
@@ -90,10 +85,7 @@ func wsProxyHandler(conn *net.Conn, viewOnly bool, isSharedConnection bool, clos
 			}
 		} else { // if not a shared connection, exit only when error or timeout  occurs
 			select {
-			case err = <-done:
-				if err != nil {
-					log.Printf("%v\n", err)
-				}
+			case <-done:
 				break
 			case <-time.After(timeout):
 				break

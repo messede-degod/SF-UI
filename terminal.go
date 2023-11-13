@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
@@ -182,7 +181,6 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 	}
 	defer client.DecTermCount() // Remove from terminal Quota
 
-	var err error
 	sess, stdin, stdout, stderr, serr := client.SSHConnection.StartTerminal()
 	if serr != nil {
 		return serr
@@ -206,10 +204,7 @@ func (sfui *SfUI) handleWsPty(terminal *Terminal) error {
 	select {
 	case <-timeout.C:
 		break
-	case err = <-done:
-		if err != nil {
-			log.Println(err.Error())
-		}
+	case <-done:
 		timeout.Stop()
 		break
 	}

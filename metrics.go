@@ -19,11 +19,12 @@ type MetricLogger struct {
 }
 
 type Metric struct {
-	Type     string
-	Time     string
-	Country  string
-	Referrer string
-	UserUid  string
+	Type            string
+	Time            string
+	Country         string
+	Referrer        string
+	UserUid         string
+	SessionDuration string
 }
 
 var MLogger = MetricLogger{}

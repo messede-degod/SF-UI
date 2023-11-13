@@ -59,6 +59,7 @@ type setupFileBrowser struct {
 // start the GUI service on the instance(ex: startfb), use the master connection
 // to issue commands.
 func (sfui *SfUI) handleSetupFileBrowser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	data, err := io.ReadAll(io.LimitReader(r.Body, 2048))
 	if err == nil {
 		setupFileBrowserReq := setupFileBrowser{}

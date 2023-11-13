@@ -39,7 +39,7 @@ func (sfui *SfUI) getClientAddr(r *http.Request) string {
 
 // NewHttpToNetConnProxy : Proxy between http/websocket and net.Conn
 func NewHttpToNetConnProxy(hconn *net.Conn) (*httputil.ReverseProxy, error) {
-	// Traget Url value is never used since we use the unix transport, but it has to specified anyhow
+	// Target Url value is never used since we use a custom Dial, but it has to specified anyhow
 	targetUrl := "http://127.0.0.1:8080"
 	target, err := url.Parse(targetUrl)
 	if err != nil {

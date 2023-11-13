@@ -93,6 +93,5 @@ func wsProxyHandler(conn *net.Conn, viewOnly bool, isSharedConnection bool, clos
 		}
 
 		ws.Close()
-		<-done
 	}
 }

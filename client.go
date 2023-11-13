@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -124,13 +125,6 @@ func (sfui *SfUI) NewClient(ClientSecret string, ClientIp string) (Client, error
 	clients[client.ClientId] = client
 	cmu.Unlock()
 
-	if sfui.EnableMetricLogging {
-		go MLogger.AddLogEntry(&Metric{
-			Type:    "Login",
-			Country: client.ClientCountry,
-		})
-	}
-
 	go func() {
 		timeout := time.NewTimer(time.Minute * time.Duration(sfui.WSTimeout))
 		select {
@@ -174,9 +168,10 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 
 	if sfui.EnableMetricLogging {
 		go MLogger.AddLogEntry(&Metric{
-			Type:    "Logout",
-			UserUid: getClientId(client.ClientIp),
-			Country: client.ClientCountry,
+			Type:            "Logout",
+			UserUid:         getClientId(client.ClientIp),
+			Country:         client.ClientCountry,
+			SessionDuration: fmt.Sprintf("%.0f", time.Since(client.ConnectedOn).Minutes()),
 		})
 	}
 

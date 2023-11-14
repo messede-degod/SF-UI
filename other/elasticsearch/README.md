@@ -9,6 +9,9 @@ Get usage metrics such as logins,logouts and new account creations.
             "properties": {
                 "Time": {
                     "type": "date"
+                },
+                "SessionDuration":{
+                    "type": "integer"
                 }
             }
         }

@@ -20,7 +20,10 @@ func GeoIpInit(FilePath string) error {
 }
 
 func GeoIpClose() error {
-	return db.Close()
+	if db != nil {
+		return db.Close()
+	}
+	return nil
 }
 
 func GeoIpLookup(IP string) (string, error) {

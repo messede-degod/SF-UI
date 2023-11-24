@@ -370,22 +370,38 @@ func (client *Client) ActivateDesktopSharing(viewOnly bool, SharedSecret string)
 }
 
 func (client *Client) DeactivateDesktopSharing() {
-	if client.mu != nil {
-		// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
-		// first lock then read the fresh copy to prevent a dirty read
-		client.mu.Lock()
-		defer client.mu.Unlock()
-		// get a fresh copy of client
-		if client.ShareDesktop.Load() {
-			fclient := clients[client.ClientId]
-			fclient.ShareDesktop.Store(false)
-			if fclient.Deleted != nil {
-				if !fclient.Deleted.Load() {
-					close(fclient.SharedDesktopConn)
-					clients[client.ClientId] = fclient
-				}
-			}
-		}
+	if client.mu == nil {
+		return
+	}
+	// client is stale, but mu is a pointer, it locks the original Client entry in "clients"
+	// first lock then read the fresh copy to prevent a dirty read
+	client.mu.Lock()
+	defer client.mu.Unlock()
+
+	if client.ShareDesktop == nil {
+		return
+	}
+
+	if !client.ShareDesktop.Load() {
+		return
+	}
+
+	// get a fresh copy of client
+	cmu.Lock()
+	fclient, ok := clients[client.ClientId]
+	cmu.Unlock()
+	if !ok {
+		return
+	}
+
+	if fclient.Deleted == nil {
+		return
+	}
+
+	if !fclient.Deleted.Load() {
+		fclient.ShareDesktop.Store(false)
+		close(fclient.SharedDesktopConn)
+		clients[client.ClientId] = fclient
 	}
 }
 

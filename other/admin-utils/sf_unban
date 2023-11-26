@@ -1,7 +1,7 @@
 #!/bin/bash
 
-curl  http://127.0.0.1:7172/ban/remove -X POST  -H "X-Mt-Secret: $SF_MT_SECRET" -d " 
+curl  http://$SF_HOST/ban/remove -X POST  -H "X-Mt-Secret: $SF_MT_SECRET" -d " 
 {
- \"ip\":\"$1\",
+ \"ip\":\"$1\"
 }
 "

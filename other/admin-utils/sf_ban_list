@@ -1,3 +1,3 @@
 #!/bin/bash
 
-curl  http://127.0.0.1:7171/ban/list  -H "X-Mt-Secret: $SF_MT_SECRET"
+curl  http://$SF_HOST/ban/list  -H "X-Mt-Secret: $SF_MT_SECRET"

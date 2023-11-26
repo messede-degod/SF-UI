@@ -1,6 +1,6 @@
 #!/bin/bash
 
-curl  http://127.0.0.1:7171/ban/add -X POST  -H "X-Mt-Secret: $SF_MT_SECRET" -d " 
+curl  http://$SF_HOST/ban/add -X POST  -H "X-Mt-Secret: $SF_MT_SECRET" -d " 
 {
  \"ip\":\"$1\",
  \"reason\": \"SFUI CLI Ban!\"

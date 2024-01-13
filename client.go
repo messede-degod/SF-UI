@@ -151,33 +151,29 @@ func (sfui *SfUI) RemoveClient(client *Client) {
 		return
 	}
 
-	if client.Deleted.Load() { // already deleted
-		return
+	if client.Deleted.CompareAndSwap(false, true) {
+		if !client.ClientActive.Load() {
+			close(client.ClientConn)  // Stop RemoveClientIfInactive if running
+			close(client.ClientAlive) // Mark client as dead
+		}
+
+		if client.SSHConnection != nil {
+			client.SSHConnection.StopSSHConnection()
+		}
+
+		if sfui.EnableMetricLogging {
+			go MLogger.AddLogEntry(&Metric{
+				Type:            "Logout",
+				UserUid:         getClientId(client.ClientIp),
+				Country:         client.ClientCountry,
+				SessionDuration: fmt.Sprintf("%.0f", time.Since(client.ConnectedOn).Minutes()),
+			})
+		}
+
+		cmu.Lock()
+		delete(clients, client.ClientId)
+		cmu.Unlock()
 	}
-
-	client.Deleted.Store(true)
-
-	if !client.ClientActive.Load() {
-		close(client.ClientConn)  // Stop RemoveClientIfInactive if running
-		close(client.ClientAlive) // Mark client as dead
-	}
-
-	if client.SSHConnection != nil {
-		client.SSHConnection.StopSSHConnection()
-	}
-
-	if sfui.EnableMetricLogging {
-		go MLogger.AddLogEntry(&Metric{
-			Type:            "Logout",
-			UserUid:         getClientId(client.ClientIp),
-			Country:         client.ClientCountry,
-			SessionDuration: fmt.Sprintf("%.0f", time.Since(client.ConnectedOn).Minutes()),
-		})
-	}
-
-	cmu.Lock()
-	delete(clients, client.ClientId)
-	cmu.Unlock()
 }
 
 // If a client has no active terminals or a GUI connection
@@ -353,8 +349,7 @@ func (client *Client) ActivateDesktopSharing(viewOnly bool, SharedSecret string)
 
 		// get a fresh copy of client
 		fclient := clients[client.ClientId]
-		if !fclient.ShareDesktop.Load() {
-			fclient.ShareDesktop.Store(true)
+		if fclient.ShareDesktop.CompareAndSwap(false, true) {
 			fclient.SharedDesktopIsViewOnly.Store(viewOnly)
 			fclient.SharedDesktopSecret = SharedSecret
 			if fclient.Deleted != nil {
@@ -399,9 +394,10 @@ func (client *Client) DeactivateDesktopSharing() {
 	}
 
 	if !fclient.Deleted.Load() {
-		fclient.ShareDesktop.Store(false)
-		close(fclient.SharedDesktopConn)
-		clients[client.ClientId] = fclient
+		if fclient.ShareDesktop.CompareAndSwap(true, false) {
+			close(fclient.SharedDesktopConn)
+			clients[client.ClientId] = fclient
+		}
 	}
 }
 
@@ -409,9 +405,7 @@ func (client *Client) DeactivateDesktopSharing() {
 func (client *Client) MarkClientIfInactive() {
 	if client.mu != nil && client.TerminalsCount != nil && client.DesktopActive != nil {
 		if client.TerminalsCount.Load() == 0 && !client.DesktopActive.Load() {
-			if client.ClientActive.Load() {
-				client.ClientActive.Store(false)
-
+			if client.ClientActive.CompareAndSwap(true, false) {
 				cmu.Lock()
 				defer cmu.Unlock()
 
@@ -435,9 +429,7 @@ func (client *Client) MarkClientIfInactive() {
 func (client *Client) MarkClientIfActive() {
 	if client.mu != nil && client.TerminalsCount != nil && client.DesktopActive != nil {
 		if client.TerminalsCount.Load() > 0 || client.DesktopActive.Load() {
-			if !client.ClientActive.Load() {
-				client.ClientActive.Store(true)
-
+			if client.ClientActive.CompareAndSwap(false, true) {
 				cmu.Lock()
 				defer cmu.Unlock()
 

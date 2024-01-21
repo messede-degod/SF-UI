@@ -33,7 +33,8 @@ type SfUI struct {
 	FileBrowserPort          uint16 `yaml:"filebrowser_port"`
 
 	CompiledClientConfig   []byte   // Ui related config that has to be sent to client
-	SfEndpoints            []string `yaml:"sf_endpoints"`               // Sf Endpoints To Use
+	SfEndpoints            []string `yaml:"sf_endpoints"` // Sf Endpoints To Use
+	NoEndpoints            int32    // No of available endpoints
 	SfUIOrigin             string   `yaml:"sf_ui_origin"`               // Where SFUI is deployed, for CSRF prevention, ex: https://web.segfault.net
 	UseXForwardedForHeader bool     `yaml:"use_x_forwarded_for_header"` // Use the X-Forwared-For HTTP header, usefull when behind a reverse proxy
 	DisableOriginCheck     bool     `yaml:"disable_origin_check"`       // Disable Origin Checking
@@ -42,7 +43,6 @@ type SfUI struct {
 	ClientInactivityTimeout int                 `yaml:"client_inactivity_timeout"` // Minutes after which the clients master SSH connection is killed
 	ValidSecret             func(s string) bool // Secret Validator
 	EndpointSelector        *atomic.Int32       // Helps select a endpoint in RR fashion
-	NoEndpoints             int32               // No of available endpoints
 
 	SegfaultSSHUsername string `yaml:"segfault_ssh_username"`
 	SegfaultSSHPassword string `yaml:"segfault_ssh_password"`

@@ -10,19 +10,19 @@ Deploying  UI files (html,css,js etc) with nginx is recommended for production d
 ## Enable websocket proxypass
   - Edit `/etc/nginx/nginx.conf`
   - Add the following `map` within the `http` block
-  ```
-       map $http_upgrade $connection_upgrade {
-                default upgrade;
-                '' close;
-       }
+```nginx
+map $http_upgrade $connection_upgrade {
+        default upgrade;
+        '' close;
+}
 ```
 
 ## Proxy pass  control endpoints to sf-ui
 - Edit `/etc/nginx/sites-enabled/default` or any other site you wish.
 - Make sure you have SF-UI running on a appropriate address that nginx can reach.
 - Add the following location directives within the `server` block, (in the same order !).
-```
-	location ~* .(png|ico|gif|jpg|jpeg|css|js|svg|html)$ {
+```nginx
+        location ~* .(png|ico|gif|jpg|jpeg|css|js|svg|html)$ {
                 try_files $uri $uri/ =404;
         }
 

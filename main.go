@@ -23,14 +23,11 @@ type SfUI struct {
 	ServerBindAddress    string `yaml:"server_bind_address"`     // Address to which the current app binds
 	Debug                bool   `yaml:"debug"`                   // Print debug information
 
-	MasterSSHCommand         string `yaml:"master_ssh_command"`          // Command used to setup the SSH Master Socket
-	TearDownMasterSSHCommand string `yaml:"teardown_master_ssh_command"` // Command used to teardown the SSH Master Socket.
-	SlaveSSHCommand          string `yaml:"slave_ssh_command"`           // Command used to start a SSH shell using the master socket
-	StartXpraCommand         string `yaml:"start_xpra_command"`          // Command used to start xpra
-	StartVNCCommand          string `yaml:"start_vnc_command"`           // Command used to start VNC
-	StartFileBrowserCommand  string `yaml:"start_filebrowser_command"`   // Command used to start filebrowser
-	VNCPort                  uint16 `yaml:"vnc_port"`
-	FileBrowserPort          uint16 `yaml:"filebrowser_port"`
+	StartXpraCommand        string `yaml:"start_xpra_command"`        // Command used to start xpra
+	StartVNCCommand         string `yaml:"start_vnc_command"`         // Command used to start VNC
+	StartFileBrowserCommand string `yaml:"start_filebrowser_command"` // Command used to start filebrowser
+	VNCPort                 uint16 `yaml:"vnc_port"`
+	FileBrowserPort         uint16 `yaml:"filebrowser_port"`
 
 	CompiledClientConfig   []byte   // Ui related config that has to be sent to client
 	SfEndpoints            []string `yaml:"sf_endpoints"`               // Sf Endpoints To Use
@@ -42,7 +39,7 @@ type SfUI struct {
 	ClientInactivityTimeout int                 `yaml:"client_inactivity_timeout"` // Minutes after which the clients master SSH connection is killed
 	ValidSecret             func(s string) bool // Secret Validator
 	EndpointSelector        *atomic.Int32       // Helps select a endpoint in RR fashion
-	NoEndpoints             int32               // No of available endpoints
+	NoOfEndpoints           int32               // No of available endpoints
 
 	SegfaultSSHUsername string `yaml:"segfault_ssh_username"`
 	SegfaultSSHPassword string `yaml:"segfault_ssh_password"`
@@ -300,7 +297,7 @@ func (sfui *SfUI) getEndpointAndSecret(secret string) (EndpointAddress string, A
 
 func (sfui *SfUI) getEndpointNameRR() string {
 	selected := sfui.EndpointSelector.Load()
-	if selected > sfui.NoEndpoints-1 {
+	if selected > sfui.NoOfEndpoints-1 {
 		sfui.EndpointSelector.Store(0)
 		selected = 0
 	}

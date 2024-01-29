@@ -25,19 +25,16 @@ func ReadConfig() SfUI {
 	}
 
 	sfuiConfig.CompiledClientConfig = getcompiledClientConfig(sfuiConfig)
-	sfuiConfig.NoEndpoints = int32(len(sfuiConfig.SfEndpoints))
+	sfuiConfig.NoOfEndpoints = int32(len(sfuiConfig.SfEndpoints))
 	return sfuiConfig
 }
 
 func getDefaultConfig() SfUI {
 	return SfUI{
-		MaxWsTerminals:           10,
-		MaxSharedDesktopConn:     4,
-		ServerBindAddress:        "127.0.0.1:7171",
-		Debug:                    false,
-		MasterSSHCommand:         "sshpass -p segfault ssh -M -S %s/ssh.sock -L %s/gui.sock:127.0.0.1:5900 -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s -t sh",
-		TearDownMasterSSHCommand: "sshpass -p segfault ssh -S %s/ssh.sock -O exit root@%s",
-		SlaveSSHCommand:          "sshpass -p segfault ssh -S %s/ssh.sock -o \"SetEnv SECRET=%s REMOTE_ADDR=%s\" root@%s",
+		MaxWsTerminals:       10,
+		MaxSharedDesktopConn: 4,
+		ServerBindAddress:    "127.0.0.1:7171",
+		Debug:                false,
 		SfEndpoints: []string{
 			"8lgm.segfault.net",
 			"adm.segfault.net"},

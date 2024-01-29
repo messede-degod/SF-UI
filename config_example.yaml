@@ -11,7 +11,6 @@ sf_ui_origin: http://127.0.0.1:7171
 disable_origin_check: true
 use_x_forwarded_for_header: false
 disable_desktop: false
-work_directory: /dev/shm
 start_xpra_command: "[[ $(ss -lnt) == *2000* ]] || /sf/bin/startxweb"
 start_vnc_command: "[[ $(ss -lnt) == *5900* ]] || /sf/bin/startxvnc"
 start_filebrowser_command: "[[ $(ss -lnt) == *2900* ]] || /sf/bin/startfb"
@@ -27,4 +26,4 @@ elastic_server_host: "sf-stats.segfault.net"
 elastic_index_name: "sf-stats"
 elastic_username: "elastic"
 elastic_password: "elastic"
-geo_ip_db_path: "geo.mmdb"
+geo_ip_db_path: "/app/geo.mmdb"

@@ -6,3 +6,4 @@ services:
     volumes:
       - ./config.yaml:/app/config.yaml:ro
       - ./banDB.json:/app/banDB.json:rw
+    restart: always

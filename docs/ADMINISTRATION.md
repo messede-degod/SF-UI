@@ -28,8 +28,9 @@ This doc covers the necessary utilities and administration guidelines for SFUI.
     -   Setting the maintenance secret:<br>
         SFUI provides a bunch of cmdline utilities that can be used to list, kill and ban clients, these utils are reliant on a administration api which required a predefined secret to work.
         - Set `maintenance_secret` to long and random value
-        - Add the following line to your `.bashrc`.<br> `export SF_MT_SECRET=<your_secret_here>`<br>
-        all utilities read the secret from this environment variable.
+        - Add the following lines to your `.bashrc`.<br> `export SF_MT_SECRET=<your_secret_here>`<br>
+        `export SF_HOST=127.0.0.1:7171`<br>
+        all utilities read the above environment variables.
 
     -   Downloading and placing the geoip mmdb:<br>
     SFUI uses the geoip mmdb to associate ip addresses with countries of origin, this information is logged to elasticsearch and also used by some of the admin utils.
@@ -41,6 +42,7 @@ This doc covers the necessary utilities and administration guidelines for SFUI.
         - SFUI by default listens on 127.0.0.1.7171, the listen address can be specified in the `server_bind_address` key
         - Maximum number of terminals that can be opened can be specified in `max_ws_terminals`
         - Desktop can be disabled with `disable_desktop`
+        - Set `sf_ui_origin` to the the site address. ex: https://shell.segfault.net and also set `disable_origin_check` to false
 
     -   Building image
         - `cd sf-ui`
@@ -50,7 +52,8 @@ This doc covers the necessary utilities and administration guidelines for SFUI.
         - `sudo docker compose up -d`
 
     -   Proxying with nginx
-        -  see `other/nginx/Readme.md`    
+        -  see `other/nginx/Readme.md`
+        -  a sample configuration has been provided in `other/nginx/sample.conf`     
 
 
 #### Checking Logs
@@ -59,10 +62,30 @@ This doc covers the necessary utilities and administration guidelines for SFUI.
 #### Checking Health
 
 #### Utilities
--   sf_clients
--   sf_ban
--   sf_unban
--   sf_ban_list
+-  Installation:<br>
+    Make sure go is installed.
+    -   `cd other/admin-utils`
+    -   `make all`
+    -   `make install`
+
+- Utilities:
+    -   sf_clients: Lists all clients currently interacting with SFUI. Output Format is as follows.
+    ```
+    <client-id> <client-ip> <country> <no-of-terminals> <if-desktop-active> <session-duration>
+    ```
+    -   sf_kill: Kill a client
+    ```
+    sf_kill <client-id>
+    ```
+    -   sf_ban: Ban clients from using SFUI
+    ```
+    sf_ban <client_ip>
+    ```
+    -   sf_unban
+    ```
+    sf_unban <client_ip>
+    ```
+    -   sf_ban_list: List all banned client adresses.
 
 #### Abuse Scenarios
 

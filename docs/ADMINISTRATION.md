@@ -59,8 +59,6 @@ This doc covers the necessary utilities and administration guidelines for SFUI.
 #### Checking Logs
 `sudo docker container logs -f sfui`
 
-#### Checking Health
-
 #### Utilities
 -  Installation:<br>
     Make sure go is installed.
@@ -87,6 +85,5 @@ This doc covers the necessary utilities and administration guidelines for SFUI.
     ```
     -   sf_ban_list: List all banned client adresses.
 
-#### Abuse Scenarios
 
 

@@ -26,4 +26,5 @@ elastic_server_host: "sf-stats.segfault.net"
 elastic_index_name: "sf-stats"
 elastic_username: "elastic"
 elastic_password: "elastic"
+open_observe_compatible: false
 geo_ip_db_path: "/app/geo.mmdb"

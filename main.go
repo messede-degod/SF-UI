@@ -50,11 +50,12 @@ type SfUI struct {
 	EnableMetricLogging   bool   `yaml:"enable_metric_logging"` // collect metrics from sfui
 	MetricLoggerQueueSize int    `yaml:"metric_logger_queue_size"`
 
-	ElasticServerHost string `yaml:"elastic_server_host"`
-	ElasticIndexName  string `yaml:"elastic_index_name"`
-	ElasticUsername   string `yaml:"elastic_username"`
-	ElasticPassword   string `yaml:"elastic_password"`
-	GeoIpDBPath       string `yaml:"geo_ip_db_path"`
+	ElasticServerHost     string `yaml:"elastic_server_host"`
+	ElasticIndexName      string `yaml:"elastic_index_name"`
+	ElasticUsername       string `yaml:"elastic_username"`
+	ElasticPassword       string `yaml:"elastic_password"`
+	OpenObserveCompatible bool   `yaml:"open_observe_compatible"`
+	GeoIpDBPath           string `yaml:"geo_ip_db_path"`
 }
 
 var buildTime string
@@ -89,7 +90,7 @@ func main() {
 		}
 		MLogger.StartLogger(sfui.MetricLoggerQueueSize, 1,
 			sfui.ElasticServerHost, sfui.ElasticIndexName,
-			sfui.ElasticUsername, sfui.ElasticPassword)
+			sfui.ElasticUsername, sfui.ElasticPassword, sfui.OpenObserveCompatible)
 	}
 
 	BanDB.Init()

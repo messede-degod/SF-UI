@@ -60,6 +60,7 @@ func getDefaultConfig() SfUI {
 		EnableMetricLogging:     false,
 		MetricLoggerQueueSize:   500,
 		GeoIpDBPath:             "geo.mmdb",
+		OpenObserveCompatible:   false,
 	}
 }
 

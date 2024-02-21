@@ -19,11 +19,11 @@ This doc covers the necessary utilities and administration guidelines for SFUI.
         2.  `segfault_ssh_key_path` - Path to the key            
         
     -   Enabling metric logging:<br>
-        SFUI can log events like logins, logouts and new account creations to a elasticsearch db, which can later be visualized using kibana.
-        -   Set   `enable_metric_logging` to true
+        SFUI can log events like logins, logouts and new account creations to a elasticsearch or openobserve, which can later be visualized using kibana / openobserve-ui.
+        -   Set  `enable_metric_logging` to true
         -   Set `elastic_server_host` to hostname of elasticsearch server (only hostname dont specify protocol scheme).
         -   Set `elastic_index_name`,`elastic_username` and `elastic_password` to appropriate values.
-
+        -   Set `open_observe_compatible` to true if using openobserve.
     
     -   Setting the maintenance secret:<br>
         SFUI provides a bunch of cmdline utilities that can be used to list, kill and ban clients, these utils are reliant on a administration api which required a predefined secret to work.

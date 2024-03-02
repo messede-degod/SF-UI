@@ -11,15 +11,16 @@ import (
 )
 
 type MetricLogger struct {
-	LogQueue              chan Metric // Queue of Metrics that is to be flushed
-	LoggingActive         *atomic.Bool
-	FlushInterval         time.Duration
-	ElasticServerUrl      string
-	ElasticIndexName      string
-	ElasticEndpoint       string
-	OpenObserveCompatible bool
-	LogDataStartString    string
-	LogDataEndString      string
+	LogQueue               chan Metric // Queue of Metrics that is to be flushed
+	LoggingActive          *atomic.Bool
+	FlushInterval          time.Duration
+	ElasticServerUrl       string
+	ElasticIndexName       string
+	ElasticEndpoint        string
+	OpenObserveCompatible  bool
+	LogDataStartString     string
+	LogDataDelimiterString string
+	LogDataEndString       string
 }
 
 type Metric struct {
@@ -49,10 +50,12 @@ func (metricLogger *MetricLogger) StartLogger(queueSize int, flushInterval int,
 	if openObserveCompatible {
 		metricLogger.ElasticEndpoint = metricLogger.ElasticEndpoint + "/_json"
 		metricLogger.LogDataStartString = "[\n"
+		metricLogger.LogDataDelimiterString = ","
 		metricLogger.LogDataEndString = "\n]"
 	} else {
 		metricLogger.ElasticEndpoint = metricLogger.ElasticEndpoint + "/_bulk"
 		metricLogger.LogDataStartString = `{ "index":{} }` + "\n"
+		metricLogger.LogDataDelimiterString = "\n"
 		metricLogger.LogDataEndString = "\n"
 	}
 	go metricLogger.periodicFlush()
@@ -89,6 +92,7 @@ outer:
 			if err == nil {
 				logData.WriteString(metricLogger.LogDataStartString)
 				logData.Write(LogBytes)
+				logData.WriteString(metricLogger.LogDataDelimiterString)
 				logData.WriteString(metricLogger.LogDataEndString)
 			}
 			logAvailable = true

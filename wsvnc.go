@@ -55,7 +55,7 @@ func (viewOnlyConn *ViewOnlyConn) Read(msg []byte) (n int, err error) {
 	return n, err
 }
 
-func wsProxyHandler(conn *net.Conn, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}, timeout time.Duration) websocket.Handler {
+func wsProxyHandler(conn *net.Conn, viewOnly bool, isSharedConnection bool, closeConnection chan interface{}, timeoutDuration time.Duration) websocket.Handler {
 	return func(ws *websocket.Conn) {
 		ws.PayloadType = websocket.BinaryFrame
 		done := make(chan error)
@@ -72,22 +72,26 @@ func wsProxyHandler(conn *net.Conn, viewOnly bool, isSharedConnection bool, clos
 			go copyCh(ws, *conn, done)
 		}
 
+		timeout := time.NewTimer(timeoutDuration)
 		if isSharedConnection { // if shared, close connection when user disabled sharing(i.e closeConnection channel is closed)
 			select {
 			case <-done:
+				timeout.Stop()
 				break
 			case _, ok := <-closeConnection:
 				if !ok {
+					timeout.Stop()
 					break
 				}
-			case <-time.After(timeout):
+			case <-timeout.C:
 				break
 			}
 		} else { // if not a shared connection, exit only when error or timeout  occurs
 			select {
 			case <-done:
+				timeout.Stop()
 				break
-			case <-time.After(timeout):
+			case <-timeout.C:
 				break
 			}
 		}

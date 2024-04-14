@@ -11,11 +11,14 @@ import (
 )
 
 type MetricLogger struct {
-	LogQueue         chan Metric // Queue of Metrics that is to be flushed
-	LoggingActive    *atomic.Bool
-	FlushInterval    time.Duration
-	ElasticServerUrl string
-	ElasticIndexName string
+	LogQueue              chan Metric // Queue of Metrics that is to be flushed
+	LoggingActive         *atomic.Bool
+	FlushInterval         time.Duration
+	ElasticServerUrl      string
+	ElasticIndexName      string
+	ElasticEndpoint       string
+	LogMarshaller         func(logs []Metric) string
+	OpenObserveCompatible bool
 }
 
 type Metric struct {
@@ -31,13 +34,24 @@ var MLogger = MetricLogger{}
 
 func (metricLogger *MetricLogger) StartLogger(queueSize int, flushInterval int,
 	elasticServerHost string, elasticIndexName string,
-	elasticUsername string, elasticPassword string) {
+	elasticUsername string, elasticPassword string, openObserveCompatible bool) {
 	metricLogger.LogQueue = make(chan Metric, queueSize)
 	metricLogger.LoggingActive = &atomic.Bool{}
 	metricLogger.LoggingActive.Store(true)
 	metricLogger.FlushInterval = time.Minute * time.Duration(flushInterval)
 	metricLogger.ElasticIndexName = elasticIndexName
 	metricLogger.ElasticServerUrl = fmt.Sprintf("https://%s:%s@%s", elasticUsername, elasticPassword, elasticServerHost)
+	metricLogger.ElasticEndpoint = metricLogger.ElasticServerUrl + "/" +
+		metricLogger.ElasticIndexName
+	metricLogger.OpenObserveCompatible = openObserveCompatible
+
+	if openObserveCompatible {
+		metricLogger.ElasticEndpoint = metricLogger.ElasticEndpoint + "/_json"
+		metricLogger.LogMarshaller = openObserveGetLogString
+	} else {
+		metricLogger.ElasticEndpoint = metricLogger.ElasticEndpoint + "/_bulk"
+		metricLogger.LogMarshaller = elasticGetLogString
+	}
 	go metricLogger.periodicFlush()
 }
 
@@ -59,39 +73,69 @@ func (metricLogger *MetricLogger) periodicFlush() {
 }
 
 func (metricLogger *MetricLogger) FlushQueue() {
-	logData := strings.Builder{}
 	logAvailable := false
+	logsToFlush := []Metric{}
 outer:
-	for { // Flush everything in the queue
+	for { // Extract everything from the queue
 		select {
 		case LogEntry, ok := <-metricLogger.LogQueue:
 			if !ok {
 				break
 			}
-			LogBytes, err := json.Marshal(LogEntry)
-			if err == nil {
-				logData.WriteString(`{ "index":{} }`)
-				logData.WriteByte(10)
-				logData.Write(LogBytes)
-				logData.WriteByte(10)
-			}
+			logsToFlush = append(logsToFlush, LogEntry)
 			logAvailable = true
 		default:
 			break outer
 		}
 	}
+
 	if logAvailable {
-		lerr := metricLogger.Insert(logData.String())
+		logString := metricLogger.LogMarshaller(logsToFlush)
+		lerr := metricLogger.Insert(logString)
 		if lerr != nil {
 			log.Println(lerr)
 		}
 	}
 }
 
+func elasticGetLogString(logs []Metric) string {
+	logData := strings.Builder{}
+	for _, log := range logs {
+		LogBytes, err := json.Marshal(log)
+		if err == nil {
+			logData.WriteString(`{ "index":{} }` + "\n")
+			logData.Write(LogBytes)
+			logData.WriteString("\n")
+		}
+	}
+
+	return logData.String()
+}
+
+func openObserveGetLogString(logs []Metric) string {
+	logData := strings.Builder{}
+	logData.WriteString("[\n")
+
+	logsLength := len(logs) - 1
+
+	for i, log := range logs {
+		LogBytes, err := json.Marshal(log)
+		if err == nil {
+			logData.Write(LogBytes)
+			if i != logsLength {
+				logData.WriteString(",")
+			}
+		}
+	}
+
+	logData.WriteString("\n]")
+
+	return logData.String()
+}
+
 func (metricLogger *MetricLogger) Insert(Data string) error {
 	client := &http.Client{}
-	req, err := http.NewRequest("POST", metricLogger.ElasticServerUrl+"/"+
-		metricLogger.ElasticIndexName+"/_bulk", strings.NewReader(Data))
+	req, err := http.NewRequest("POST", metricLogger.ElasticEndpoint, strings.NewReader(Data))
 	if err != nil {
 		return err
 	}

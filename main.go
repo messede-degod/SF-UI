@@ -23,14 +23,11 @@ type SfUI struct {
 	ServerBindAddress    string `yaml:"server_bind_address"`     // Address to which the current app binds
 	Debug                bool   `yaml:"debug"`                   // Print debug information
 
-	MasterSSHCommand         string `yaml:"master_ssh_command"`          // Command used to setup the SSH Master Socket
-	TearDownMasterSSHCommand string `yaml:"teardown_master_ssh_command"` // Command used to teardown the SSH Master Socket.
-	SlaveSSHCommand          string `yaml:"slave_ssh_command"`           // Command used to start a SSH shell using the master socket
-	StartXpraCommand         string `yaml:"start_xpra_command"`          // Command used to start xpra
-	StartVNCCommand          string `yaml:"start_vnc_command"`           // Command used to start VNC
-	StartFileBrowserCommand  string `yaml:"start_filebrowser_command"`   // Command used to start filebrowser
-	VNCPort                  uint16 `yaml:"vnc_port"`
-	FileBrowserPort          uint16 `yaml:"filebrowser_port"`
+	StartXpraCommand        string `yaml:"start_xpra_command"`        // Command used to start xpra
+	StartVNCCommand         string `yaml:"start_vnc_command"`         // Command used to start VNC
+	StartFileBrowserCommand string `yaml:"start_filebrowser_command"` // Command used to start filebrowser
+	VNCPort                 uint16 `yaml:"vnc_port"`
+	FileBrowserPort         uint16 `yaml:"filebrowser_port"`
 
 	CompiledClientConfig   []byte   // Ui related config that has to be sent to client
 	SfEndpoints            []string `yaml:"sf_endpoints"` // Sf Endpoints To Use
@@ -43,6 +40,7 @@ type SfUI struct {
 	ClientInactivityTimeout int                 `yaml:"client_inactivity_timeout"` // Minutes after which the clients master SSH connection is killed
 	ValidSecret             func(s string) bool // Secret Validator
 	EndpointSelector        *atomic.Int32       // Helps select a endpoint in RR fashion
+	NoOfEndpoints           int32               // No of available endpoints
 
 	SegfaultSSHUsername string `yaml:"segfault_ssh_username"`
 	SegfaultSSHPassword string `yaml:"segfault_ssh_password"`
@@ -53,11 +51,12 @@ type SfUI struct {
 	EnableMetricLogging   bool   `yaml:"enable_metric_logging"` // collect metrics from sfui
 	MetricLoggerQueueSize int    `yaml:"metric_logger_queue_size"`
 
-	ElasticServerHost string `yaml:"elastic_server_host"`
-	ElasticIndexName  string `yaml:"elastic_index_name"`
-	ElasticUsername   string `yaml:"elastic_username"`
-	ElasticPassword   string `yaml:"elastic_password"`
-	GeoIpDBPath       string `yaml:"geo_ip_db_path"`
+	ElasticServerHost     string `yaml:"elastic_server_host"`
+	ElasticIndexName      string `yaml:"elastic_index_name"`
+	ElasticUsername       string `yaml:"elastic_username"`
+	ElasticPassword       string `yaml:"elastic_password"`
+	OpenObserveCompatible bool   `yaml:"open_observe_compatible"`
+	GeoIpDBPath           string `yaml:"geo_ip_db_path"`
 }
 
 var buildTime string
@@ -92,7 +91,7 @@ func main() {
 		}
 		MLogger.StartLogger(sfui.MetricLoggerQueueSize, 1,
 			sfui.ElasticServerHost, sfui.ElasticIndexName,
-			sfui.ElasticUsername, sfui.ElasticPassword)
+			sfui.ElasticUsername, sfui.ElasticPassword, sfui.OpenObserveCompatible)
 	}
 
 	BanDB.Init()
@@ -300,7 +299,7 @@ func (sfui *SfUI) getEndpointAndSecret(secret string) (EndpointAddress string, A
 
 func (sfui *SfUI) getEndpointNameRR() string {
 	selected := sfui.EndpointSelector.Load()
-	if selected > sfui.NoEndpoints-1 {
+	if selected > sfui.NoOfEndpoints-1 {
 		sfui.EndpointSelector.Store(0)
 		selected = 0
 	}

@@ -67,10 +67,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "sf-ui:build:production"
+              "buildTarget": "sf-ui:build:production"
             },
             "development": {
-              "browserTarget": "sf-ui:build:development"
+              "buildTarget": "sf-ui:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -78,7 +78,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "sf-ui:build"
+            "buildTarget": "sf-ui:build"
           }
         },
         "test": {

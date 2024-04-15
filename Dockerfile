@@ -24,7 +24,7 @@ COPY *.go config.yaml ./
 COPY other/systemd/sfui.service ./other/systemd/sfui.service
 COPY --from=ui /ui/dist/sf-ui/  ./ui/dist/sf-ui/
 COPY other/docker/build_helper.go ./
-COPY .git/ORIG_HEAD build_hash
+COPY .git/refs/heads/main build_hash
 RUN go run build_helper.go
 RUN rm build_helper.go
 RUN sh build.sh

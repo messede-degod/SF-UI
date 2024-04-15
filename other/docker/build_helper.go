@@ -13,8 +13,12 @@ func main() {
 	build_hash := ""
 	dat, err := os.ReadFile("build_hash")
 	if err == nil {
-		build_hash = string(dat)[:7]
+		build_hash = string(dat)
+		if len(build_hash) > 7 {
+			build_hash = build_hash[0:7]
+		}
 	}
+
 	build_cmd := fmt.Sprintf(`CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags prod -ldflags '-w' -ldflags '-X "main.buildTime=%s" -X "main.buildHash=%s"' -o sfui`, date, build_hash)
 	os.WriteFile("build.sh", []byte(build_cmd), 0644)
 }

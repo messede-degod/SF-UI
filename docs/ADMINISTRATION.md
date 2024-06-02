@@ -8,7 +8,7 @@ This doc covers the necessary utilities and administration guidelines for SFUI.
 -   Essential Configuration<br>
  Create a config file `cp config_example.yaml config.yaml` .
     -   Setting up segfault endpoints: <br>
-        `yaml-key: sf_endpoints`. Segfault endpoints to which SFUI must connects must be specified here.
+        `yaml-key: sf_endpoints`. Segfault endpoints to which SFUI connects must be specified here.
         -   SFUI uses the subdomain part of the specified endpoints as the ***endpoint name*** .
         -   During login SFUI checks if the secret is in the following format `EndpointName-SECRETXXXXXXX`, the endpoint name is then checked against the specified set of endpoints, if a match is found ssh connection is established to said endpoint else a error is thrown.
         -   New account creations are load balanced across all available enpoints in a round robin fashion.  
@@ -27,7 +27,7 @@ This doc covers the necessary utilities and administration guidelines for SFUI.
     
     -   Setting the maintenance secret:<br>
         SFUI provides a bunch of cmdline utilities that can be used to list, kill and ban clients, these utils are reliant on a administration api which required a predefined secret to work.
-        - Set `maintenance_secret` to long and random value
+        - Set `maintenance_secret` to a long and random value
         - Add the following lines to your `.bashrc`.<br> `export SF_MT_SECRET=<your_secret_here>`<br>
         `export SF_HOST=127.0.0.1:7171`<br>
         all utilities read the above environment variables.

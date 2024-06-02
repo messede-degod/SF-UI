@@ -194,6 +194,7 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 						Referrer: r.Header.Get("Referer"),
 						Country:  GetCountryByIp(loginReq.ClientIp),
 						UserUid:  getClientId(loginReq.ClientIp),
+						TimeZone: r.Header.Get("TimeZone"),
 					})
 				}
 
@@ -233,6 +234,7 @@ func (sfui *SfUI) handleLogin(w http.ResponseWriter, r *http.Request) {
 							Referrer: r.Header.Get("Referer"),
 							Country:  GetCountryByIp(loginReq.ClientIp),
 							UserUid:  getClientId(loginReq.ClientIp),
+							TimeZone: r.Header.Get("TimeZone"),
 						})
 					}
 				}

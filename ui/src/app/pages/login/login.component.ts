@@ -113,7 +113,17 @@ export class LoginComponent {
       });
     }
 
+    let timeZone = ""
+    try{
+      timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    }catch(e){
+      timeZone = "ERR"
+    }
+
     let response = fetch(Config.ApiEndpoint + "/secret", {
+      "headers": {
+        "TimeZone": timeZone
+      },
       "method": "POST",
       "body": JSON.stringify(loginData)
     })

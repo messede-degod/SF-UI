@@ -25,6 +25,7 @@ type Metric struct {
 	Type            string
 	Time            string
 	Country         string
+	TimeZone        string
 	Referrer        string
 	UserUid         string
 	SessionDuration string

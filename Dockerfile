@@ -1,16 +1,16 @@
 # Build Filebrowser
-FROM node:latest AS filebrowser
+FROM node:20 AS filebrowser
 WORKDIR /filebrowser/
-COPY filebrowser-ui/package.json ./
-RUN npm install
+COPY filebrowser-ui/package.json filebrowser-ui/package-lock.json ./
+RUN npm ci
 COPY filebrowser-ui/ ./
 RUN npm run build
 
 # Build Angular UI
-FROM node:latest AS ui
+FROM node:20 AS ui
 WORKDIR /ui/
-COPY ui/package.json ./
-RUN npm install
+COPY ui/package.json ui/package-lock.json ./
+RUN npm ci
 COPY ui/ ./
 COPY --from=filebrowser /filebrowser/dist/ ./src/assets/filebrowser_client/
 RUN npm run build
